@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="#">Elenco Clienti</a></li>
+{% endblock %}
+
+{% block title %}<i class="icon-group"></i>  Elenco Clienti {% endblock%}
+
+{% block main %}
+
+<table class="table table-striped" id="clienti">
+	<thead>
+	<tr>
+		<th>ID</th>
+		<th>Ragione sociale</th>
+		<th>Indirizzo</th>
+		<th>Codice Fiscale</th>
+		<th>Partita IVA</th>
+		<th>Telefono</th>
+		<th>E-Mail</th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+
+{% for c in clienti %}
+	<tr>
+		<td>
+			<a href="/clienti/{{c.id}}"><i class="icon-search"></i> {{c.id}}</a>
+		</td>
+		<td>
+			{{c.ragione_sociale}}
+		</td>
+		<td>
+			{{c.indirizzo}}
+		</td>
+		<td>
+			{{c.cod_fiscale}}
+		</td>
+		<td>
+			{{c.p_iva}}
+		</td>
+		<td>
+			{{c.telefono}}
+		</td>	
+		<td>
+			{{c.mail}}
+		</td>		
+
+		<td>
+			<div class="btn-group">
+				<a href="/clienti/modifica/{{c.id}}" class="btn small-btn"><i class="icon-edit"></i> modifica</a>
+				<a href="/clienti/elimina/{{c.id}}" class="btn small-btn"><i class="icon-trash"></i> elimina</a>
+			</div>
+		</td>
+	</tr>
+{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}
+
+{% block left %}
+	<h4>Azioni</h4>
+	<a href="/clienti/nuovo/" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Cliente</a></li>
+{% endblock%}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="/fatture/">Elenco Fatture</a> <span class="divider">/</span></li>
+<li><a href="#">Fattura {{f}}</a></li>
+{% endblock %}
+
+{% block title %}<i class="icon-file-text"></i>  Dettaglio Fattura {% endblock%}
+
+{% block main %}
+
+<h3>Informazioni:</h3>
+<table class="table">
+	<tr>
+		<td><h5>Data</h5></td>
+		<td>{{f.data}}</td>
+	</tr>
+	<tr>
+		<td><h5>Cliente</h5></td>
+		<td>{{f.cliente}}</td>
+	</tr>
+	<tr {% if not f.stato %} class="error" {% endif %} > 
+		<td><h5>Stato pagamento</h5></td>
+		<td>
+			{% if f.stato %}<i class="icon-check icon-large"></i>
+			{% else %}<i class="icon-check-empty icon-large"></i></td>{% endif %}
+	</tr>
+	<tr>
+		<td><h5>ID Marca da Bollo</h5></td>
+		<td>{{f.bollo}} ({{f.valore_bollo}} <i class="icon-eur"></i>)</td>
+	</tr>	
+	<tr>
+		<td><h5>Template</h5></td>
+		<td>{{f.template}}</td>
+	</tr>	
+</table>
+
+<h3>Prestazioni:</h3>
+
+<table class="table table-striped" id="fatture">
+	<thead>
+		<tr>
+			<th>Descrizione</th>
+			<th>Importo</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for p in f.prestazione_fattura.all %}
+		<tr>
+			<td>{{p.descrizione}}</a></td>
+			<td> {{p.importo}} €</td>
+			<td>
+				<div class="btn-group">
+					<a href="/clienti/modifica/{{c.id}}" class="btn  btn-small"><i class="icon-edit"></i> modifica</a>
+					<a href="/clienti/elimina/{{c.id}}" class="btn  btn-small"><i class="icon-trash"></i> elimina</a>
+				</div>
+			</td>
+		</tr>
+		{% endfor %}
+		<tr>
+		<td colspan="4">
+			<a href="/prestazioni/nuova/{{f.id}}" class="btn"><i class="icon-plus"></i> Aggiungi prestazione</a>
+		</td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>Importo:</h3>
+
+<table class="table table-striped" id="fatture">
+	<thead>
+		<tr>
+			<th>Imponibile</th>
+			<th>Rivalsa INPS (4%)</th>
+			<th>Bollo</th>
+			<th>TOTALE</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="importo">
+			<td>{{f.imponibile}} <i class="icon-eur"></i></a></td>
+			<td> {{f.rivalsa}} <i class="icon-eur"></i></td>
+			<td> {{f.valore_bollo}} <i class="icon-eur"></i></td>
+			<td class="totale">{{f.totale}} <i class="icon-eur"></i></td>
+		</tr>
+	</tbody>
+</table>
+
+{% endblock %}
+
+{% block left %}
+<h4>Azioni</h4>
+<a href="/fatture/modifica/{{fattura.id}}" class="btn btn-block "><i class="icon-edit"></i> modifica</a>
+<a href="/fatture/elimina/{{fattura.id}}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
+<a href="/fatture/stampa/{{fattura.id}}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
+
+{% endblock%}

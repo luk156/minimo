@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}
+<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="#">Elenco Fatture</a></li>
+{% endblock %}
+
+{% block title %}<i class="icon-file-text"></i>  Elenco Fatture {% endblock%}
+
+{% block main %}
+
+<div class="large-12 columns">
+</br>
+<div class="tabbable"> <!-- Only required for left/right tabs -->
+    <ul class="nav nav-tabs">
+		{% for anno in anni %}
+		<li {%if forloop.last %} class="active" {% endif%} ><a href="#tab-{{ forloop.counter }}" data-toggle="tab">{{anno}}</a></li>
+		{% endfor %}
+    </ul>
+    <div class="tab-content">
+		{% for anno,f in fatture %}
+		<div class="tab-pane fade in {%if forloop.last %}active{% endif%}" id="tab-{{ forloop.counter }}">
+			<table class="table table-striped" id="fatture-{{anno}}">
+				<thead>
+				<tr>
+					<th>ID</th>
+					<th>Data</th>
+					<th>Cliente</th>
+					<th>Totale</th>
+					<th>Pagata</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for fattura in f %}
+
+				<tr {% if not fattura.stato %} class="error" {% endif %} >
+					<td><a href="/fatture/dettagli/{{fattura.id}}" ><i class="icon-search"> </i> 
+						{{fattura}}</a></td>
+					<td>
+						
+						{{fattura.data}}</td>
+					<td><a href="/clienti/{{fattura.cliente.id}}">{{fattura.cliente|truncatechars:30}}</a></td>
+					<td><b>{{fattura.totale}} </b><i class="icon-eur"></i></td>
+					<td>
+						{% if fattura.stato %}<i class="icon-check icon-large"></i>
+						{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+					</td>
+					<td><a href="/fatture/stampa/{{fattura.id}}" class="btn"><i class="icon-print"> </i>Stampa</a></td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			</br>
+			</br>
+		</div>
+		{% endfor %}
+    </div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block left %}
+	<h4>Azioni</h4>
+	<a href="/fatture/nuovo/" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi fattura</a></li>
+{% endblock%}

@@ -1,0 +1,63 @@
+{% load dajaxice_templatetags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<script src="/static/bootstrap/js/jquery.min.js"></script>
+<script src="/static/bootstrap/js/bootstrap.js"></script>
+<link href="/static/stile.css" rel="stylesheet">
+<link href="/static/bootstrap/css/font-awesome.min.css" rel="stylesheet">
+<script type="text/javascript" src="{% static "/static/dajax/jquery.dajax.core.js" %}"></script>
+{% dajaxice_js_import %}
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="navbar navbar-static-top">
+	<div class="navbar-inner">
+		<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+		</a>
+		<a class="brand" href="#"> Minimo</a>
+		<div class="nav-collapse">
+			<ul class="nav">
+  				<li id="nav-clienti"><a href="/clienti/"><i class="icon-user"></i> Clienti</a></li>
+				<li id="nav-fatture"><a href="/fatture/"><i class="icon-file-text"></i> Fatture</a></li>
+				<li id="nav-template"><a href="/template/"><i class="icon-picture"></i> Template</a></li>
+				<li id="nav-bilancio"><a href="/bilancio/"><i class="icon-bar-chart"></i> Bilanci</a></li>        
+			</ul> 
+
+		</div>
+		<script>
+			var url="{{request.path}}";
+			$("#nav-"+url.split("/")[1]).addClass("active")
+		</script>
+	</div>
+</div>
+	<ul class="breadcrumb">
+		{% block breadcrumb %}{% endblock %}
+	</ul>
+<div class="container-fluid">
+	<div class="row-fluid">
+
+		<div class="span2" id="left" >{% block left %}{% endblock %}</div>
+
+		<div class="span10" id="main" >
+		<span class="text-right"><h2>{% block title %}{% endblock %}</h2></span>
+		{% block main %}{% endblock %}
+
+		</div>
+		{% block main-large %}{% endblock %}
+	</div>
+</div>
+
+
+
+</body>
+</html>

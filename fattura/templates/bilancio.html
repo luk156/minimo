@@ -1,0 +1,50 @@
+{% extends "base.html" %}	
+{% load crispy_forms_tags %}
+
+{% block head %}
+	<script src="/static/js/highcharts/highcharts.js"></script>
+	<link href="/static/css/datetimepicker.css" rel="stylesheet">
+	<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+	<script src="/static/js/locales/bootstrap-datetimepicker.it.js"></script>
+{%endblock%}
+
+{% block title %} Bilancio {% endblock %}	
+
+{% block breadcrumb %}
+<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="#">Bilancio</a></li>
+{% endblock %}
+
+{% block main %}
+
+<div id="fatturato">
+{% include 'bilancio/fatturato.html' %}
+</div>
+
+{% endblock %}
+
+
+{% block left %}
+
+
+<script type="text/javascript">
+window.onload = function() 
+{ 
+	$(".dateinput").datetimepicker({format: 'dd/mm/yyyy',autoclose: true, minView:2, language: 'it'});
+};
+
+
+function aggiorna_statistiche(){
+	Dajaxice.fattura.aggiorna_bilancio(Dajax.process,{'inizio':$("#div_id_inizio input").val(),'fine':$("#div_id_fine input").val()});
+};
+
+function reset_statistiche(){
+	$("#div_id_inizio input").val('');
+	$("#div_id_fine input").val('');
+	Dajaxice.fattura.aggiorna_bilancio(Dajax.process,{'inizio':'0','fine':$("#div_id_fine input").val()});
+};
+</script>
+
+	<h4>Intervallo</h4>
+	 {% crispy form %}
+{% endblock%}
