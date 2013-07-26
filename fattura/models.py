@@ -147,7 +147,7 @@ class Prestazione(models.Model):
 	importo=models.FloatField('Importo')
 	fattura=models.ForeignKey(Fattura, related_name='prestazione_fattura')	
 	def __unicode__(self):
-		return '%s' % (self.descrizione[0:40]+"...")
+		return '%s(%s)' % (self.descrizione,self.importo)
 	def imponibile(self):
 		return round(self.importo/1.04,2)
 	def rivalsa(self):
