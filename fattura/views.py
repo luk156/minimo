@@ -304,7 +304,7 @@ def fatture(request):
 	if request.user.is_superuser:
 		fatture=F.objects.all()
 	else:
-		fatture=F.objects.filter(fattura_user=request.user)
+		fatture=F.objects.filter(user=request.user)
 	Fatture=[]
 	f=[]
 	Fatture.append(anni)
