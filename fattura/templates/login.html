@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %} Accedi {% endblock %}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="#">login</a></li>
+{% endblock %}
+
+{% block main-large %}
+<div class="clearfix">
+  {% crispy form %}
+</div>
+
+{% endblock %}

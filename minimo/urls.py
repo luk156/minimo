@@ -1,9 +1,12 @@
 from django.conf.urls import patterns, include, url
 from dajaxice.core import dajaxice_autodiscover, dajaxice_config
 dajaxice_autodiscover()
+
 # Uncomment the next two lines to enable the admin:
 #from django.contrib import admin
 #admin.autodiscover()
+from fattura.models import *
+
 
 urlpatterns = patterns('',
 	# Examples:
@@ -42,3 +45,19 @@ urlpatterns = patterns('',
 	# Uncomment the next line to enable the admin:
 	#url(r'^admin/', include(admin.site.urls)),
 )
+
+urlpatterns += patterns('django.contrib.auth.views',
+    #utente
+    #(r'^utente/nuovo/$', 'turni.views.nuovoutente'),
+    (r'^utenti/modifica_password/$', 'password_change', {'password_change_form': PasswordForm}),
+    (r'^utenti/modifica_password/ok/$', 'password_change_done'),
+    (r'^utenti/reset/$', 'password_reset'),
+    (r'^utenti/reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$', 'password_reset_confirm'),
+    (r'^utenti/reset/completa/$', 'password_reset_complete'),
+    (r'^utenti/reset/ok/$', 'password_reset_done'),
+    )
+
+urlpatterns += patterns('',
+    (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name':'login.html', 'authentication_form': LoginForm} ),
+    (r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
+    )

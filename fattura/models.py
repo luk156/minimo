@@ -4,9 +4,13 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Field, MultiField, HTML, Button
 from crispy_forms.bootstrap import *
+
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.models import User
 # Create your models here.
 
 class Cliente(models.Model):
+	user=models.ForeignKey(User, editable=False, related_name='cliente_user')
 	ragione_sociale=models.CharField('Ragione sociale',max_length=70)
 	indirizzo=models.CharField('Indirizzo',max_length=70)
 	cod_fiscale=models.CharField('Codice Fiscale',max_length=50, blank=True, null=True)
@@ -21,6 +25,7 @@ class ClienteForm(forms.ModelForm):
 	class Meta:
 		model = Cliente
 	def __init__(self, *args, **kwargs):
+		self.request = kwargs.pop('request', None)
 		self.helper = FormHelper()
 		self.helper.layout = Layout(
 			Div(
@@ -36,12 +41,13 @@ class ClienteForm(forms.ModelForm):
 				Submit('save', 'Invia', css_class="btn-primary")
 			)
 		)
-		super( ClienteForm, self).__init__(*args, **kwargs)	
+		super( ClienteForm, self).__init__(*args, **kwargs)
 
 def content_file_name(instance, filename):
     return '/'.join(['content', "template"+str(instance.id)+".odt"])
 
 class TemplateFattura(models.Model):
+	user=models.ForeignKey(User, editable=False, related_name='template_user')
 	nome = models.CharField('Nome',max_length=70)
 	descrizione = models.CharField('Descrizione',max_length=70, blank=True, null=True)
 	template = models.FileField(upload_to=content_file_name)
@@ -64,6 +70,7 @@ class TemplateFatturaForm(forms.ModelForm):
 		super(TemplateFatturaForm, self).__init__(*args, **kwargs)	
 
 class Fattura(models.Model):
+	user=models.ForeignKey(User, editable=False, related_name='fattura_user')
 	data=models.DateField('Data di emissione')
 	cliente=models.ForeignKey(Cliente, related_name='fattura_cliente', null = True, on_delete = models.SET_NULL)	
 	stato=models.BooleanField('Stato pagamento')
@@ -177,3 +184,32 @@ class IntervalloForm(forms.Form):
 			),
 		)
 		super(IntervalloForm, self).__init__(*args, **kwargs)
+
+class LoginForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+		super(LoginForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper()
+		#self.helper.form_method = 'post'
+		#self.helper.form_action = "/login/"
+		#self.helper.form_tag = False
+		self.helper.layout = Layout(
+			Field('username', placeholder="username"),
+			Field('password', placeholder="password"),
+			FormActions(
+				Submit('save', 'Invia', css_class="btn-primary")
+			)
+		)
+
+class PasswordForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+		super(PasswordForm, self).__init__(*args, **kwargs)
+		self.helper = FormHelper()
+		self.helper.layout = Layout(
+			Field('old_password'),
+			Field('new_password1'),
+			Field('new_password2'),
+			FormActions(
+				Submit('save', 'Invia', css_class="btn-primary")
+			)
+		)
+		
