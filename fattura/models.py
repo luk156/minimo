@@ -7,6 +7,8 @@ from crispy_forms.bootstrap import *
 
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.models import User
+
+import os
 # Create your models here.
 
 class Cliente(models.Model):
@@ -44,15 +46,23 @@ class ClienteForm(forms.ModelForm):
 		super( ClienteForm, self).__init__(*args, **kwargs)
 
 def content_file_name(instance, filename):
-    return '/'.join(['content', "template"+str(instance.id)+".odt"])
+    return '/'.join(['content', "template-"+str(instance.nome)+".odt"])
 
 class TemplateFattura(models.Model):
 	user=models.ForeignKey(User, editable=False, related_name='template_user')
-	nome = models.CharField('Nome',max_length=70)
+	nome = models.CharField('Nome',max_length=70, unique=True)
 	descrizione = models.CharField('Descrizione',max_length=70, blank=True, null=True)
 	template = models.FileField(upload_to=content_file_name)
 	def __unicode__(self):
 		return '%s' % (self.nome)
+	def save(self, *args, **kwargs):
+		# delete old file when replacing by updating the file
+		try:
+			this = TemplateFattura.objects.get(id=self.id)
+			if this.template != self.template:
+				this.template.delete(save=False)
+		except: pass # when new photo then we do nothing, normal case          
+		super(TemplateFattura, self).save(*args, **kwargs)
 
 class TemplateFatturaForm(forms.ModelForm):
 	class Meta:
@@ -68,6 +78,15 @@ class TemplateFatturaForm(forms.ModelForm):
 			)
 		)
 		super(TemplateFatturaForm, self).__init__(*args, **kwargs)	
+	def clean_template(self):
+		filename = self.cleaned_data["template"]
+		ext = os.path.splitext(filename.name)[1]
+		ext = ext.lower()
+		print "clean_file value: %s" % ext
+		if ext != ".odt" :
+			raise forms.ValidationError("Il file deve avere estensione .odt!")
+
+
 
 class Fattura(models.Model):
 	user=models.ForeignKey(User, editable=False, related_name='fattura_user')
