@@ -5,4 +5,4 @@ local_settings.py
 fattura/migrations/*
 *.sqlite
 media/*
-minimo/settings.py
+env/*
