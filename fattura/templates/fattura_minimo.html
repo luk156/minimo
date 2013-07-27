@@ -53,16 +53,25 @@
 			<td> {{p.importo}} €</td>
 			<td>
 				<div class="btn-group">
-					<a href="/clienti/modifica/{{c.id}}" class="btn  btn-small"><i class="icon-edit"></i> modifica</a>
-					<a href="/clienti/elimina/{{c.id}}" class="btn  btn-small"><i class="icon-trash"></i> elimina</a>
+					<a href="/prestazioni/modifica/{{p.id}}" class="btn  btn-small"><i class="icon-edit"></i> modifica</a>
+					<a href="/prestazioni/elimina/{{p.id}}" class="btn  btn-small"><i class="icon-trash"></i> elimina</a>
 				</div>
 			</td>
 		</tr>
 		{% endfor %}
 		<tr>
-		<td colspan="4">
-			<a href="/prestazioni/nuova/{{f.id}}" class="btn"><i class="icon-plus"></i> Aggiungi prestazione</a>
-		</td>
+			<td> 
+			 	<form  method="post" action="/prestazioni/nuova/{{f.id}}">{% csrf_token %}
+			 	<textarea class="textarea" id="id_descrizione" name="descrizione" rows="5" style="width:90%;"></textarea>
+			 </td>
+			 <td>
+			 	<div class="input-append">
+			 	<input class="textinput textInput" id="id_importo" name="importo" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
+			 	</div>
+			 </td>
+			 <td>
+			 	<input type="submit" name="save" value="Aggiungi" class="btn btn-primary btn-primary" id="submit-id-save"/> </form>
+	    	</td>
 		</tr>
 	</tbody>
 </table>

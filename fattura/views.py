@@ -210,7 +210,7 @@ def nuovaprestazione(request,f_id):
 				data = form.cleaned_data
 				p=Prestazione(descrizione=data['descrizione'],importo=data['importo'],fattura=f)
 				p.save()
-				return HttpResponseRedirect('/fatture') 
+				return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
 		else:
 			form = PrestazioneForm()
 			form.helper.form_action = '/prestazioni/nuova/'+str(f.id)
@@ -229,7 +229,7 @@ def modificaprestazione(request,p_id):
 			form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
 			if form.is_valid():
 				form.save()
-				return HttpResponseRedirect('/fatture') 
+				return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
 		else:
 			form = PrestazioneForm(instance=prestazione)
 			form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
@@ -243,7 +243,7 @@ def eliminaprestazione(request,p_id):
 	f=prestazione.fattura
 	if f.user == request.user or request.user.is_superuser:
 		prestazione.delete()
-		return HttpResponseRedirect('/fatture')
+		return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
 	else:
 		raise PermissionDenied
 
@@ -346,8 +346,9 @@ def export_fatture(request):
 @login_required
 def fattura(request, f_id):
 	f=F.objects.get(id=f_id)
+	form_prestazione = PrestazioneForm()
 	if f.user == request.user or request.user.is_superuser:
-		return render_to_response( template_fattura, {'request':request, 'f': f,}, RequestContext(request))
+		return render_to_response( template_fattura, {'request':request, 'f': f,'form':form_prestazione }, RequestContext(request))
 	else:
 		raise PermissionDenied		
 
@@ -397,7 +398,8 @@ def bilancio_intervallo(request, inizio, fine):
 	f_data=[]
 	f_tot=[]
 	fatturato=[]
-	data_precedente=dt.date.today()
+	data_precedente=dt.date(1,1,1)
+
 	for f in fatture:
 		if f.data == data_precedente:
 			f_tot[-1]+=f.totale()
