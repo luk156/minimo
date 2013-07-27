@@ -61,7 +61,8 @@ class TemplateFattura(models.Model):
 			this = TemplateFattura.objects.get(id=self.id)
 			if this.template != self.template:
 				this.template.delete(save=False)
-		except: pass # when new photo then we do nothing, normal case          
+		except:
+			pass # when new photo then we do nothing, normal case          
 		super(TemplateFattura, self).save(*args, **kwargs)
 
 class TemplateFatturaForm(forms.ModelForm):
@@ -82,9 +83,10 @@ class TemplateFatturaForm(forms.ModelForm):
 		filename = self.cleaned_data["template"]
 		ext = os.path.splitext(filename.name)[1]
 		ext = ext.lower()
-		print "clean_file value: %s" % ext
+		#print "clean_file value: %s" % ext
 		if ext != ".odt" :
 			raise forms.ValidationError("Il file deve avere estensione .odt!")
+		return filename
 
 
 
