@@ -275,14 +275,14 @@ def nuovafattura(request):
 @login_required
 def modificafattura(request,f_id):
 	azione = 'Modifica'
-	f = Fattura.objects.get(id=f_id)
+	f = F.objects.get(id=f_id)
 	if f.user == request.user or request.user.is_superuser:
 		if request.method == 'POST':  # If the form has been submitted...
 			form = FatturaForm(request.POST, instance=f)  # necessario per modificare la riga preesistente
 			form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
 			if form.is_valid():
 				form.save()
-				return HttpResponseRedirect('/fatture/') # Redirect after POST
+				return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
 		else:
 			form = FatturaForm(instance=f)
 			form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'

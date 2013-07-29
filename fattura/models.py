@@ -116,7 +116,7 @@ class FatturaMinimo(Fattura):
 		return self.totale()-self.valore_bollo-self.imponibile()
 
 class FatturaStandard(Fattura):
-	IVA=models.IntegerField('IVA',max_length=30)
+	IVA=models.IntegerField('Aliquota IVA')
 	def imponibile(self):
 		i=0
 		for p in Prestazione.objects.filter(fattura=self.id):
