@@ -88,6 +88,29 @@ class TemplateFatturaForm(forms.ModelForm):
 			raise forms.ValidationError("Il file deve avere estensione .odt!")
 		return filename
 
+class Imposta(models.Model):
+	user=models.ForeignKey(User, editable=False, related_name='imposta_user')
+	nome=models.CharField('Nome Imposta',max_length=30)
+	aliquota=models.IntegerField('Aliquota')
+	def calcola(self,imponibile):
+		return imponibile*self.aliquota/100.0
+	def __unicode__(self):
+		return '%s (%s)' % (self.nome, str(self.aliquota))
+
+
+class ImpostaForm(forms.ModelForm):
+	class Meta:
+		model = Imposta
+	def __init__(self, *args, **kwargs):
+		self.helper = FormHelper()
+		self.helper.layout = Layout(
+			Field('nome'),
+			Field('aliquota'),
+			FormActions(
+				Submit('save', 'Invia', css_class="btn-primary")
+			)
+		)
+		super(ImpostaForm, self).__init__(*args, **kwargs)	
 
 
 class Fattura(models.Model):
@@ -96,72 +119,57 @@ class Fattura(models.Model):
 	cliente=models.ForeignKey(Cliente, related_name='fattura_cliente', null = True, on_delete = models.SET_NULL)	
 	stato=models.BooleanField('Stato pagamento')
 	template=models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
+	imposte=models.ManyToManyField(Imposta)
+	bollo=models.CharField('ID Bollo',max_length=30, blank=True, null=True)
+	valore_bollo=models.IntegerField('Valore marca da bollo', blank=True, null=True)
 	def __unicode__(self):
 		return '%s/%s' % (self.id,self.data.year)
 	class Meta:
 		ordering = ['data']
-
-class FatturaMinimo(Fattura):
-	bollo=models.CharField('ID Bollo',max_length=30)
-	valore_bollo=models.IntegerField('Valore marca da bollo')
-	def totale(self):
-		totale=0
-		for p in Prestazione.objects.filter(fattura=self.id):
-			totale += p.importo
-		totale+=self.valore_bollo
-		return totale
-	def imponibile(self):
-		return round((self.totale()-self.valore_bollo)/1.04,2)
-	def rivalsa(self):
-		return self.totale()-self.valore_bollo-self.imponibile()
-
-class FatturaStandard(Fattura):
-	IVA=models.IntegerField('Aliquota IVA')
 	def imponibile(self):
 		i=0
-		for p in Prestazione.objects.filter(fattura=self.id):
-			i += p.importo
-		return round(i,2)
+		for p in self.prestazione_fattura.all():
+			i+=p.importo
+		return i
+	def tot_imposte(self):
+		t=0
+		for i in self.imposte.all():
+			t+=i.calcola(self.imponibile())
+		return t
 	def totale(self):
-		return round(self.imponibile()+self.iva(),2)
-	def iva(self):
-		return round(self.imponibile()*self.IVA/100,2)
+		tot = self.imponibile()+self.tot_imposte()
+		if self.valore_bollo:
+			tot+=self.valore_bollo
+		return tot
 
-class FatturaMinimoForm(forms.ModelForm):
+
+class FatturaForm(forms.ModelForm):
 	class Meta:
-		model = FatturaMinimo
+		model = Fattura
 	def __init__(self, *args, **kwargs):
+		user_rid = kwargs.pop('user_rid')
+		super(FatturaForm, self).__init__(*args, **kwargs)
+		self.fields['imposte'].queryset = Imposta.objects.filter(user_id=user_rid)
 		self.helper = FormHelper()
 		self.helper.layout = Layout(
-			AppendedText('data', '<i class="icon-calendar"></i>'),
-			Field('cliente'),
-			Field('stato'),
-			Field('bollo'),
-			Field('valore_bollo'),
-			Field('template'),
+			Div(
+				Div(
+					AppendedText('data', '<i class="icon-calendar"></i>'),
+					Field('cliente'),
+					Field('stato'),
+					Field('template'),
+				css_class="span6"),
+				Div(
+					Field('imposte'),
+					Field('bollo'),
+					Field('valore_bollo'),
+				css_class="span6"),
+			css_class="row-fluid"),
 			FormActions(
 				Submit('save', 'Invia', css_class="btn-primary")
 			)
 		)
-		super(FatturaMinimoForm, self).__init__(*args, **kwargs)	
-
-class FatturaStandardForm(forms.ModelForm):
-	class Meta:
-		model = FatturaStandard
-	def __init__(self, *args, **kwargs):
-		self.helper = FormHelper()
-		self.helper.layout = Layout(
-			AppendedText('data', '<i class="icon-calendar"></i>'),
-			AppendedText('cliente', '<i class="icon-user"></i>'),
-			Field('stato'),
-			Field('IVA'),
-			Field('template'),
-			FormActions(
-				Submit('save', 'Invia', css_class="btn-primary")
-			)
-		)
-		super(FatturaStandardForm, self).__init__(*args, **kwargs)
-
+		
 
 class Prestazione(models.Model):
 	descrizione=models.TextField('Descrizione')
@@ -169,10 +177,7 @@ class Prestazione(models.Model):
 	fattura=models.ForeignKey(Fattura, related_name='prestazione_fattura')	
 	def __unicode__(self):
 		return '%s(%s)' % (self.descrizione,self.importo)
-	def imponibile(self):
-		return round(self.importo/1.04,2)
-	def rivalsa(self):
-		return self.importo-self.imponibile()
+
 
 class PrestazioneForm(forms.ModelForm):
 	class Meta:

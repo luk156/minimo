@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load fattura_extras %}
 
 {% block breadcrumb %}
 <li><a href="/">Home</a> <span class="divider">/</span></li>
@@ -23,14 +24,28 @@
 		<td>{{f.cliente}}</td>
 	</tr>
 	<tr>
-		<td><h5>Aliquota IVA</h5></td>
-		<td>{{f.IVA}} %</td>
+		<td><h5>Imposte</h5></td>
+		<td>{% for i in f.imposte.all %}
+				{{i.nome}} ({{i.aliquota}}%)</br>
+			{% endfor %}
+		</td>
+	</tr>
+	<tr> 
+		<td><h5>Marca da bollo</h5></td>
+		<td>
+		{%if f.valore_bollo %}
+		{{f.bollo}} ({{f.valore_bollo}} €)
+		{%else%}
+		No
+		{%endif%}
+		</td>
 	</tr>
 	<tr {% if not f.stato %} class="error" {% endif %} > 
 		<td><h5>Stato pagamento</h5></td>
 		<td>
 			{% if fattura.stato %}<i class="icon-check icon-large"></i>
-			{% else %}<i class="icon-check-empty icon-large"></i></td>{% endif %}
+			{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+		</td>
 	</tr>
 	<tr>
 		<td><h5>Template</h5></td>
@@ -82,20 +97,29 @@
 <h3>Importo:</h3>
 
 <table class="table table-striped" id="fatture">
-	<thead>
-		<tr>
-			<th>Imponibile</th>
-			<th>IVA</th>
-			<th>TOTALE</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr class="importo">
-			<td>{{f.imponibile}} <i class="icon-eur"></i></a></td>
-			<td> {{f.iva}} <i class="icon-eur"></i></td>
-			<td class="totale">{{f.totale}} <i class="icon-eur"></i></td>
-		</tr>
-	</tbody>
+
+	<tr>
+		<td>Imponibile</td>
+		<td></td>
+		<td>{{f.imponibile}} <i class="icon-eur"></i></td>
+	</tr>
+	{% for i in f.imposte.all %}
+	<tr>
+		<td>{{i.nome}}</td>
+		<td>{{i.aliquota}} %</td>
+		<td>{{i|tot_imposta:f.imponibile}} <i class="icon-eur"></i></td>
+	</tr>
+	{% endfor %}
+	<tr >
+		<td>Marca da bollo</td>
+		<td></td>
+		<td>{%if f.valore_bollo %} {{f.valore_bollo}}{%else%}0{%endif%} <i class="icon-eur"></i></td>
+	</tr>
+	<tr class="totale">
+		<td>totale</td>
+		<td></td>
+		<td>{{ f.totale }} <i class="icon-eur"></i></td>
+	</tr>
 </table>
 
 {% endblock %}

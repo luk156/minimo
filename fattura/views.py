@@ -112,18 +112,6 @@ def export_csv(request, queryset, export_data, filter_by=None, file_name='export
 
 anni=(2012,2013)
 
-if settings.TIPO_FATTURA=="standard":
-	FatturaForm = FatturaStandardForm
-	F = FatturaStandard
-	template_fattura='fattura_standard.html'
-	template_bilancio='bilancio_standard.html'
-	template_esempio='template_standard.odt'
-elif settings.TIPO_FATTURA=="minimo":
-	FatturaForm = FatturaMinimoForm
-	F = FatturaMinimo
-	template_fattura='fattura_minimo.html'
-	template_bilancio='bilancio_minimo.html'
-	template_esempio='template_minimo.odt'
 
 def home(request):
 	return True
@@ -185,7 +173,7 @@ def export_clienti(request):
 def cliente(request,c_id):
 	c= Cliente.objects.get(id=c_id)
 	if c.user == request.user or request.user.is_superuser:
-		return render_to_response( 'cliente.html', {'request':request, 'c':c , 'f': F.objects.filter(cliente=c)}, RequestContext(request))
+		return render_to_response( 'cliente.html', {'request':request, 'c':c , 'f': Fattura.objects.filter(cliente=c)}, RequestContext(request))
 	else:
 		raise PermissionDenied
 
@@ -258,33 +246,33 @@ def prestazioni(request):
 @login_required
 def nuovafattura(request):
 	azione = 'Nuova'
-	#pdb.set_trace()
+	pdb.set_trace()
 	if request.method == 'POST':
-		form = FatturaForm(request.POST)
+		form = FatturaForm(request.POST,user_rid=request.user.id)
 		form.helper.form_action = '/fatture/nuovo/'
 		if form.is_valid():
 			f=form.save(commit=False)
 			f.user=request.user
 			f.save()
-			return HttpResponseRedirect('/fatture')
+			return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
 	else:
-		form = FatturaForm()
+		form = FatturaForm(user_rid=request.user.id)
 		form.helper.form_action = '/fatture/nuovo/'
 	return render_to_response('form_fattura.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
 
 @login_required
 def modificafattura(request,f_id):
 	azione = 'Modifica'
-	f = F.objects.get(id=f_id)
+	f = Fattura.objects.get(id=f_id)
 	if f.user == request.user or request.user.is_superuser:
 		if request.method == 'POST':  # If the form has been submitted...
-			form = FatturaForm(request.POST, instance=f)  # necessario per modificare la riga preesistente
+			form = FatturaForm(request.POST, instance=f, user_rid=request.user.id)  # necessario per modificare la riga preesistente
 			form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
 			if form.is_valid():
 				form.save()
 				return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
 		else:
-			form = FatturaForm(instance=f)
+			form = FatturaForm(instance=f,user_rid=request.user.id)
 			form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
 		return render_to_response('form_fattura.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
 	else:
@@ -292,7 +280,7 @@ def modificafattura(request,f_id):
 
 @login_required
 def eliminafattura(request,f_id):
-	fattura = F.objects.get(id=f_id)
+	fattura = Fattura.objects.get(id=f_id)
 	if fattura.user == request.user or request.user.is_superuser:
 		fattura.delete()
 		return HttpResponseRedirect('/fatture')
@@ -302,9 +290,11 @@ def eliminafattura(request,f_id):
 @login_required
 def fatture(request):
 	if request.user.is_superuser:
-		fatture=F.objects.all()
+		fatture=Fattura.objects.all()
+		imposte=Imposta.objects.all()
 	else:
-		fatture=F.objects.filter(user=request.user)
+		fatture=Fattura.objects.filter(user=request.user)
+		imposte=Imposta.objects.filter(user=request.user)
 	Fatture=[]
 	f=[]
 	Fatture.append(anni)
@@ -312,15 +302,15 @@ def fatture(request):
 		f.append(fatture.filter(data__year=anno))
 	Fatture.append(f)
 	Fatture=zip(*Fatture)
-	return render_to_response( 'fatture.html', {'request':request, 'fatture': Fatture, 'anni': anni}, RequestContext(request))
+	return render_to_response( 'fatture.html', {'request':request, 'fatture': Fatture, 'anni': anni, 'imposte':imposte}, RequestContext(request))
 
 
 @login_required
 def export_fatture(request):
 	if request.user.is_superuser:
-		fatture=F.objects.all()
+		fatture=Fattura.objects.all()
 	else:
-		fatture=F.objects.filter(fattura_user=request.user)
+		fatture=Fattura.objects.filter(fattura_user=request.user)
     # Create the HttpResponse object with the appropriate CSV header
 	if settings.TIPO_FATTURA=="standard":
 		return export_csv(request, fatture, [('Data','data'),
@@ -345,16 +335,16 @@ def export_fatture(request):
 
 @login_required
 def fattura(request, f_id):
-	f=F.objects.get(id=f_id)
+	f=Fattura.objects.get(id=f_id)
 	form_prestazione = PrestazioneForm()
 	if f.user == request.user or request.user.is_superuser:
-		return render_to_response( template_fattura, {'request':request, 'f': f,'form':form_prestazione }, RequestContext(request))
+		return render_to_response( 'fattura.html', {'request':request, 'f': f,'form':form_prestazione }, RequestContext(request))
 	else:
 		raise PermissionDenied		
 
 @login_required
 def stampa_fattura(request,f_id):
-	f=F.objects.get(id=f_id)
+	f=Fattura.objects.get(id=f_id)
 	if f.user == request.user or request.user.is_superuser:
 		#pdb.set_trace()
 		#f.template
@@ -392,9 +382,9 @@ def bilancio(request):
 @login_required
 def bilancio_intervallo(request, inizio, fine):
 	if request.user.is_superuser:
-		fatture=F.objects.filter(data__gte=inizio,data__lte=fine)
+		fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
 	else:
-		fatture=F.objects.filter(data__gte=inizio,data__lte=fine,user=request.user)
+		fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine,user=request.user)
 	f_data=[]
 	f_tot=[]
 	fatturato=[]
@@ -463,4 +453,47 @@ def template(request):
 		template=TemplateFattura.objects.all()
 	else:
 		template=TemplateFattura.objects.filter(user=request.user)
-	return render_to_response( 'template.html', {'request':request, 'templates': template, 'template_esempio':template_esempio}, RequestContext(request))
+	return render_to_response( 'template.html', {'request':request, 'templates': template, 'template_esempio':'template_standard.odt'}, RequestContext(request))
+
+@login_required
+def nuovoimposta(request):
+	azione = 'Nuovo'
+	if request.method == 'POST':
+		form = ImpostaForm(request.POST)
+		form.helper.form_action = '/imposte/nuovo/'
+		if form.is_valid():
+			t=form.save(commit=False)
+			t.user=request.user
+			t.save()
+			return HttpResponseRedirect('/fatture')
+	else:
+		form = ImpostaForm()
+		form.helper.form_action = '/imposte/nuovo/'
+	return render_to_response('form_imposta.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+
+@login_required
+def modificaimposta(request,i_id):
+	azione = 'Modifica'
+	i = Imposta.objects.get(id=i_id)
+	if i.user == request.user or request.user.is_superuser:
+		if request.method == 'POST':  # If the form has been submitted...
+			form = ImpostaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+			form.helper.form_action = '/imposta/modifica/'+str(i.id)+'/'
+			if form.is_valid():
+				form.save()
+				return HttpResponseRedirect('/fatture') # Redirect after POST
+		else:
+			form = ImpostaForm(instance=i)
+			form.helper.form_action = '/imposte/modifica/'+str(i.id)+'/'
+		return render_to_response('form_imposta.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+	else:
+		raise PermissionDenied
+
+@login_required
+def eliminaimposta(request,i_id):
+	imposta = Imposta.objects.get(id=i_id)
+	if imposta.user == request.user or request.user.is_superuser:	
+		imposta.delete()
+		return HttpResponseRedirect('/fatture')
+	else:
+		raise PermissionDenied		
