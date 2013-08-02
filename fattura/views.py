@@ -361,7 +361,7 @@ def stampa_fattura(request,f_id):
 		pdf = conv.convert(document, format='pdf')
 		#return render_to_response( 'modello_fattura.html', {'request':request, 'f': f})
 		response = HttpResponse(pdf, mimetype='application/pdf')
-		response['Content-Disposition'] = 'attachment; filename=Fattura-%s.pdf' % (f)
+		response['Content-Disposition'] = 'attachment; filename=Fattura-%s-%s.pdf' % (f.progressivo(),f.data.year)
 		return response
 	else:
 		raise PermissionDenied		

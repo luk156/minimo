@@ -16,8 +16,8 @@ class Cliente(models.Model):
 	ragione_sociale=models.CharField('Ragione sociale',max_length=70)
 	indirizzo=models.CharField('Indirizzo',max_length=70)
 	cod_fiscale=models.CharField('Codice Fiscale',max_length=50, blank=True, null=True)
-	p_iva=models.CharField('Partita IVA',max_length=30)
-	telefono=models.IntegerField('Telefono')
+	p_iva=models.CharField('Partita IVA',max_length=30, blank=True, null=True)
+	telefono=models.IntegerField('Telefono', blank=True, null=True)
 	mail=models.EmailField('E-mail',max_length=50, blank=True, null=True)
 	def __unicode__(self):
 		return '%s' % (self.ragione_sociale)
@@ -91,9 +91,9 @@ class TemplateFatturaForm(forms.ModelForm):
 class Imposta(models.Model):
 	user=models.ForeignKey(User, editable=False, related_name='imposta_user')
 	nome=models.CharField('Nome Imposta',max_length=30)
-	aliquota=models.IntegerField('Aliquota')
+	aliquota=models.FloatField('Aliquota')
 	def calcola(self,imponibile):
-		return imponibile*self.aliquota/100.0
+		return round(imponibile*self.aliquota/100.0,2)
 	def __unicode__(self):
 		return '%s (%s %%)' % (self.nome, str(self.aliquota))
 
@@ -121,26 +121,26 @@ class Fattura(models.Model):
 	template=models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
 	imposte=models.ManyToManyField(Imposta)
 	bollo=models.CharField('ID Bollo',max_length=30, blank=True, null=True)
-	valore_bollo=models.IntegerField('Valore marca da bollo', blank=True, null=True)
+	valore_bollo=models.FloatField('Valore marca da bollo', blank=True, null=True)
 	def __unicode__(self):
-		return '%s - %s' % (self.progressivo(),self.data.year)
+		return '%s-%s' % (self.progressivo(),self.data.year)
 	class Meta:
 		ordering = ['data']
 	def imponibile(self):
 		i=0
 		for p in self.prestazione_fattura.all():
 			i+=p.importo
-		return i
+		return round(i,2)
 	def tot_imposte(self):
 		t=0
 		for i in self.imposte.all():
 			t+=i.calcola(self.imponibile())
-		return t
+		return round(t,2)
 	def totale(self):
 		tot = self.imponibile()+self.tot_imposte()
 		if self.valore_bollo:
 			tot+=self.valore_bollo
-		return tot
+		return round(tot,2)
 	def progressivo(self):
 		fatture_anno=Fattura.objects.filter(data__year=self.data.year)
 		i=0
