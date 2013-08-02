@@ -246,7 +246,7 @@ def prestazioni(request):
 @login_required
 def nuovafattura(request):
 	azione = 'Nuova'
-	pdb.set_trace()
+	#pdb.set_trace()
 	if request.method == 'POST':
 		form = FatturaForm(request.POST,user_rid=request.user.id)
 		form.helper.form_action = '/fatture/nuovo/'

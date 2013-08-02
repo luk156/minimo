@@ -95,7 +95,7 @@ class Imposta(models.Model):
 	def calcola(self,imponibile):
 		return imponibile*self.aliquota/100.0
 	def __unicode__(self):
-		return '%s (%s)' % (self.nome, str(self.aliquota))
+		return '%s (%s %%)' % (self.nome, str(self.aliquota))
 
 
 class ImpostaForm(forms.ModelForm):
@@ -123,7 +123,7 @@ class Fattura(models.Model):
 	bollo=models.CharField('ID Bollo',max_length=30, blank=True, null=True)
 	valore_bollo=models.IntegerField('Valore marca da bollo', blank=True, null=True)
 	def __unicode__(self):
-		return '%s/%s' % (self.id,self.data.year)
+		return '%s - %s' % (self.progressivo(),self.data.year)
 	class Meta:
 		ordering = ['data']
 	def imponibile(self):
@@ -141,7 +141,13 @@ class Fattura(models.Model):
 		if self.valore_bollo:
 			tot+=self.valore_bollo
 		return tot
-
+	def progressivo(self):
+		fatture_anno=Fattura.objects.filter(data__year=self.data.year)
+		i=0
+		for f in fatture_anno:
+			i+=1
+			if f.id==self.id:
+				return i
 
 class FatturaForm(forms.ModelForm):
 	class Meta:
