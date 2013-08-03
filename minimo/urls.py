@@ -45,6 +45,10 @@ urlpatterns = patterns('',
 	(r'^imposte/nuovo/$', 'fattura.views.nuovoimposta'),
 	(r'^imposte/modifica/(?P<i_id>\w+)/$', 'fattura.views.modificaimposta'),
 	(r'^imposte/elimina/(?P<i_id>\w+)/$', 'fattura.views.eliminaimposta'),
+	#ritenute
+	(r'^ritenute/nuovo/$', 'fattura.views.nuovoritenuta'),
+	(r'^ritenute/modifica/(?P<i_id>\w+)/$', 'fattura.views.modificaritenuta'),
+	(r'^ritenute/elimina/(?P<i_id>\w+)/$', 'fattura.views.eliminaritenuta'),
 	# bilancio
 	(r'^bilancio/$', 'fattura.views.bilancio'),
 	# Uncomment the admin/doc line below to enable admin documentation:

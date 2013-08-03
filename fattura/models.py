@@ -97,6 +97,15 @@ class Imposta(models.Model):
 	def __unicode__(self):
 		return '%s (%s %%)' % (self.nome, str(self.aliquota))
 
+class Ritenuta(models.Model):
+	user=models.ForeignKey(User, editable=False, related_name='ritenuta_user')
+	nome=models.CharField('Nome Ritenuta',max_length=30)
+	aliquota=models.FloatField('Aliquota')
+	def calcola(self,imponibile):
+		return round(imponibile*self.aliquota/100.0,2)
+	def __unicode__(self):
+		return '%s (%s %%)' % (self.nome, str(self.aliquota))	
+
 
 class ImpostaForm(forms.ModelForm):
 	class Meta:
@@ -112,6 +121,19 @@ class ImpostaForm(forms.ModelForm):
 		)
 		super(ImpostaForm, self).__init__(*args, **kwargs)	
 
+class RitenutaForm(forms.ModelForm):
+	class Meta:
+		model = Ritenuta
+	def __init__(self, *args, **kwargs):
+		self.helper = FormHelper()
+		self.helper.layout = Layout(
+			Field('nome'),
+			Field('aliquota'),
+			FormActions(
+				Submit('save', 'Invia', css_class="btn-primary")
+			)
+		)
+		super(RitenutaForm, self).__init__(*args, **kwargs)
 
 class Fattura(models.Model):
 	user=models.ForeignKey(User, editable=False, related_name='fattura_user')
@@ -119,7 +141,8 @@ class Fattura(models.Model):
 	cliente=models.ForeignKey(Cliente, related_name='fattura_cliente', null = True, on_delete = models.SET_NULL)	
 	stato=models.BooleanField('Stato pagamento')
 	template=models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
-	imposte=models.ManyToManyField(Imposta)
+	imposte=models.ManyToManyField(Imposta,  blank=True, null = True)
+	ritenute=models.ManyToManyField(Ritenuta,  blank=True, null = True)
 	bollo=models.CharField('ID Bollo',max_length=30, blank=True, null=True)
 	valore_bollo=models.FloatField('Valore marca da bollo', blank=True, null=True)
 	def __unicode__(self):
@@ -136,8 +159,13 @@ class Fattura(models.Model):
 		for i in self.imposte.all():
 			t+=i.calcola(self.imponibile())
 		return round(t,2)
+	def tot_ritenute(self):
+		r=0
+		for i in self.ritenute.all():
+			r+=i.calcola(self.imponibile())
+		return round(r,2)	
 	def totale(self):
-		tot = self.imponibile()+self.tot_imposte()
+		tot = self.imponibile()+self.tot_imposte()-self.tot_ritenute()
 		if self.valore_bollo:
 			tot+=self.valore_bollo
 		return round(tot,2)
@@ -167,6 +195,7 @@ class FatturaForm(forms.ModelForm):
 				css_class="span6"),
 				Div(
 					Field('imposte'),
+					Field('ritenute'),
 					Field('bollo'),
 					Field('valore_bollo'),
 				css_class="span6"),

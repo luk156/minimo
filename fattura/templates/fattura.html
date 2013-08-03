@@ -30,6 +30,13 @@
 			{% endfor %}
 		</td>
 	</tr>
+	<tr>
+		<td><h5>Ritenute</h5></td>
+		<td>{% for i in f.ritenute.all %}
+				{{i.nome}} ({{i.aliquota}}%)</br>
+			{% endfor %}
+		</td>
+	</tr>
 	<tr> 
 		<td><h5>Marca da bollo</h5></td>
 		<td>
@@ -107,13 +114,20 @@
 	<tr>
 		<td>{{i.nome}}</td>
 		<td>{{i.aliquota}} %</td>
-		<td>{{i|tot_imposta:f.imponibile}} <i class="icon-eur"></i></td>
+		<td>+ {{i|tot_imposta:f.imponibile}} <i class="icon-eur"></i></td>
+	</tr>
+	{% endfor %}
+	{% for i in f.ritenute.all %}
+	<tr>
+		<td>{{i.nome}}</td>
+		<td>{{i.aliquota}} %</td>
+		<td>- {{i|tot_imposta:f.imponibile}} <i class="icon-eur"></i></td>
 	</tr>
 	{% endfor %}
 	<tr >
 		<td>Marca da bollo</td>
 		<td></td>
-		<td>{%if f.valore_bollo %} {{f.valore_bollo}}{%else%}0{%endif%} <i class="icon-eur"></i></td>
+		<td>{%if f.valore_bollo %}+ {{f.valore_bollo}}{%else%}0{%endif%} <i class="icon-eur"></i></td>
 	</tr>
 	<tr class="totale">
 		<td>totale</td>

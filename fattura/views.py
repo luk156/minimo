@@ -292,9 +292,11 @@ def fatture(request):
 	if request.user.is_superuser:
 		fatture=Fattura.objects.all()
 		imposte=Imposta.objects.all()
+		ritenute=Ritenuta.objects.all()
 	else:
 		fatture=Fattura.objects.filter(user=request.user)
 		imposte=Imposta.objects.filter(user=request.user)
+		ritenute=Ritenuta.objects.filter(user=request.user)
 	Fatture=[]
 	f=[]
 	Fatture.append(anni)
@@ -302,7 +304,7 @@ def fatture(request):
 		f.append(fatture.filter(data__year=anno))
 	Fatture.append(f)
 	Fatture=zip(*Fatture)
-	return render_to_response( 'fatture.html', {'request':request, 'fatture': Fatture, 'anni': anni, 'imposte':imposte}, RequestContext(request))
+	return render_to_response( 'fatture.html', {'request':request, 'ritenute': ritenute ,'fatture': Fatture, 'anni': anni, 'imposte':imposte}, RequestContext(request))
 
 
 @login_required
@@ -352,8 +354,6 @@ def stampa_fattura(request,f_id):
 		context = dict(
 			data=str(f.data),
 			fattura=f,
-			cliente=f.cliente,
-			prestazioni=f.prestazione_fattura.all(),
 			)
 
 		document = template.render(Context(context))
@@ -372,8 +372,6 @@ def bilancio(request):
 	form=IntervalloForm()
 	if request.method == 'POST':  # If the form has been submitted...
 		form = IntervalloForm(request.POST) 
-		if form.is_valid():
-			print "ciao"
 	anno=dt.datetime.today().year
 	fatturato=bilancio_intervallo(request,dt.date(anno,1,1),dt.datetime.now().date())
 	
@@ -496,4 +494,47 @@ def eliminaimposta(request,i_id):
 		imposta.delete()
 		return HttpResponseRedirect('/fatture')
 	else:
-		raise PermissionDenied		
+		raise PermissionDenied	
+
+@login_required
+def nuovoritenuta(request):
+	azione = 'Nuovo'
+	if request.method == 'POST':
+		form = RitenutaForm(request.POST)
+		form.helper.form_action = '/ritenute/nuovo/'
+		if form.is_valid():
+			t=form.save(commit=False)
+			t.user=request.user
+			t.save()
+			return HttpResponseRedirect('/fatture')
+	else:
+		form = RitenutaForm()
+		form.helper.form_action = '/ritenute/nuovo/'
+	return render_to_response('form_ritenuta.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+
+@login_required
+def modificaritenuta(request,i_id):
+	azione = 'Modifica'
+	i = Ritenuta.objects.get(id=i_id)
+	if i.user == request.user or request.user.is_superuser:
+		if request.method == 'POST':  # If the form has been submitted...
+			form = RitenutaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+			form.helper.form_action = '/ritenute/modifica/'+str(i.id)+'/'
+			if form.is_valid():
+				form.save()
+				return HttpResponseRedirect('/fatture') # Redirect after POST
+		else:
+			form = RitenutaForm(instance=i)
+			form.helper.form_action = '/ritenute/modifica/'+str(i.id)+'/'
+		return render_to_response('form_ritenuta.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+	else:
+		raise PermissionDenied
+
+@login_required
+def eliminaritenuta(request,i_id):
+	r = Ritenuta.objects.get(id=i_id)
+	if r.user == request.user or request.user.is_superuser:	
+		r.delete()
+		return HttpResponseRedirect('/fatture')
+	else:
+		raise PermissionDenied	
