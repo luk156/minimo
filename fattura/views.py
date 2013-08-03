@@ -254,6 +254,7 @@ def nuovafattura(request):
 			f=form.save(commit=False)
 			f.user=request.user
 			f.save()
+			form.save_m2m()
 			return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
 	else:
 		form = FatturaForm(user_rid=request.user.id)
