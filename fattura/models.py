@@ -18,6 +18,7 @@ import os
 class Cliente(models.Model):
     user = models.ForeignKey(User, editable=False, related_name='cliente_user')
     ragione_sociale = models.CharField('Ragione sociale',max_length=70)
+    #indirizzo=models.CharField('Indirizzo',max_length=70)
     via = models.CharField('Via',max_length=70)
     cap = models.CharField('CAP',max_length=6)
     citta = models.CharField('Città',max_length=70)
@@ -39,6 +40,8 @@ class ClienteForm(forms.ModelForm):
     #indirizzo=forms.CharField(widget = forms.Textarea(),)
     class Meta:
         model = Cliente
+        
+        
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         self.helper = FormHelper()
@@ -61,16 +64,22 @@ class ClienteForm(forms.ModelForm):
         )
         super( ClienteForm, self).__init__(*args, **kwargs)
 
+
 def content_file_name(instance, filename):
     return '/'.join(['content', "template-"+str(instance.nome)+".odt"])
 
+
 class TemplateFattura(models.Model):
-    user=models.ForeignKey(User, editable=False, related_name='template_user')
+    user = models.ForeignKey(User, editable=False, related_name='template_user')
     nome = models.CharField('Nome',max_length=70, unique=True)
     descrizione = models.CharField('Descrizione',max_length=70, blank=True, null=True)
     template = models.FileField(upload_to=content_file_name)
+    
+    
     def __unicode__(self):
         return '%s' % (self.nome)
+    
+    
     def save(self, *args, **kwargs):
         # delete old file when replacing by updating the file
         try:
@@ -80,6 +89,8 @@ class TemplateFattura(models.Model):
         except:
             pass # when new photo then we do nothing, normal case          
         super(TemplateFattura, self).save(*args, **kwargs)
+
+
 
 class TemplateFatturaForm(forms.ModelForm):
     class Meta:
@@ -94,7 +105,9 @@ class TemplateFatturaForm(forms.ModelForm):
                 Submit('save', 'Invia', css_class="btn-primary")
             )
         )
-        super(TemplateFatturaForm, self).__init__(*args, **kwargs)  
+        super(TemplateFatturaForm, self).__init__(*args, **kwargs)
+        
+        
     def clean_template(self):
         filename = self.cleaned_data["template"]
         ext = os.path.splitext(filename.name)[1]
@@ -104,28 +117,39 @@ class TemplateFatturaForm(forms.ModelForm):
             raise forms.ValidationError("Il file deve avere estensione .odt!")
         return filename
 
+
 class Imposta(models.Model):
-    user=models.ForeignKey(User, editable=False, related_name='imposta_user')
-    nome=models.CharField('Nome Imposta',max_length=30)
-    aliquota=models.FloatField('Aliquota')
+    user = models.ForeignKey(User, editable=False, related_name='imposta_user')
+    nome = models.CharField('Nome Imposta',max_length=30)
+    aliquota = models.FloatField('Aliquota')
+    
+    
     def calcola(self,imponibile):
         return round(imponibile*self.aliquota/100.0,2)
+    
+    
     def __unicode__(self):
         return '%s (%s %%)' % (self.nome, str(self.aliquota))
 
 class Ritenuta(models.Model):
-    user=models.ForeignKey(User, editable=False, related_name='ritenuta_user')
-    nome=models.CharField('Nome Ritenuta',max_length=30)
-    aliquota=models.FloatField('Aliquota')
+    user = models.ForeignKey(User, editable=False, related_name='ritenuta_user')
+    nome = models.CharField('Nome Ritenuta',max_length=30)
+    aliquota = models.FloatField('Aliquota')
+    
     def calcola(self,imponibile):
         return round(imponibile*self.aliquota/100.0,2)
+    
     def __unicode__(self):
         return '%s (%s %%)' % (self.nome, str(self.aliquota))   
 
 
 class ImpostaForm(forms.ModelForm):
+    
+    
     class Meta:
         model = Imposta
+        
+        
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -138,8 +162,12 @@ class ImpostaForm(forms.ModelForm):
         super(ImpostaForm, self).__init__(*args, **kwargs)  
 
 class RitenutaForm(forms.ModelForm):
+    
+    
     class Meta:
         model = Ritenuta
+        
+        
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -152,20 +180,22 @@ class RitenutaForm(forms.ModelForm):
         super(RitenutaForm, self).__init__(*args, **kwargs)
 
 class Fattura(models.Model):
-    user=models.ForeignKey(User, editable=False, related_name='fattura_user')
+    user = models.ForeignKey(User, editable=False, related_name='fattura_user')
     numero = models.IntegerField('Numero progressivo', editable=False, default=0, unique_for_year="data")
-    data=models.DateField('Data di emissione')
-    cliente=models.ForeignKey(Cliente, related_name='fattura_cliente', null = True, on_delete = models.SET_NULL)    
-    stato=models.BooleanField('Stato pagamento')
-    template=models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
-    imposte=models.ManyToManyField(Imposta,  blank=True, null = True)
-    ritenute=models.ManyToManyField(Ritenuta,  blank=True, null = True)
-    bollo=models.CharField('ID Bollo',max_length=30, blank=True, null=True)
-    valore_bollo=models.FloatField('Valore marca da bollo', blank=True, null=True)
+    data = models.DateField('Data di emissione')
+    cliente = models.ForeignKey(Cliente, related_name='fattura_cliente', null = True, on_delete = models.SET_NULL)    
+    stato = models.BooleanField('Stato pagamento')
+    template = models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
+    imposte = models.ManyToManyField(Imposta,  blank=True, null = True)
+    ritenute = models.ManyToManyField(Ritenuta,  blank=True, null = True)
+    bollo = models.CharField('ID Bollo',max_length=30, blank=True, null=True)
+    valore_bollo = models.FloatField('Valore marca da bollo', blank=True, null=True)
+    
+    
     def __unicode__(self):
-        
-        
         return '%s-%s' % (self.progressivo(),self.data.year)
+    
+    
     class Meta:
         ordering = ['data']
         
@@ -173,28 +203,28 @@ class Fattura(models.Model):
     def imponibile(self):
         i=0
         for p in self.prestazione_fattura.all():
-            i+=p.importo
+            i += p.importo
         return round(i,2)
     
 
     def tot_imposte(self):
         t=0
         for i in self.imposte.all():
-            t+=i.calcola(self.imponibile())
+            t += i.calcola(self.imponibile())
         return round(t,2)
     
 
     def tot_ritenute(self):
         r=0
         for i in self.ritenute.all():
-            r+=i.calcola(self.imponibile())
+            r += i.calcola(self.imponibile())
         return round(r,2)
     
 
     def totale(self):
         tot = self.imponibile()+self.tot_imposte()-self.tot_ritenute()
         if self.valore_bollo:
-            tot+=self.valore_bollo
+            tot += self.valore_bollo
         return round(tot,2)
     
 
@@ -204,16 +234,20 @@ class Fattura(models.Model):
     
     def save(self, *args, **kwargs):
         if self.numero == 0:
-            fatture_anno=Fattura.objects.filter(data__year=self.data.year).aggregate(Max('numero'))
-            if not fatture_anno:
-		fatture_anno = 0
+            fatture_anno = Fattura.objects.filter(data__year=self.data.year).aggregate(Max('numero'))
+            if not fatture_anno['numero__max']:
+                fatture_anno['numero__max'] = 0
             self.numero = fatture_anno['numero__max'] + 1
         super(Fattura, self).save(*args, **kwargs)
 
 
 class FatturaForm(forms.ModelForm):
+    
+    
     class Meta:
         model = Fattura
+        
+        
     def __init__(self, *args, **kwargs):
         user_rid = kwargs.pop('user_rid')
         super(FatturaForm, self).__init__(*args, **kwargs)
@@ -241,17 +275,23 @@ class FatturaForm(forms.ModelForm):
         
 
 class Prestazione(models.Model):
-    descrizione=models.TextField('Descrizione')
-    importo=models.FloatField('Importo')
-    fattura=models.ForeignKey(Fattura, related_name='prestazione_fattura')  
+    descrizione = models.TextField('Descrizione')
+    importo = models.FloatField('Importo')
+    fattura = models.ForeignKey(Fattura, related_name='prestazione_fattura')
+    
+    
     def __unicode__(self):
         return '%s(%s)' % (self.descrizione,self.importo)
 
 
 class PrestazioneForm(forms.ModelForm):
+    
+    
     class Meta:
         model = Prestazione
         exclude = ('fattura')
+        
+        
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -264,8 +304,10 @@ class PrestazioneForm(forms.ModelForm):
         super(PrestazioneForm, self).__init__(*args, **kwargs)
 
 class IntervalloForm(forms.Form):
-    inizio=forms.DateField()
-    fine=forms.DateField()
+    inizio = forms.DateField()
+    fine = forms.DateField()
+    
+    
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -281,6 +323,8 @@ class IntervalloForm(forms.Form):
         super(IntervalloForm, self).__init__(*args, **kwargs)
 
 class LoginForm(AuthenticationForm):
+    
+    
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -296,6 +340,8 @@ class LoginForm(AuthenticationForm):
         )
 
 class PasswordForm(PasswordChangeForm):
+    
+    
     def __init__(self, *args, **kwargs):
         super(PasswordForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
