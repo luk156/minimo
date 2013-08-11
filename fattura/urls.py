@@ -53,7 +53,7 @@ urlpatterns = patterns('fattura.views',
     # bilancio
     (r'^bilancio/$', 'bilancio'),
 
-) #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += patterns('django.contrib.auth.views',
     #utente
