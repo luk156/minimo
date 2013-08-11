@@ -77,12 +77,13 @@
 			<td> {{p.importo}} €</td>
 			<td>
 				<div class="btn-group">
-					<a href="/prestazioni/modifica/{{p.id}}" class="btn  btn-small"><i class="icon-edit"></i> modifica</a>
-					<a href="/prestazioni/elimina/{{p.id}}" class="btn  btn-small"><i class="icon-trash"></i> elimina</a>
+					<a {% if f.stato %} href="#" {% else %} href="/prestazioni/modifica/{{p.id}}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+					<a {% if f.stato %} href="#" {% else %} href="/prestazioni/elimina/{{p.id}}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-trash"></i> elimina</a>
 				</div>
 			</td>
 		</tr>
-		{% endfor %}
+	{% endfor %}
+		{% if not f.stato %}
 		<tr>
 		<td> 
 		 	<form  method="post" action="/prestazioni/nuova/{{f.id}}">{% csrf_token %}
@@ -98,6 +99,7 @@
     	</td>
 		
 		</tr>
+		{% endif %}
 	</tbody>
 </table>
 
@@ -140,9 +142,10 @@
 
 {% block left %}
 <h4>Azioni</h4>
-<a href="/fatture/modifica/{{f.id}}" class="btn btn-block "><i class="icon-edit"></i> modifica</a>
+<a {% if f.stato %} href="#" {% else %} href="/fatture/incassa/{{f.id}}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
+<a {% if f.stato %} href="#" {% else %} href="/fatture/modifica/{{f.id}}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
 <a href="/fatture/elimina/{{f.id}}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
 <a href="/fatture/stampa/{{f.id}}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
-<a href="/fatture/invio/{{f.id}}" class="btn"><i class="icon-envelope"> </i>Email</a>
+<a href="/fatture/invio/{{f.id}}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>
 
 {% endblock%}
