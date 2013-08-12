@@ -2,7 +2,7 @@
 
 {% block breadcrumb %}
 <li><a href="/">Home</a> <span class="divider">/</span></li>
-<li><a href="/clienti/">Elenco Clienti</a> <span class="divider">/</span></li>
+<li><a href="{% url 'clienti' %}">Elenco Clienti</a> <span class="divider">/</span></li>
 <li><a href="#">{{c}}</a></li>
 {% endblock %}
 
@@ -55,7 +55,7 @@
 				{% for fattura in f %}
 
 				<tr>
-					<td><a href="/fatture/dettagli/{{fattura.id}}" ><i class="icon-search"> </i> 
+					<td><a href="{% url 'fattura' fattura.id %}" ><i class="icon-search"> </i> 
 						{{fattura}}</a></td>
 					<td>{{fattura.data}}</td>
 					<td>{{fattura.totale}} €</td>
@@ -72,7 +72,7 @@
 
 {% block left %}
 <h4>Azioni</h4>
-<a href="/clienti/modifica/{{c.id}}" class="btn btn-block "><i class="icon-edit"></i> modifica</a>
-<a href="/clienti/elimina/{{c.id}}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
+<a href="{% url 'modificacliente' c.id %}" class="btn btn-block "><i class="icon-edit"></i> modifica</a>
+<a href="{% url 'eliminacliente' c.id %}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
 
 {% endblock%}

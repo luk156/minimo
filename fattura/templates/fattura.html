@@ -7,7 +7,7 @@
 
 {% block breadcrumb %}
 <li><a href="/">Home</a> <span class="divider">/</span></li>
-<li><a href="/fatture/">Elenco Fatture</a> <span class="divider">/</span></li>
+<li><a href="{% url 'fatture' %}">Elenco Fatture</a> <span class="divider">/</span></li>
 <li><a href="#">Fattura {{f}}</a></li>
 {% endblock %}
 
@@ -79,8 +79,8 @@
 			<td> {{p.importo}} €</td>
 			<td>
 				<div class="btn-group">
-					<a {% if f.stato %} href="#" {% else %} href="/prestazioni/modifica/{{p.id}}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
-					<a {% if f.stato %} href="#" {% else %} href="/prestazioni/elimina/{{p.id}}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-trash"></i> elimina</a>
+					<a {% if f.stato %} href="#" {% else %} href="{% url 'modificaprestazione' p.id %}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+					<a {% if f.stato %} href="#" {% else %} href="{% url 'eliminaprestazione' p.id %}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-trash"></i> elimina</a>
 				</div>
 			</td>
 		</tr>
@@ -88,7 +88,7 @@
 		{% if not f.stato %}
 		<tr>
 		<td> 
-		 	<form  method="post" action="/prestazioni/nuova/{{f.id}}">{% csrf_token %}
+		 	<form  method="post" action="{% url 'nuovaprestazione' f.id %}">{% csrf_token %}
 		 	<textarea class="textarea" id="id_descrizione" name="descrizione" rows="5" style="width:90%;"></textarea>
 		 </td>
 		 <td>
@@ -144,10 +144,10 @@
 
 {% block left %}
 <h4>Azioni</h4>
-<a {% if f.stato %} href="#" {% else %} href="/fatture/incassa/{{f.id}}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
-<a {% if f.stato %} href="#" {% else %} href="/fatture/modifica/{{f.id}}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
-<a href="/fatture/elimina/{{f.id}}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
-<a href="/fatture/stampa/{{f.id}}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
-<a href="/fatture/invio/{{f.id}}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>
+<a {% if f.stato %} href="#" {% else %} href="{% url 'incassa_fattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
+<a {% if f.stato %} href="#" {% else %} href="{% url 'modificafattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+<a href="{% url 'eliminafattura' f.id %}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
+<a href="{% url 'stampa_fattura' f.id %}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
+<a href="{% url 'invio_fattura' f.id %}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>
 
 {% endblock%}

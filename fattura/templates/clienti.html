@@ -29,7 +29,7 @@
 {% for c in clienti %}
 	<tr>
 		<td>
-			<a href="/clienti/{{c.id}}"><i class="icon-search"></i> {{c.id}}</a>
+			<a href="{% url 'cliente' c.id %}"><i class="icon-search"></i> {{c.id}}</a>
 		</td>
 		<td>
 			{{c.ragione_sociale}}
@@ -52,8 +52,8 @@
 
 		<td>
 			<div class="btn-group">
-				<a href="/clienti/modifica/{{c.id}}" class="btn small-btn"><i class="icon-edit"></i> modifica</a>
-				<a href="/clienti/elimina/{{c.id}}" class="btn small-btn"><i class="icon-trash"></i> elimina</a>
+				<a href="{% url 'modificacliente' c.id %}" class="btn small-btn"><i class="icon-edit"></i> modifica</a>
+				<a href="{% url 'eliminacliente' c.id %}" class="btn small-btn"><i class="icon-trash"></i> elimina</a>
 			</div>
 		</td>
 	</tr>
@@ -65,6 +65,6 @@
 
 {% block left %}
 	<h4>Azioni</h4>
-	<a href="/clienti/nuovo/" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Cliente</a></li>
-	<a href="/clienti/export/" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a></li>
+	<a href="{% url 'nuovocliente' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Cliente</a></li>
+	<a href="{% url 'export_clienti' %}" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a></li>
 {% endblock%}
