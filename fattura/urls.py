@@ -35,6 +35,7 @@ urlpatterns = patterns('fattura.views',
     (r'^fatture/dettagli/(?P<f_id>\w+)/$', 'fattura'),
     (r'^fatture/stampa/(?P<f_id>\w+)/$', 'stampa_fattura'),
     (r'^fatture/invio/(?P<f_id>\w+)/$', 'invio_fattura'),
+    (r'^fatture/incassa/(?P<f_id>\w+)/$', 'incassa_fattura'),
     (r'^fatture/modifica/(?P<f_id>\w+)/$', 'modificafattura'),
     (r'^fatture/elimina/(?P<f_id>\w+)/$', 'eliminafattura'),
     #template
