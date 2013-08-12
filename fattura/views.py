@@ -282,6 +282,17 @@ def modificafattura(request,f_id):
     else:
         raise PermissionDenied
 
+@login_required    
+def incassa_fattura(request, f_id):
+    azione = 'i'
+    f = Fattura.objects.get(id=f_id)
+    if f.user == request.user or request.user.is_superuser:
+        f.stato = True
+        f.save()
+        return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+    else:
+        raise PermissionDenied
+    
 @login_required
 def eliminafattura(request,f_id):
     fattura = Fattura.objects.get(id=f_id)
