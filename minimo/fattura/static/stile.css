@@ -1,0 +1,14 @@
+
+.table th, .table td {
+padding: 4px;
+}
+
+tr.importo {
+	font-size: 16px;
+	line-height: 24px;
+}
+
+td.totale {
+
+	font-size: 24px;
+}
