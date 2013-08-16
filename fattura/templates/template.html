@@ -34,8 +34,8 @@
 		</td>
 		<td>
 			<div class="btn-group">
-				<a href="/template/modifica/{{t.id}}" class="btn"><i class="icon-edit"></i> modifica</a>
-				<a href="/template/elimina/{{t.id}}" class="btn"><i class="icon-trash"></i> elimina</a>
+				<a href="{% url 'modificatemplate' t.id %}" class="btn"><i class="icon-edit"></i> modifica</a>
+				<a href="{% url 'eliminatemplate' t.id %}" class="btn"><i class="icon-trash"></i> elimina</a>
 			</div>
 		</td>
 	</tr>
@@ -47,6 +47,6 @@
 
 {% block left %}
 	<h4>Azioni</h4>
-	<a href="/template/nuovo/" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Template</a>
+	<a href="{% url 'nuovotemplate' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Template</a>
 	<a href="/static/{{template_esempio}}" class="btn btn-block "><i class="icon-download"> </i> Scarica Template Esempio</a>
 {% endblock%}

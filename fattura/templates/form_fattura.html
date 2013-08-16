@@ -12,7 +12,8 @@
 {% endblock%}
 
 {% block breadcrumb %}
-<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="{% url 'fatture' %}">Elenco Fatture</a> <span class="divider">/</span></li>
 <li><a href="#">{{azione}} Fattura</a></li>
 {% endblock %}
 

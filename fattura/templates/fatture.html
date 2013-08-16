@@ -41,14 +41,14 @@
 					<td>
 						
 						{{fattura.data}} {{fattura.progressivo}}</td>
-					<td><a href="/clienti/{{fattura.cliente.id}}">{{fattura.cliente|truncatechars:30}}</a></td>
+					<td><a href="{% url 'cliente' c.id %}">{{fattura.cliente|truncatechars:30}}</a></td>
 					<td><b>{{fattura.totale}} </b><i class="icon-eur"></i></td>
 					<td>
 						{% if fattura.stato %}<i class="icon-check icon-large"></i>
 						{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
 					</td>
-					<td><a href="/fatture/stampa/{{fattura.id}}" class="btn"><i class="icon-print"> </i>Stampa</a></td>
-					<td><a href="/fatture/invio/{{fattura.id}}" class="btn"><i class="icon-envelope"> </i>Email</a></td>
+					<td><a href="{% url 'stampa_fattura' fattura.id %}" class="btn"><i class="icon-print"> </i>Stampa</a></td>
+					<td><a href="{% url 'invio_fattura' fattura.id %}" class="btn"><i class="icon-envelope"> </i>Email</a></td>
 				</tr>
 				{% endfor %}
 				</tbody>
@@ -70,29 +70,29 @@
 	{%for i in imposte %}
 	<div style="line-height:32px;">
 			<div class="btn-group pull-right">
-				<a href="/imposte/modifica/{{i.id}}" class="btn btn-small"><i class="icon-edit"></i></a>
-				<a href="/imposte/elimina/{{i.id}}" class="btn btn-small"><i class="icon-trash"></i></a>
+				<a href="{% url 'modificaimposta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'eliminaimposta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
 			</div>
 			{{i.nome}} ({{i.aliquota}}%) 
 	</div>
 	{%endfor%}
-	<a href="/imposte/nuovo/" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
+	<a href="{% url 'nuovoimposta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
 
 	<h4>Ritenute disponibili</h4>
 	
 	{%for i in ritenute %}
 	<div style="line-height:32px;">
 			<div class="btn-group pull-right">
-				<a href="/ritenute/modifica/{{i.id}}" class="btn btn-small"><i class="icon-edit"></i></a>
-				<a href="/ritenute/elimina/{{i.id}}" class="btn btn-small"><i class="icon-trash"></i></a>
+				<a href="{% url 'modificaritenuta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'eliminaritenuta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
 			</div>
 			{{i.nome}} ({{i.aliquota}}%) 
 	</div>
 	{%endfor%}
-	<a href="/ritenute/nuovo/" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
+	<a href="{% url 'nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
 
 	<h4>Azioni</h4>
-	<a href="/fatture/nuovo/" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi fattura</a>
-	<a href="/fatture/export/" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a>
+	<a href="{% url 'nuovafattura' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi fattura</a>
+	<a href="{% url 'export_fatture' %}" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a>
 	
 {% endblock%}
