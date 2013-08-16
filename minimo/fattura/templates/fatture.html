@@ -36,12 +36,12 @@
 				{% for fattura in f %}
 
 				<tr {% if not fattura.stato %} class="error" {% endif %} >
-					<td><a href="/fatture/dettagli/{{fattura.id}}" ><i class="icon-search"> </i> 
+					<td><a href="{% url 'minimo.fattura.views.fattura' fattura.id %}" ><i class="icon-search"> </i> 
 						{{fattura}}</a></td>
 					<td>
 						
 						{{fattura.data}} {{fattura.progressivo}}</td>
-					<td><a href="{% url 'minimo.fattura.views.cliente' fattura.id %}">{{fattura.cliente|truncatechars:30}}</a></td>
+					<td><a href="{% url 'minimo.cliente.views.cliente' fattura.cliente.id %}">{{fattura.cliente|truncatechars:30}}</a></td>
 					<td><b>{{fattura.totale}} </b><i class="icon-eur"></i></td>
 					<td>
 						{% if fattura.stato %}<i class="icon-check icon-large"></i>

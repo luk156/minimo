@@ -1,5 +1,4 @@
-
-# Create your views here.
+# -*- coding: utf-8 -*-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext, Context
@@ -118,76 +117,6 @@ anni=(2012,2013)
 
 def home(request):
     return True
-
-@login_required
-def nuovocliente(request):
-    azione = 'nuovo';
-    if request.method == 'POST':
-        form = ClienteForm(request.POST)
-        if form.is_valid():
-            c=form.save(commit=False)
-            c.user=request.user
-            c.save()
-            return HttpResponseRedirect('/clienti') 
-    else:
-        form = ClienteForm()
-    return render_to_response('form_cliente.html',{'request':request, 'form': form,'azione': azione}, RequestContext(request))
-
-@login_required
-def modificacliente(request,c_id):
-    azione = 'modifica'
-    cliente = Cliente.objects.get(id=c_id)
-    if cliente.user == request.user or request.user.is_superuser:
-        if request.method == 'POST': 
-            form = ClienteForm(request.POST, instance=cliente,)
-            if form.is_valid():
-                form.save()
-                return HttpResponseRedirect('/clienti') 
-        else:
-            form = ClienteForm(instance=cliente)
-        return render_to_response('form_cliente.html',{'request':request, 'form': form,'azione': azione, 'c': cliente,}, RequestContext(request))
-    else:
-        raise PermissionDenied
-
-@login_required
-def clienti(request):
-    if request.user.is_superuser:
-        clienti=Cliente.objects.all()
-    else:
-        clienti=Cliente.objects.filter(user=request.user)
-    return render_to_response( 'clienti.html', {'request':request, 'clienti': clienti}, RequestContext(request))
-
-@login_required
-def export_clienti(request):
-    if request.user.is_superuser:
-        clienti=Cliente.objects.all()
-    else:
-        clienti=Cliente.objects.filter(user=request.user)   
-    # Create the HttpResponse object with the appropriate CSV header
-    return export_csv(request, clienti, [('Ragione Sociale','ragione_sociale'),
-        ('Indirizzo','indirizzo'),
-        ('Codice Fiscale','codice_fiscale'),
-        ('Partita IVA','p_iva'),
-        ('Telefono','telefono'),
-        ('E-Mail','mail'),
-        ])
-
-@login_required
-def cliente(request,c_id):
-    c= Cliente.objects.get(id=c_id)
-    if c.user == request.user or request.user.is_superuser:
-        return render_to_response( 'cliente.html', {'request':request, 'c':c , 'f': Fattura.objects.filter(cliente=c)}, RequestContext(request))
-    else:
-        raise PermissionDenied
-
-@login_required
-def eliminacliente(request,c_id):
-    cliente = Cliente.objects.get(id=c_id)
-    if cliente.user == request.user or request.user.is_superuser:
-        cliente.delete()
-        return HttpResponseRedirect('/clienti')
-    else:
-        raise PermissionDenied
 
 @login_required
 def nuovaprestazione(request,f_id):

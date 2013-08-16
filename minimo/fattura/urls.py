@@ -13,14 +13,7 @@ urlpatterns = patterns('minimo.fattura.views',
     # Examples:
     url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
     url(r'^$', 'fatture'),
-    # url(r'^minimo/', include('minimo.foo.urls')),
-    # clienti
-    (r'^clienti/$', 'clienti'),
-    (r'^clienti/export/$', 'export_clienti'),
-    (r'^clienti/nuovo/$', 'nuovocliente'),
-    (r'^clienti/(?P<c_id>\w+)/$', 'cliente'),
-    (r'^clienti/modifica/(?P<c_id>\w+)/$', 'modificacliente'),
-    (r'^clienti/elimina/(?P<c_id>\w+)/$', 'eliminacliente'),
+
     # prestazioni
     (r'^prestazioni/$', 'prestazioni'),
     (r'^prestazioni/nuova/(?P<f_id>\w+)$', 'nuovaprestazione'),
