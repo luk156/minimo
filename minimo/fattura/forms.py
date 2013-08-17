@@ -7,7 +7,7 @@ from crispy_forms.bootstrap import *
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
 from minimo.fattura.models import *
-
+from minimo.cliente.models import *
 
         
 
@@ -76,7 +76,6 @@ class RitenutaForm(forms.ModelForm):
         
 class FatturaForm(forms.ModelForm):
     
-    
     class Meta:
         model = Fattura
         
@@ -105,6 +104,7 @@ class FatturaForm(forms.ModelForm):
                 Submit('save', 'Invia', css_class="btn-primary")
             )
         )
+    
 
 
 class FatturaInvioForm(forms.Form):

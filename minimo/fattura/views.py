@@ -19,6 +19,7 @@ import csv, codecs
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, EmailMessage
+from minimo.fattura.utils import *
 
 try:
     from cStringIO import StringIO
@@ -187,6 +188,7 @@ def nuovafattura(request):
             f.user=request.user
             f.save()
             form.save_m2m()
+            copia_dati_fiscali(f, form.cleaned_data['cliente'])
             return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
     else:
         form = FatturaForm(user_rid=request.user.id)
@@ -203,6 +205,7 @@ def modificafattura(request,f_id):
             form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
             if form.is_valid():
                 form.save()
+                copia_dati_fiscali(f, form.cleaned_data['cliente'])
                 return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
         else:
             form = FatturaForm(instance=f,user_rid=request.user.id)

@@ -41,7 +41,11 @@
 					<td>
 						
 						{{fattura.data}} {{fattura.progressivo}}</td>
-					<td><a href="{% url 'minimo.cliente.views.cliente' fattura.cliente.id %}">{{fattura.cliente|truncatechars:30}}</a></td>
+					{%if fattura.cliente.id %}
+						<td><a href="{% url 'minimo.cliente.views.cliente' fattura.cliente.id %}">{{fattura.ragione_sociale|truncatechars:30}}</a></td>
+					{% else %}
+						<td>{{fattura.ragione_sociale|truncatechars:30}}</td>
+					{% endif %}
 					<td><b>{{fattura.totale}} </b><i class="icon-eur"></i></td>
 					<td>
 						{% if fattura.stato %}<i class="icon-check icon-large"></i>

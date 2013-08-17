@@ -5,6 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count, Min, Sum, Max, Avg
 from minimo.cliente.models import Cliente
+from minimo.fattura.utils import *
 
 import os
 
@@ -66,7 +67,14 @@ class Fattura(models.Model):
     user = models.ForeignKey(User, editable=False, related_name='fattura_user')
     numero = models.IntegerField('Numero progressivo', editable=False, default=0, unique_for_year="data")
     data = models.DateField('Data di emissione')
-    cliente = models.ForeignKey(Cliente, related_name='fattura_cliente', null = True, on_delete = models.SET_NULL)    
+    cliente = models.ForeignKey(Cliente, blank=True, null = True, on_delete = models.SET_NULL)
+    ragione_sociale = models.CharField('Ragione sociale',max_length=70,null=True, blank=True)
+    via = models.CharField('Via',max_length=70, null=True, blank=True)
+    cap = models.CharField('CAP',max_length=6, null=True, blank=True)
+    citta = models.CharField('Citt?',max_length=70, null=True, blank=True)
+    provincia = models.CharField('Provincia',max_length=10, null=True, blank=True)
+    cod_fiscale = models.CharField('Codice Fiscale',max_length=50, blank=True, null=True)
+    p_iva = models.CharField('Partita IVA',max_length=30, blank=True, null=True)
     stato = models.BooleanField('Stato pagamento')
     template = models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
     imposte = models.ManyToManyField(Imposta,  blank=True, null = True)
@@ -120,8 +128,9 @@ class Fattura(models.Model):
             fatture_anno = Fattura.objects.filter(data__year=self.data.year).aggregate(Max('numero'))
             if not fatture_anno['numero__max']:
                 fatture_anno['numero__max'] = 0
-            self.numero = fatture_anno['numero__max'] + 1
+            self.numero = fatture_anno['numero__max'] + 1   
         super(Fattura, self).save(*args, **kwargs)
+        
 
 
          
