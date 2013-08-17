@@ -10,6 +10,18 @@
 {% block meta_title %}Dettaglio cliente{% endblock %}
 {% block title %}<i class="icon-user"></i> Dettaglio Cliente {% endblock%}
 
+{% block js %}
+	<script>
+		function CancellaCliente() {
+				if ( confirm("Vuoi veramente cancellare il Cliente {{c.ragione_sociale}}?") ) {
+						document.location.href = "{% url 'minimo.cliente.views.eliminacliente' c.id %}";
+						}
+				}
+	</script>
+
+{% endblock %}
+
+
 {% block main %}
 
 <h3>Informazioni:</h3>
@@ -73,6 +85,6 @@
 {% block left %}
 <h4>Azioni</h4>
 <a href="{% url 'minimo.cliente.views.modificacliente' c.id %}" class="btn btn-block "><i class="icon-edit"></i> modifica</a>
-<a href="{% url 'minimo.cliente.views.eliminacliente' c.id %}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
+<a href="#" class="btn btn-block " onClick="CancellaCliente();"><i class="icon-trash"></i> elimina</a>
 
 {% endblock%}

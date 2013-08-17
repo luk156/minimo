@@ -13,6 +13,17 @@
 
 {% block title %}<i class="icon-file-text"></i>  Dettaglio Fattura {% endblock%}
 
+{% block js %}
+	<script>
+		function CancellaFattura() {
+				if ( confirm("Vuoi veramente cancellare la fattura {{f}}?") ) {
+						document.location.href = "{% url 'minimo.fattura.views.eliminafattura' f.id %}";
+						}
+				}
+	</script>
+
+{% endblock %}
+
 {% block main %}
 
 <h3>Informazioni:</h3>
@@ -146,7 +157,7 @@
 <h4>Azioni</h4>
 <a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.fattura.views.incassa_fattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
 <a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.fattura.views.modificafattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
-<a href="{% url 'minimo.fattura.views.eliminafattura' f.id %}" class="btn btn-block "><i class="icon-trash"></i> elimina</a>
+<a href="#" class="btn btn-block " onClick="CancellaFattura();"><i class="icon-trash"></i> elimina</a>
 <a href="{% url 'minimo.fattura.views.stampa_fattura' f.id %}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
 <a href="{% url 'minimo.fattura.views.invio_fattura' f.id %}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>
 
