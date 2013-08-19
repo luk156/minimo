@@ -268,9 +268,13 @@ def export_fatture(request):
     # Create the HttpResponse object with the appropriate CSV header
     if settings.TIPO_FATTURA=="standard":
         return export_csv(request, fatture, [('Data','data'),
-        ('Cliente','cliente'),
+        ('Cliente','ragione_sociale'),
+        ('Via', 'via'),
+        ('Cap', 'cap'),
+        ('Città', 'citta'),
+        ('Provincia', 'provincia'),
         ('Aliquota IVA','IVA'),
-        ('Stato','stato'),
+        ('Pagata','stato_pagamento'),
         ('Prestazioni','prestazione_fattura.all'),
         ('Imponibile','imponibile'),
         ('IVA','iva'),

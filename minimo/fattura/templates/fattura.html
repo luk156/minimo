@@ -76,8 +76,7 @@
 	<tr {% if not f.stato %} class="error" {% endif %} > 
 		<td><h5>Stato pagamento</h5></td>
 		<td>
-			{% if fattura.stato %}<i class="icon-check icon-large"></i>
-			{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+			{{ f.stato_pagamento }}
 		</td>
 	</tr>
 	<tr>

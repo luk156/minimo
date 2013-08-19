@@ -131,6 +131,13 @@ class Fattura(models.Model):
     
     cliente = property(_get_cliente)
     
+    def _stato_pagamento(self):
+        if self.stato:
+            return "Pagata"
+        else:
+            return "Da pagare"
+    
+    stato_pagamento = property(_stato_pagamento)
     
     def save(self, *args, **kwargs):
         if self.numero == 0:
