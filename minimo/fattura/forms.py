@@ -75,8 +75,8 @@ class RitenutaForm(forms.ModelForm):
         
         
 class FatturaForm(forms.ModelForm):
-    imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple)
-    ritenute = forms.ModelMultipleChoiceField(queryset=Ritenuta.objects.all(), widget=forms.CheckboxSelectMultiple)
+    imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
+    ritenute = forms.ModelMultipleChoiceField(queryset=Ritenuta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
     ragione_sociale = forms.CharField('Ragione sociale')
     class Meta:
         model = Fattura
