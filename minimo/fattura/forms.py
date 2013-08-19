@@ -76,6 +76,7 @@ class RitenutaForm(forms.ModelForm):
         
 class FatturaForm(forms.ModelForm):
     
+    ragione_sociale = forms.CharField('Ragione sociale')
     class Meta:
         model = Fattura
         
@@ -89,7 +90,8 @@ class FatturaForm(forms.ModelForm):
             Div(
                 Div(
                     AppendedText('data', '<i class="icon-calendar"></i>'),
-                    Field('cliente'),
+                    AppendedText('ragione_sociale', '<i class="icon-user"></i>'),
+                    #Field('cliente'),
                     Field('stato'),
                     Field('template'),
                 css_class="span6"),

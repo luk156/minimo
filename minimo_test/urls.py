@@ -14,8 +14,8 @@ urlpatterns = patterns('minimo',
     url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
     
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include('minimo.fattura.urls')),
-) #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^', include('minimo.urls')),
+) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 

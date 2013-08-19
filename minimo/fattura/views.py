@@ -184,11 +184,13 @@ def nuovafattura(request):
         form = FatturaForm(request.POST,user_rid=request.user.id)
         form.helper.form_action = '/fatture/nuovo/'
         if form.is_valid():
+            cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
             f=form.save(commit=False)
+            f.cliente = cliente
             f.user=request.user
             f.save()
             form.save_m2m()
-            copia_dati_fiscali(f, form.cleaned_data['cliente'])
+            copia_dati_fiscali(f, cliente)
             return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
     else:
         form = FatturaForm(user_rid=request.user.id)
@@ -204,8 +206,11 @@ def modificafattura(request,f_id):
             form = FatturaForm(request.POST, instance=f, user_rid=request.user.id)  # necessario per modificare la riga preesistente
             form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
             if form.is_valid():
-                form.save()
-                copia_dati_fiscali(f, form.cleaned_data['cliente'])
+                cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
+                f=form.save(commit=False)
+                f.cliente = cliente
+                f.save()
+                copia_dati_fiscali(f, cliente)
                 return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
         else:
             form = FatturaForm(instance=f,user_rid=request.user.id)

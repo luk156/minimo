@@ -21,6 +21,9 @@ import csv, codecs
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, EmailMessage
+from django.core import serializers
+from django.utils import simplejson
+
 
 try:
     from cStringIO import StringIO
@@ -97,3 +100,17 @@ def eliminacliente(request,c_id):
         return HttpResponseRedirect('/clienti')
     else:
         raise PermissionDenied
+
+
+def get_clienti(request):
+    results = []
+    if request.method == "GET":
+        if request.GET.has_key(u'q'):
+            value = request.GET[u'q']
+            if len(value) >= 1:
+                model_results = Cliente.objects.filter(ragione_sociale__icontains=value)[:request.GET[u'limit']]
+                for x in model_results:
+                    results.append("%s" %(x.ragione_sociale))
+    json = simplejson.dumps(results)
+    return HttpResponse(json, mimetype='application/json')
+

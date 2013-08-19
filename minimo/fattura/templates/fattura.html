@@ -20,6 +20,19 @@
 						document.location.href = "{% url 'minimo.fattura.views.eliminafattura' f.id %}";
 						}
 				}
+		
+		$("input#id_ragione_sociale").autocomplete({
+                url:"{{BASE_URL}}/clienti/get_clienti",
+                remoteDataType: 'json',
+                minChars: 1,
+                mustMatch: true,
+                maxItemsToShow: 5,
+                selectFirst: false,
+                useCache: false,
+                showResult: function(value, data) {
+                    return '<span style="color:#5E3E31">' + value + '</span>';
+                },
+            });
 	</script>
 
 {% endblock %}

@@ -1,7 +1,14 @@
-# Django settings for minimo project.
 import os
-BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+import sys
+sys.path.append('/opt/libreoffice3.4/basis3.4/program')
+sys.path.append('/usr/share/pyshared')
 
+# Full filesystem path to the project.
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+# Name of the directory for the project.
+PROJECT_DIRNAME = PROJECT_ROOT.split(os.sep)[-1]
+print PROJECT_DIRNAME
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -15,14 +22,13 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(BASE_PATH, "minimo_db.sqlite"),    # Or path to database file if using sqlite3.
+        'NAME': os.path.join(PROJECT_DIRNAME, "minimo_db.sqlite"),    # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -46,31 +52,39 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(BASE_PATH, "media/")
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
-# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = '/media/'
+# Every cache key will get prefixed with this value - here we set it to
+# the name of the directory the project is in to try and use something
+# project specific.
+CACHE_MIDDLEWARE_KEY_PREFIX = PROJECT_DIRNAME
+
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+STATIC_URL = "/static/"
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(BASE_PATH, "static/")
+STATIC_ROOT = os.path.join(PROJECT_ROOT, STATIC_URL.strip("/"))
 
-# URL prefix for static files.
-# Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+MEDIA_URL = STATIC_URL + "media/"
 
-# Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/home/media/media.lawrence.com/media/"
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, *MEDIA_URL.strip("/").split("/"))
+
+# Package/module name to import the root urlpatterns from for the project.
+ROOT_URLCONF = "%s.urls" % PROJECT_DIRNAME
+
+# Put strings here, like "/home/html/django_templates"
+# or "C:/www/django/templates".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
+TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, "templates"),)
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -101,17 +115,11 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'minimo_test.urls'
+
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'minimo_test.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    "/home/matteo/minimo/fattura/templates"
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -123,9 +131,10 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
     'south',
     'minimo.fattura',
+    'minimo.cliente',
     'dajaxice',
     'dajax',
     'crispy_forms',
@@ -169,9 +178,11 @@ LOGGING = {
 #TIPO_FATTURA="minimo"
 TIPO_FATTURA="standard"
 
-WEBODT_CONVERTER = 'webodt.converters.openoffice.OpenOfficeODFConverter'
-WEBODT_TEMPLATE_PATH = '/home/matteo/minimo_test/media/'
+#WEBODT_CONVERTER = 'webodt.converters.openoffice.OpenOfficeODFConverter'
+WEBODT_CONVERTER = 'webodt.converters.abiword.AbiwordODFConverter'
+WEBODT_TEMPLATE_PATH = (os.path.join(PROJECT_ROOT, 'static/media/'))
 OOFFICE_SERVER = ('127.0.0.1', 2002)
+WEBODT_ABIWORD_COMMAND = '/usr/bin/abiword'
 
 CRISPY_FAIL_SILENTLY = not DEBUG
 
@@ -186,3 +197,12 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 DAJAXICE_DEBUG = True
+
+##### For Email ########
+# If this isn't set in your settings file, you can set these here
+#EMAIL_HOST = 'host here'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'tuo_nome'
+EMAIL_HOST_PASSWORD = 'tua_password'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'tuo_smtp' #'smtp.scrittecartelli.it'

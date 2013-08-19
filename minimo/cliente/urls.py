@@ -20,5 +20,5 @@ urlpatterns = patterns('minimo.cliente.views',
     (r'^(?P<c_id>\w+)/$', 'cliente'),
     (r'^modifica/(?P<c_id>\w+)/$', 'modificacliente'),
     (r'^elimina/(?P<c_id>\w+)/$', 'eliminacliente'),
-
+    (r'^get_clienti', 'get_clienti'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
