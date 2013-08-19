@@ -186,7 +186,7 @@ def nuovafattura(request):
         if form.is_valid():
             cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
             f=form.save(commit=False)
-            f.cliente = cliente
+            ##f.cliente = cliente
             f.user=request.user
             f.save()
             form.save_m2m()
@@ -208,7 +208,7 @@ def modificafattura(request,f_id):
             if form.is_valid():
                 cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
                 f=form.save(commit=False)
-                f.cliente = cliente
+                ##f.cliente = cliente
                 f.save()
                 copia_dati_fiscali(f, cliente)
                 return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
