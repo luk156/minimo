@@ -3,6 +3,8 @@
 *.pyc
 local_settings.py
 fattura/migrations/*
+minimo/fattura/migrations/*
 *.sqlite
 media/*
 env/*
+minimo_test/static/*
