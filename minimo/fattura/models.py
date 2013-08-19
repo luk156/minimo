@@ -67,7 +67,7 @@ class Fattura(models.Model):
     user = models.ForeignKey(User, editable=False, related_name='fattura_user')
     numero = models.IntegerField('Numero progressivo', editable=False, default=0, unique_for_year="data")
     data = models.DateField('Data di emissione')
-    cliente = models.ForeignKey(Cliente, blank=True, null = True, on_delete = models.SET_NULL)
+    #cliente = models.ForeignKey(Cliente, blank=True, null = True, on_delete = models.SET_NULL)
     ragione_sociale = models.CharField('Ragione sociale',max_length=70,null=True, blank=True)
     via = models.CharField('Via',max_length=70, null=True, blank=True)
     cap = models.CharField('CAP',max_length=6, null=True, blank=True)
@@ -121,6 +121,15 @@ class Fattura(models.Model):
 
     def progressivo(self):
         return self.numero
+    
+    def _get_cliente(self):
+        try:
+            cliente = Cliente.objects.get(ragione_sociale=self.ragione_sociale)
+        except Exception:
+            cliente = None
+        return cliente
+    
+    cliente = property(_get_cliente)
     
     
     def save(self, *args, **kwargs):
