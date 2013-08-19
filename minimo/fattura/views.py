@@ -210,6 +210,7 @@ def modificafattura(request,f_id):
                 f=form.save(commit=False)
                 ##f.cliente = cliente
                 f.save()
+                form.save_m2m()
                 copia_dati_fiscali(f, cliente)
                 return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
         else:
