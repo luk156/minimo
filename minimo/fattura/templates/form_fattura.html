@@ -27,6 +27,28 @@
                     return value ;
                 },
             });
+		$(document).ready(function(){
+			$("#div_id_ritenute").hide();
+			if ("{{azione}}" != "Modifica") {
+				$("input#submit-id-save").hide();
+			}
+			
+			
+			$("select#id_tipo").change(function(){
+				if ($("select#id_tipo").val()){
+					$("input#submit-id-save").show('slow');
+					if ($("select#id_tipo").val() == 'FA'){
+						$("#div_id_ritenute").hide('slow');
+					
+					}else{
+						$("#div_id_ritenute").show('slow');
+					
+					}
+				}else{
+					$("input#submit-id-save").hide();
+				}
+			});
+		});
 	</script>
 
 {% endblock %}

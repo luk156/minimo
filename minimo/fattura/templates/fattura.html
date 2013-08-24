@@ -14,25 +14,23 @@
 {% block title %}<i class="icon-file-text"></i>  Dettaglio Fattura {% endblock%}
 
 {% block js %}
-	<script>
+	<script type="text/javascript" charset="utf-8">
+		
 		function CancellaFattura() {
 				if ( confirm("Vuoi veramente cancellare la fattura {{f}}?") ) {
 						document.location.href = "{% url 'minimo.fattura.views.eliminafattura' f.id %}";
 						}
 				}
-		
-		$("input#id_ragione_sociale").autocomplete({
-                url:"{{BASE_URL}}/clienti/get_clienti",
-                remoteDataType: 'json',
-                minChars: 1,
-                mustMatch: true,
-                maxItemsToShow: 5,
-                selectFirst: false,
-                useCache: false,
-                showResult: function(value, data) {
-                    return '<span style="color:#5E3E31">' + value + '</span>';
-                },
-            });
+
+		$(function(){
+			$.getJSON("{% url 'minimo.fattura.views.get_imposta' %}", function(data){
+				var options = '';
+				$.each(data, function(key, val) {
+					options += '<option value="' + key + '">' + key + '</option>';
+				});
+			  $("#id_descrizione_iva").html(options);
+			})
+		})
 	</script>
 
 {% endblock %}
@@ -50,19 +48,16 @@
 		<td>{{f.ragione_sociale}}</td>
 	</tr>
 	<tr>
-		<td><h5>Imposte</h5></td>
-		<td>{% for i in f.imposte.all %}
-				{{i.nome}} ({{i.aliquota}}%)</br>
-			{% endfor %}
-		</td>
+			<td><h5>Tipo documento</h5></td>
+			<td>{% if f.tipo == 'RA' %}
+					Ritenuta d'acconto
+				{% endif %}
+				{% if f.tipo == 'FA' %}
+					Fattura
+				{% endif %}
+			</td>
 	</tr>
-	<tr>
-		<td><h5>Ritenute</h5></td>
-		<td>{% for i in f.ritenute.all %}
-				{{i.nome}} ({{i.aliquota}}%)</br>
-			{% endfor %}
-		</td>
-	</tr>
+	
 	<tr> 
 		<td><h5>Marca da bollo</h5></td>
 		<td>
@@ -91,6 +86,12 @@
 	<thead>
 		<tr>
 			<th>Descrizione</th>
+			<th>Prezzo unitario</th>
+			<th>Quantità</th>
+			
+			{% if f.tipo == "FA"%}
+				<th>IVA</th>
+			{% endif %}
 			<th>Importo</th>
 			<th></th>
 		</tr>
@@ -98,7 +99,12 @@
 	<tbody>
 		{% for p in f.prestazione_fattura.all %}
 		<tr>
-			<td>{{p.descrizione}}</a></td>
+			<td>{{p.descrizione}}</td>
+			<td>{{p.importo_unitario}}</td>
+			<td>{{p.quantita}}</td>
+			{% if f.tipo == "FA"%}
+				<td>{%if p.iva %}{{p.iva}} % {%endif%}</td>
+			{% endif %}
 			<td> {{p.importo}} €</td>
 			<td>
 				<div class="btn-group">
@@ -116,9 +122,22 @@
 		 </td>
 		 <td>
 		 	<div class="input-append">
-		 	<input class="textinput textInput" id="id_importo" name="importo" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
+		 	<input class="textinput textInput" id="id_importo_unitario" name="importo_unitario" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
 		 	</div>
 		 </td>
+		 <td>
+		 	<div class="input-append">
+		 	<input class="textinput textInput" id="id_quantita" name="quantita" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
+		 	</div>
+		 </td>
+		{% if f.tipo == "FA"%}
+			<td>
+				<div class="input-append">
+					<!--<input class="textinput textInput" id="id_iva" name="iva" type="text" /> <span class="add-on"><i class="icon-tag"></i></span>-->
+					<select name="descrizione_iva" id="id_descrizione_iva"><option value="1">---</option></select>
+				</div>
+			</td>
+		{% endif %}
 		 <td>
 		 	<input type="submit" name="save" value="Aggiungi" class="btn btn-primary btn-primary" id="submit-id-save"/> </form>
     	</td>
@@ -137,18 +156,19 @@
 		<td></td>
 		<td>{{f.imponibile}} <i class="icon-eur"></i></td>
 	</tr>
-	{% for i in f.imposte.all %}
+	
+	{% if f.tipo == 'FA' %}
 	<tr>
-		<td>{{i.nome}}</td>
-		<td>{{i.aliquota}} %</td>
-		<td>+ {{i|tot_imposta:f.imponibile}} <i class="icon-eur"></i></td>
+		<td>Totale IVA</td>
+		<td></td>
+		<td>+ {{f.iva_totale}} <i class="icon-eur"></i></td>
 	</tr>
-	{% endfor %}
+	{% endif %}
 	{% for i in f.ritenute.all %}
 	<tr>
 		<td>{{i.nome}}</td>
 		<td>{{i.aliquota}} %</td>
-		<td>- {{i|tot_imposta:f.imponibile}} <i class="icon-eur"></i></td>
+		<td>- {{i|tot_imposta:f.totale}} <i class="icon-eur"></i></td>
 	</tr>
 	{% endfor %}
 	<tr >
@@ -169,6 +189,7 @@
 <h4>Azioni</h4>
 <a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.fattura.views.incassa_fattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
 <a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.fattura.views.modificafattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+<a {% if f.stato %} href="{% url 'minimo.fattura.views.sblocca_fattura' f.id %}" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Sblocca</a>
 <a href="#" class="btn btn-block " onClick="CancellaFattura();"><i class="icon-trash"></i> elimina</a>
 <a href="{% url 'minimo.fattura.views.stampa_fattura' f.id %}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
 <a href="{% url 'minimo.fattura.views.invio_fattura' f.id %}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>

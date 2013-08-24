@@ -19,6 +19,9 @@ import csv, codecs
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, EmailMessage
+from django.core import serializers
+from django.utils import simplejson
+
 from minimo.fattura.utils import *
 
 try:
@@ -123,50 +126,45 @@ def home(request):
 def nuovaprestazione(request,f_id):
     azione = 'nuovo'
     f=Fattura.objects.get(id=f_id)
-    if f.user == request.user or request.user.is_superuser:
-        if request.method == 'POST':
-            form = PrestazioneForm(request.POST)
-            form.helper.form_action = '/prestazioni/nuova/'+str(f.id)
-            if form.is_valid():
-                data = form.cleaned_data
-                p=Prestazione(descrizione=data['descrizione'],importo=data['importo'],fattura=f)
-                p.save()
-                return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
-        else:
-            form = PrestazioneForm()
-            form.helper.form_action = '/prestazioni/nuova/'+str(f.id)
-        return render_to_response('form_prestazione.html',{'request':request, 'form': form,'azione': azione, 'f': f_id}, RequestContext(request))
+    if request.method == 'POST':
+        form = PrestazioneForm(request.POST)
+        form.helper.form_action = '/prestazioni/nuova/'+str(f.id)
+        if form.is_valid():
+            data = form.cleaned_data
+            p=Prestazione(descrizione=data['descrizione'],importo_unitario=data['importo_unitario'], quantita=data['quantita'],fattura=f, descrizione_iva=data['descrizione_iva'])
+            p.save()
+            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
     else:
-        raise PermissionDenied
+        form = PrestazioneForm()
+        form.helper.form_action = '/prestazioni/nuova/'+str(f.id)
+    return render_to_response('form_prestazione.html',{'request':request, 'form': form,'azione': azione, 'f': f_id}, RequestContext(request))
+ 
 
 @login_required
 def modificaprestazione(request,p_id):
     azione = 'Modifica'
     prestazione = Prestazione.objects.get(id=p_id)
     f=prestazione.fattura
-    if f.user == request.user or request.user.is_superuser:
-        if request.method == 'POST': 
-            form = PrestazioneForm(request.POST, instance=prestazione,)
-            form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
-            if form.is_valid():
-                form.save()
-                return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
-        else:
-            form = PrestazioneForm(instance=prestazione)
-            form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
-        return render_to_response('form_prestazione.html',{'request':request, 'form': form,'azione': azione, 'p': prestazione,}, RequestContext(request))
+    if request.method == 'POST': 
+        form = PrestazioneForm(request.POST, instance=prestazione,)
+        form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
+        if form.is_valid():
+            data = form.cleaned_data             
+            form.save()
+            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
     else:
-        raise PermissionDenied
+        form = PrestazioneForm(instance=prestazione)
+        form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
+    return render_to_response('form_prestazione.html',{'request':request, 'form': form,'azione': azione, 'p': prestazione,}, RequestContext(request))
+
 
 @login_required
 def eliminaprestazione(request,p_id):
     prestazione = Prestazione.objects.get(id=p_id)
     f=prestazione.fattura
-    if f.user == request.user or request.user.is_superuser:
-        prestazione.delete()
-        return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
-    else:
-        raise PermissionDenied
+    prestazione.delete()
+    return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+
 
 @login_required
 def prestazioni(request):
@@ -201,55 +199,56 @@ def nuovafattura(request):
 def modificafattura(request,f_id):
     azione = 'Modifica'
     f = Fattura.objects.get(id=f_id)
-    if f.user == request.user or request.user.is_superuser:
-        if request.method == 'POST':  # If the form has been submitted...
-            form = FatturaForm(request.POST, instance=f, user_rid=request.user.id)  # necessario per modificare la riga preesistente
-            form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
-            if form.is_valid():
-                cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
-                f=form.save(commit=False)
-                ##f.cliente = cliente
-                f.save()
-                form.save_m2m()
-                copia_dati_fiscali(f, cliente)
-                return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
-        else:
-            form = FatturaForm(instance=f,user_rid=request.user.id)
-            form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
-        return render_to_response('form_fattura.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
+    if request.method == 'POST':  # If the form has been submitted...
+        form = FatturaForm(request.POST, instance=f, user_rid=request.user.id)  # necessario per modificare la riga preesistente
+        form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
+        if form.is_valid():
+            cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
+            f=form.save(commit=False)
+            ##f.cliente = cliente
+            f.save()
+            form.save_m2m()
+            copia_dati_fiscali(f, cliente)
+            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
     else:
-        raise PermissionDenied
+        form = FatturaForm(instance=f,user_rid=request.user.id)
+        form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
+    return render_to_response('form_fattura.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
+   
+
+@login_required    
+def sblocca_fattura(request, f_id):
+    azione = 'i'
+    f = Fattura.objects.get(id=f_id)
+    f.stato = False
+    f.save()
+    return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+
+
 
 @login_required    
 def incassa_fattura(request, f_id):
     azione = 'i'
     f = Fattura.objects.get(id=f_id)
-    if f.user == request.user or request.user.is_superuser:
-        f.stato = True
-        f.save()
-        return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
-    else:
-        raise PermissionDenied
+    f.stato = True
+    f.save()
+    return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+
+
     
 @login_required
 def eliminafattura(request,f_id):
     fattura = Fattura.objects.get(id=f_id)
-    if fattura.user == request.user or request.user.is_superuser:
-        fattura.delete()
-        return HttpResponseRedirect('/fatture')
-    else:
-        raise PermissionDenied
+    fattura.delete()
+    return HttpResponseRedirect('/fatture')
+
 
 @login_required
 def fatture(request):
-    if request.user.is_superuser:
-        fatture=Fattura.objects.all()
-        imposte=Imposta.objects.all()
-        ritenute=Ritenuta.objects.all()
-    else:
-        fatture=Fattura.objects.filter(user=request.user)
-        imposte=Imposta.objects.filter(user=request.user)
-        ritenute=Ritenuta.objects.filter(user=request.user)
+    fatture=Fattura.objects.all()
+    imposte=Imposta.objects.all()
+    ritenute=Ritenuta.objects.all()
+
     Fatture=[]
     f=[]
     Fatture.append(anni)
@@ -531,4 +530,16 @@ def eliminaritenuta(request,i_id):
     r.delete()
     return HttpResponseRedirect('/fatture')
     #else:
-    #    raise PermissionDenied  
+    #    raise PermissionDenied
+    
+    
+    
+def get_imposta(request):
+    results = {}
+    if request.method == "GET":       
+        model_results = Imposta.objects.all()
+        for x in model_results:
+            results[x.nome] = x.aliquota
+    json = simplejson.dumps(results)
+
+    return HttpResponse(json, mimetype='application/json')

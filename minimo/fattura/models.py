@@ -39,11 +39,11 @@ class TemplateFattura(models.Model):
 class Imposta(models.Model):
     user = models.ForeignKey(User, editable=False, related_name='imposta_user')
     nome = models.CharField('Nome Imposta',max_length=30)
-    aliquota = models.FloatField('Aliquota')
+    aliquota = models.IntegerField('Aliquota')
     
     
-    def calcola(self,imponibile):
-        return round(imponibile*self.aliquota/100.0,2)
+    def calcola(self,totale_netto):
+        return round(totale_netto*self.aliquota/100.0,2)
     
     
     def __unicode__(self):
@@ -54,17 +54,23 @@ class Ritenuta(models.Model):
     nome = models.CharField('Nome Ritenuta',max_length=30)
     aliquota = models.FloatField('Aliquota')
     
-    def calcola(self,imponibile):
-        return round(imponibile*self.aliquota/100.0,2)
+    def calcola(self,totale_netto):
+        perc = (100-self.aliquota)/100.0
+        lordo = totale_netto / perc
+        return round(lordo - totale_netto , 2)
     
     def __unicode__(self):
         return '%s (%s %%)' % (self.nome, str(self.aliquota))   
 
 
-
+TIPO_DOCUMENTO = (
+    ('RA', 'Ritenuta acconto'),
+    ('FA', 'Fattura'),
+)
 
 class Fattura(models.Model):
     user = models.ForeignKey(User, editable=False, related_name='fattura_user')
+    tipo = models.CharField('Tipo documento', max_length=5, choices=TIPO_DOCUMENTO)
     numero = models.IntegerField('Numero progressivo', editable=False, default=0, unique_for_year="data")
     data = models.DateField('Data di emissione')
     #cliente = models.ForeignKey(Cliente, blank=True, null = True, on_delete = models.SET_NULL)
@@ -79,6 +85,7 @@ class Fattura(models.Model):
     template = models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
     imposte = models.ManyToManyField(Imposta,  blank=True, null = True)
     ritenute = models.ManyToManyField(Ritenuta,  blank=True, null = True)
+    ritenuta = models.IntegerField('IVA', blank=True, null=True, default=None)
     bollo = models.CharField('ID Bollo',max_length=30, blank=True, null=True)
     valore_bollo = models.FloatField('Valore marca da bollo', blank=True, null=True)
     
@@ -92,33 +99,52 @@ class Fattura(models.Model):
         
         
     def imponibile(self):
-        i=0
-        for p in self.prestazione_fattura.all():
-            i += p.importo
-        return round(i,2)
+        tot=0
+        #for p in self.prestazione_fattura.all():
+        #    i += p.importo
+        #return round(i,2)
+        if self.tipo == 'FA':
+            for p in self.prestazione_fattura.all():
+                tot += p.totale_netto
+                print tot
+            if self.valore_bollo:
+                tot += self.valore_bollo
+            return round(tot,2)
+        if self.tipo == 'RA':            
+            tot = self.totale() + self.tot_ritenute()
+            if self.valore_bollo:
+                tot += self.valore_bollo
+            return round(tot,2)
     
-
-    def tot_imposte(self):
+    
+    def iva_totale(self):
         t=0
-        for i in self.imposte.all():
-            t += i.calcola(self.imponibile())
+        for p in self.prestazione_fattura.all():
+            t += p.totale_iva
         return round(t,2)
     
 
     def tot_ritenute(self):
         r=0
         for i in self.ritenute.all():
-            r += i.calcola(self.imponibile())
+            r += i.calcola(self.totale())
         return round(r,2)
     
 
     def totale(self):
-        tot = self.imponibile()+self.tot_imposte()-self.tot_ritenute()
-        if self.valore_bollo:
-            tot += self.valore_bollo
-        return round(tot,2)
-    
-
+        tot = 0
+        if self.tipo =='FA':
+            for p in self.prestazione_fattura.all():
+                tot += p.totale_lordo
+            if self.valore_bollo:
+                tot += self.valore_bollo
+            return round(tot,2)
+        if self.tipo == 'RA':
+            for p in self.prestazione_fattura.all():
+                tot += p.totale_netto
+            
+            return round(tot,2)
+        
     def progressivo(self):
         return self.numero
     
@@ -153,11 +179,38 @@ class Fattura(models.Model):
 
 class Prestazione(models.Model):
     descrizione = models.TextField('Descrizione')
-    importo = models.FloatField('Importo')
+    quantita = models.FloatField('Quantità')
+    importo_unitario = models.FloatField('Prezzo unitario', default=1)
+    descrizione_iva = models.CharField('Iva', max_length=70, blank=True, null=True, default=None)
+    iva = models.IntegerField('IVA', blank=True, null=True, default=None)
+    #importo = models.FloatField('Importo')
     fattura = models.ForeignKey(Fattura, related_name='prestazione_fattura')
     
+    def _totale_netto(self):
+        return self.quantita * self.importo_unitario
+    
+    importo = property(_totale_netto)
+    totale_netto = property(_totale_netto)
+    
+    def _totale_lordo(self):
+        return self.totale_netto + self.totale_iva
+    
+    totale_lordo = property(_totale_lordo)
+    
+    def _totale_iva(self):
+        print 'iva:', (self.iva/100), 'netto:', self.totale_netto
+        return round(self.totale_netto*(self.iva/100.0), 2)
+    totale_iva = property(_totale_iva)
     
     def __unicode__(self):
         return '%s(%s)' % (self.descrizione,self.importo)
+    
+    def save(self, *args, **kwargs):
+        try:
+            self.iva = Imposta.objects.get(nome=self.descrizione_iva).aliquota
+        except Exception:
+            self.iva = 0
+        
+        super(Prestazione, self).save(*args, **kwargs)
 
 

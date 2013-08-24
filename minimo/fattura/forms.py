@@ -75,7 +75,7 @@ class RitenutaForm(forms.ModelForm):
         
         
 class FatturaForm(forms.ModelForm):
-    imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
+    #imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
     ritenute = forms.ModelMultipleChoiceField(queryset=Ritenuta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
     stato = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     ragione_sociale = forms.CharField('Ragione sociale')
@@ -92,6 +92,7 @@ class FatturaForm(forms.ModelForm):
         self.helper.layout = Layout(
             Div(
                 Div(
+                    Field('tipo'),
                     AppendedText('data', '<i class="icon-calendar"></i>'),
                     AppendedText('ragione_sociale', '<i class="icon-user"></i>'),
                     #Field('cliente'),
@@ -99,7 +100,7 @@ class FatturaForm(forms.ModelForm):
                     Field('template'),
                 css_class="span6"),
                 Div(
-                    Field('imposte'),
+                    #Field('imposte'),
                     Field('ritenute'),
                     Field('bollo'),
                     Field('valore_bollo'),
@@ -142,14 +143,16 @@ class PrestazioneForm(forms.ModelForm):
     
     class Meta:
         model = Prestazione
-        exclude = ('fattura')
+        exclude = ('fattura', 'iva')
         
         
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Field('descrizione'),
-            AppendedText('importo', '<i class="icon-money"></i>'),
+            Field('quantita'),
+            AppendedText('importo_unitario', '<i class="icon-money"></i>'),
+            Field('descrizione_iva'),
             FormActions(
                 Submit('save', 'Aggiungi', css_class="btn-primary")
             )
