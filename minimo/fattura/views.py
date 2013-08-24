@@ -262,10 +262,11 @@ def fatture(request):
 
 @login_required
 def export_fatture(request):
-    if request.user.is_superuser:
-        fatture=Fattura.objects.all()
-    else:
-        fatture=Fattura.objects.filter(fattura_user=request.user)
+    #if request.user.is_superuser:
+     #   fatture=Fattura.objects.all()
+    #else:
+     #   fatture=Fattura.objects.filter(fattura_user=request.user)
+    fatture=Fattura.objects.all()
     # Create the HttpResponse object with the appropriate CSV header
     if settings.TIPO_FATTURA=="standard":
         return export_csv(request, fatture, [('Data','data'),
@@ -304,24 +305,24 @@ def fattura(request, f_id):
 @login_required
 def stampa_fattura(request,f_id):
     f=Fattura.objects.get(id=f_id)
-    if f.user == request.user or request.user.is_superuser:
-        #pdb.set_trace()
-        #f.template
-        template = webodt.ODFTemplate(f.template.template.name)
-        context = dict(
-            data=str(f.data),
-            fattura=f,
-            )
+    #if f.user == request.user or request.user.is_superuser:
+    #pdb.set_trace()
+    #f.template
+    template = webodt.ODFTemplate(f.template.template.name)
+    context = dict(
+        data=str(f.data),
+        fattura=f,
+        )
 
-        document = template.render(Context(context))
-        conv = converter()
-        pdf = conv.convert(document, format='pdf')
-        #return render_to_response( 'modello_fattura.html', {'request':request, 'f': f})
-        response = HttpResponse(pdf, mimetype='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename=Fattura-%s-%s.pdf' % (f.progressivo(),f.data.year)
-        return response
-    else:
-        raise PermissionDenied      
+    document = template.render(Context(context))
+    conv = converter()
+    pdf = conv.convert(document, format='pdf')
+    #return render_to_response( 'modello_fattura.html', {'request':request, 'f': f})
+    response = HttpResponse(pdf, mimetype='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename=Fattura-%s-%s.pdf' % (f.progressivo(),f.data.year)
+    return response
+    #else:
+    #    raise PermissionDenied      
 
 @login_required
 def invio_fattura(request,f_id):
@@ -331,33 +332,31 @@ def invio_fattura(request,f_id):
         'mittente' : f.user.email,
         'destinatario' : f.cliente.mail,
     }
-    if f.user == request.user or request.user.is_superuser:
-        if request.method == 'POST': 
-            form = FatturaInvioForm(request.POST, data,)
-            #form.helper.form_action = 'fatture/invio/'+ str(f.id)+'/'
-            if form.is_valid():
-                oggetto = form.cleaned_data['oggetto']
-                corpo = form.cleaned_data['messaggio']
-                email = EmailMessage(oggetto, corpo, form.cleaned_data['mittente'],
-                    [form.cleaned_data['destinatario']],
-                    headers = {'Reply-To': form.cleaned_data['mittente']})
-                template = webodt.ODFTemplate(f.template.template.name)
-                context = dict(
-                    data=str(f.data),
-                    fattura=f,
-                    )
-        
-                document = template.render(Context(context))
-                conv = converter()
-                pdf = conv.convert(document, format='pdf')
-                email.attach_file(pdf.name)
-                return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
-        else:
-            form = FatturaInvioForm(data)
-            #form.helper.form_action = '/'
-        return render_to_response('InvioFattura.html',{'request':request, 'form':form, }, RequestContext(request))
+   
+    if request.method == 'POST': 
+        form = FatturaInvioForm(request.POST, data,)
+        #form.helper.form_action = 'fatture/invio/'+ str(f.id)+'/'
+        if form.is_valid():
+            oggetto = form.cleaned_data['oggetto']
+            corpo = form.cleaned_data['messaggio']
+            email = EmailMessage(oggetto, corpo, form.cleaned_data['mittente'],
+                [form.cleaned_data['destinatario']],
+                headers = {'Reply-To': form.cleaned_data['mittente']})
+            template = webodt.ODFTemplate(f.template.template.name)
+            context = dict(
+                data=str(f.data),
+                fattura=f,
+                )
+    
+            document = template.render(Context(context))
+            conv = converter()
+            pdf = conv.convert(document, format='pdf')
+            email.attach_file(pdf.name)
+            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
     else:
-        raise PermissionDenied
+        form = FatturaInvioForm(data)
+        #form.helper.form_action = '/'
+    return render_to_response('InvioFattura.html',{'request':request, 'form':form, }, RequestContext(request))
     
 
 @login_required
@@ -373,10 +372,11 @@ def bilancio(request):
 
 @login_required
 def bilancio_intervallo(request, inizio, fine):
-    if request.user.is_superuser:
-        fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
-    else:
-        fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine,user=request.user)
+    #if request.user.is_superuser:
+    #    fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
+    #else:
+    #    fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine,user=request.user)
+    fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
     f_data=[]
     f_tot=[]
     fatturato=[]
@@ -416,35 +416,35 @@ def nuovotemplate(request):
 def modificatemplate(request,t_id):
     azione = 'Modifica'
     f = TemplateFattura.objects.get(id=t_id)
-    if f.user == request.user or request.user.is_superuser:
-        if request.method == 'POST':  # If the form has been submitted...
-            form = TemplateFatturaForm(request.POST, request.FILES, instance=f)  # necessario per modificare la riga preesistente
-            form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
-            if form.is_valid():
-                form.save()
-                return HttpResponseRedirect('/template/') # Redirect after POST
-        else:
-            form = TemplateFatturaForm(instance=f)
-            form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
-        return render_to_response('form_template.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
+    #if f.user == request.user or request.user.is_superuser:
+    if request.method == 'POST':  # If the form has been submitted...
+        form = TemplateFatturaForm(request.POST, request.FILES, instance=f)  # necessario per modificare la riga preesistente
+        form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/template/') # Redirect after POST
     else:
-        raise PermissionDenied
+        form = TemplateFatturaForm(instance=f)
+        form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
+    return render_to_response('form_template.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
+    #else:
+    #    raise PermissionDenied
 
 @login_required
 def eliminatemplate(request,t_id):
     template = TemplateFattura.objects.get(id=t_id)
-    if template.user == request.user or request.user.is_superuser:  
-        template.delete()
-        return HttpResponseRedirect('/template')
-    else:
-        raise PermissionDenied      
+    #if template.user == request.user or request.user.is_superuser:  
+    template.delete()
+    return HttpResponseRedirect('/template')
+    #else:
+    #    raise PermissionDenied      
 
 @login_required
 def template(request):
-    if request.user.is_superuser:
-        template=TemplateFattura.objects.all()
-    else:
-        template=TemplateFattura.objects.filter(user=request.user)
+    #if request.user.is_superuser:
+    template=TemplateFattura.objects.all()
+    #else:
+    #    template=TemplateFattura.objects.filter(user=request.user)
     return render_to_response( 'template.html', {'request':request, 'templates': template, 'template_esempio':'template_standard.odt'}, RequestContext(request))
 
 @login_required
@@ -467,28 +467,28 @@ def nuovoimposta(request):
 def modificaimposta(request,i_id):
     azione = 'Modifica'
     i = Imposta.objects.get(id=i_id)
-    if i.user == request.user or request.user.is_superuser:
-        if request.method == 'POST':  # If the form has been submitted...
-            form = ImpostaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
-            form.helper.form_action = '/imposta/modifica/'+str(i.id)+'/'
-            if form.is_valid():
-                form.save()
-                return HttpResponseRedirect('/fatture') # Redirect after POST
-        else:
-            form = ImpostaForm(instance=i)
-            form.helper.form_action = '/imposte/modifica/'+str(i.id)+'/'
-        return render_to_response('form_imposta.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+    #if i.user == request.user or request.user.is_superuser:
+    if request.method == 'POST':  # If the form has been submitted...
+        form = ImpostaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+        form.helper.form_action = '/imposta/modifica/'+str(i.id)+'/'
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/fatture') # Redirect after POST
     else:
-        raise PermissionDenied
+        form = ImpostaForm(instance=i)
+        form.helper.form_action = '/imposte/modifica/'+str(i.id)+'/'
+    return render_to_response('form_imposta.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+    #else:
+    #    raise PermissionDenied
 
 @login_required
 def eliminaimposta(request,i_id):
     imposta = Imposta.objects.get(id=i_id)
-    if imposta.user == request.user or request.user.is_superuser:   
-        imposta.delete()
-        return HttpResponseRedirect('/fatture')
-    else:
-        raise PermissionDenied  
+    #if imposta.user == request.user or request.user.is_superuser:   
+    imposta.delete()
+    return HttpResponseRedirect('/fatture')
+    #else:
+    #    raise PermissionDenied  
 
 @login_required
 def nuovoritenuta(request):
@@ -510,25 +510,25 @@ def nuovoritenuta(request):
 def modificaritenuta(request,i_id):
     azione = 'Modifica'
     i = Ritenuta.objects.get(id=i_id)
-    if i.user == request.user or request.user.is_superuser:
-        if request.method == 'POST':  # If the form has been submitted...
-            form = RitenutaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
-            form.helper.form_action = '/ritenute/modifica/'+str(i.id)+'/'
-            if form.is_valid():
-                form.save()
-                return HttpResponseRedirect('/fatture') # Redirect after POST
-        else:
-            form = RitenutaForm(instance=i)
-            form.helper.form_action = '/ritenute/modifica/'+str(i.id)+'/'
-        return render_to_response('form_ritenuta.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+    #if i.user == request.user or request.user.is_superuser:
+    if request.method == 'POST':  # If the form has been submitted...
+        form = RitenutaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+        form.helper.form_action = '/ritenute/modifica/'+str(i.id)+'/'
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/fatture') # Redirect after POST
     else:
-        raise PermissionDenied
+        form = RitenutaForm(instance=i)
+        form.helper.form_action = '/ritenute/modifica/'+str(i.id)+'/'
+    return render_to_response('form_ritenuta.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+    #else:
+    #    raise PermissionDenied
 
 @login_required
 def eliminaritenuta(request,i_id):
     r = Ritenuta.objects.get(id=i_id)
-    if r.user == request.user or request.user.is_superuser: 
-        r.delete()
-        return HttpResponseRedirect('/fatture')
-    else:
-        raise PermissionDenied  
+    #if r.user == request.user or request.user.is_superuser: 
+    r.delete()
+    return HttpResponseRedirect('/fatture')
+    #else:
+    #    raise PermissionDenied  

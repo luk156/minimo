@@ -86,7 +86,8 @@ class FatturaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user_rid = kwargs.pop('user_rid')
         super(FatturaForm, self).__init__(*args, **kwargs)
-        self.fields['imposte'].queryset = Imposta.objects.filter(user_id=user_rid)
+        #self.fields['imposte'].queryset = Imposta.objects.filter(user_id=user_rid)
+        self.fields['imposte'].queryset = Imposta.objects.filter()
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(

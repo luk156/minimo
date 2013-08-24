@@ -132,6 +132,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+    'livesettings',
     'south',
     'minimo.fattura',
     'minimo.cliente',
@@ -173,7 +174,8 @@ LOGGING = {
         },
     }
 }
-
+import logging
+logging.getLogger('keyedcache').setLevel(logging.INFO)
 
 #TIPO_FATTURA="minimo"
 TIPO_FATTURA="standard"

@@ -6,3 +6,4 @@ django-dajaxice==0.5.5
 -e git://github.com/luk156/django-webodt@637d3122914e3c38f51266a01d89943f7ae920d2#egg=django_webodt-dev
 lxml==3.2.1
 wsgiref==0.1.2
+-e hg+http://bitbucket.org/bkroeze/django-livesettings/#egg=django-livesettings

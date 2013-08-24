@@ -8,7 +8,7 @@ from minimo.cliente.models import Cliente
 from minimo.fattura.utils import *
 
 import os
-
+import config
 
 def content_file_name(instance, filename):
     return '/'.join(['content', "template-"+str(instance.nome)+".odt"])
