@@ -8,34 +8,6 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
 from minimo.fattura.models import *
 from minimo.cliente.models import *
-
-        
-
-class TemplateFatturaForm(forms.ModelForm):
-    class Meta:
-        model = TemplateFattura
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Field('nome'),
-            Field('descrizione'),
-            Field('template'),
-            FormActions(
-                Submit('save', 'Salva', css_class="btn-primary")
-            )
-        )
-        super(TemplateFatturaForm, self).__init__(*args, **kwargs)
-        
-        
-    def clean_template(self):
-        filename = self.cleaned_data["template"]
-        ext = os.path.splitext(filename.name)[1]
-        ext = ext.lower()
-        #print "clean_file value: %s" % ext
-        if ext != ".odt" :
-            raise forms.ValidationError("Il file deve avere estensione .odt!")
-        return filename
-    
     
 class ImpostaForm(forms.ModelForm):
     

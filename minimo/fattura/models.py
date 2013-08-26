@@ -12,30 +12,6 @@ from datetime import datetime, timedelta
 import os
 import config
 
-def content_file_name(instance, filename):
-    return '/'.join(['content', "template-"+str(instance.nome)+".odt"])
-
-
-class TemplateFattura(models.Model):
-    user = models.ForeignKey(User, editable=False, related_name='template_user')
-    nome = models.CharField('Nome',max_length=70, unique=True)
-    descrizione = models.CharField('Descrizione',max_length=70, blank=True, null=True)
-    template = models.FileField(upload_to=content_file_name)
-    
-    
-    def __unicode__(self):
-        return '%s' % (self.nome)
-    
-    
-    def save(self, *args, **kwargs):
-        # delete old file when replacing by updating the file
-        try:
-            this = TemplateFattura.objects.get(id=self.id)
-            if this.template != self.template:
-                this.template.delete(save=False)
-        except:
-            pass # when new photo then we do nothing, normal case          
-        super(TemplateFattura, self).save(*args, **kwargs)
 
 
 class Imposta(models.Model):
@@ -105,7 +81,7 @@ class Fattura(models.Model):
     cod_fiscale = models.CharField('Codice Fiscale',max_length=50, blank=True, null=True)
     p_iva = models.CharField('Partita IVA',max_length=30, blank=True, null=True)
     stato = models.BooleanField('Stato pagamento')
-    template = models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
+    template = models.ForeignKey(TemplateDocumento, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
     #imposte = models.ManyToManyField(Imposta,  blank=True, null = True)
     ritenute = models.ManyToManyField(Ritenuta,  blank=True, null = True)
     ritenuta = models.IntegerField('IVA', blank=True, null=True, default=None)
