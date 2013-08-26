@@ -4,8 +4,9 @@ from django.db import models
 
 from django.contrib.auth.models import User
 from django.db.models import Count, Min, Sum, Max, Avg
-from minimo.cliente.models import Cliente
+from minimo.cliente.models import *
 from minimo.fattura.utils import *
+from minimo.template.models import *
 from datetime import datetime, timedelta
 
 import os

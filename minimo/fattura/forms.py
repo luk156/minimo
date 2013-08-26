@@ -138,6 +138,7 @@ class FatturaInvioForm(forms.Form):
     destinatario = forms.EmailField('Email destinatario')
     cc_destinatario = forms.EmailField('Emaild destinatario per cc', required=False)
     oggetto = forms.CharField('Oggetto')
+    #TODO: visualizzare come textfield
     messaggio = forms.CharField('Messaggio')
     
     def __init__(self,*args, **kwargs):

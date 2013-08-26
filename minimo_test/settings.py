@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'south',
     'minimo.fattura',
     'minimo.cliente',
+    'minimo.template',
     'dajaxice',
     'dajax',
     'crispy_forms',

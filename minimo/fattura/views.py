@@ -114,7 +114,7 @@ def export_csv(request, queryset, export_data, filter_by=None, file_name='export
     rsp['Content-Disposition'] = 'attachment; filename=%s' % filename.encode('utf-8')
     return rsp
 
-#TODO: rendere automatici gli anni
+
 corrente = dt.datetime.today().year
 precedente = corrente -1
 anni=(precedente,corrente)
@@ -403,56 +403,6 @@ def bilancio_intervallo(request, inizio, fine):
 
     return fatturato
 
-@login_required
-def nuovotemplate(request):
-    azione = 'Nuovo'
-    if request.method == 'POST':
-        form = TemplateFatturaForm(request.POST, request.FILES)
-        form.helper.form_action = '/template/nuovo/'
-        if form.is_valid():
-            t=form.save(commit=False)
-            t.user=request.user
-            t.save()
-            return HttpResponseRedirect('/template')
-    else:
-        form = TemplateFatturaForm()
-        form.helper.form_action = '/template/nuovo/'
-    return render_to_response('form_template.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
-
-@login_required
-def modificatemplate(request,t_id):
-    azione = 'Modifica'
-    f = TemplateFattura.objects.get(id=t_id)
-    #if f.user == request.user or request.user.is_superuser:
-    if request.method == 'POST':  # If the form has been submitted...
-        form = TemplateFatturaForm(request.POST, request.FILES, instance=f)  # necessario per modificare la riga preesistente
-        form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('/template/') # Redirect after POST
-    else:
-        form = TemplateFatturaForm(instance=f)
-        form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
-    return render_to_response('form_template.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
-    #else:
-    #    raise PermissionDenied
-
-@login_required
-def eliminatemplate(request,t_id):
-    template = TemplateFattura.objects.get(id=t_id)
-    #if template.user == request.user or request.user.is_superuser:  
-    template.delete()
-    return HttpResponseRedirect('/template')
-    #else:
-    #    raise PermissionDenied      
-
-@login_required
-def template(request):
-    #if request.user.is_superuser:
-    template=TemplateFattura.objects.all()
-    #else:
-    #    template=TemplateFattura.objects.filter(user=request.user)
-    return render_to_response( 'template.html', {'request':request, 'templates': template, 'template_esempio':'template_standard.odt'}, RequestContext(request))
 
 @login_required
 def nuovoimposta(request):

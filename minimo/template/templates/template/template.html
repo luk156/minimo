@@ -34,8 +34,8 @@
 		</td>
 		<td>
 			<div class="btn-group">
-				<a href="{% url 'minimo.fattura.views.modificatemplate' t.id %}" class="btn"><i class="icon-edit"></i> modifica</a>
-				<a href="{% url 'minimo.fattura.views.eliminatemplate' t.id %}" class="btn"><i class="icon-trash"></i> elimina</a>
+				<a href="{% url 'minimo.template.views.modificatemplate' t.id %}" class="btn"><i class="icon-edit"></i> modifica</a>
+				<a href="{% url 'minimo.template.views.eliminatemplate' t.id %}" class="btn"><i class="icon-trash"></i> elimina</a>
 			</div>
 		</td>
 	</tr>
@@ -47,6 +47,6 @@
 
 {% block left %}
 	<h4>Azioni</h4>
-	<a href="{% url 'minimo.fattura.views.nuovotemplate' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Template</a>
+	<a href="{% url 'minimo.template.views.nuovotemplate' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Template</a>
 	<a href="/static/{{template_esempio}}" class="btn btn-block "><i class="icon-download"> </i> Scarica Template Esempio</a>
 {% endblock%}
