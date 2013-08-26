@@ -28,9 +28,9 @@
                 },
             });
 		$(document).ready(function(){
-			$("#div_id_ritenute").hide();
+			$("#div_id_ritenute").hide('slow');
 			if ("{{azione}}" != "Modifica") {
-				$("input#submit-id-save").hide();
+				$("input#submit-id-save").hide('slow');
 			}
 			
 			
@@ -45,7 +45,7 @@
 					
 					}
 				}else{
-					$("input#submit-id-save").hide();
+					$("input#submit-id-save").hide('slow');
 				}
 			});
 		});

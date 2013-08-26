@@ -114,9 +114,10 @@ def export_csv(request, queryset, export_data, filter_by=None, file_name='export
     rsp['Content-Disposition'] = 'attachment; filename=%s' % filename.encode('utf-8')
     return rsp
 
-
-
-anni=(2012,2013)
+#TODO: rendere automatici gli anni
+corrente = dt.datetime.today().year
+precedente = corrente -1
+anni=(precedente,corrente)
 
 
 def home(request):
@@ -245,10 +246,11 @@ def eliminafattura(request,f_id):
 
 @login_required
 def fatture(request):
-    fatture=Fattura.objects.all()
-    imposte=Imposta.objects.all()
-    ritenute=Ritenuta.objects.all()
-
+    fatture = Fattura.objects.all()
+    imposte = Imposta.objects.all()
+    ritenute = Ritenuta.objects.all()
+    pagamenti = Pagamento.objects.all()
+    
     Fatture=[]
     f=[]
     Fatture.append(anni)
@@ -256,7 +258,7 @@ def fatture(request):
         f.append(fatture.filter(data__year=anno))
     Fatture.append(f)
     Fatture=zip(*Fatture)
-    return render_to_response( 'fatture.html', {'request':request, 'ritenute': ritenute ,'fatture': Fatture, 'anni': anni, 'imposte':imposte}, RequestContext(request))
+    return render_to_response( 'fatture.html', {'request':request, 'pagamenti': pagamenti, 'ritenute': ritenute ,'fatture': Fatture, 'anni': anni, 'imposte':imposte}, RequestContext(request))
 
 
 @login_required
@@ -318,7 +320,10 @@ def stampa_fattura(request,f_id):
     pdf = conv.convert(document, format='pdf')
     #return render_to_response( 'modello_fattura.html', {'request':request, 'f': f})
     response = HttpResponse(pdf, mimetype='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename=Fattura-%s-%s.pdf' % (f.progressivo(),f.data.year)
+    if f.tipo == 'RA':
+        response['Content-Disposition'] = 'attachment; filename=RitenutaAcconto-%s-%s.pdf' % (f.progressivo(),f.data.year)
+    if f.tipo == 'FA':
+        response['Content-Disposition'] = 'attachment; filename=Fattura-%s-%s.pdf' % (f.progressivo(),f.data.year)
     return response
     #else:
     #    raise PermissionDenied      
@@ -338,8 +343,11 @@ def invio_fattura(request,f_id):
         if form.is_valid():
             oggetto = form.cleaned_data['oggetto']
             corpo = form.cleaned_data['messaggio']
+            cc = [form.cleaned_data['cc_destinatario']]
+            to = [form.cleaned_data['destinatario']]
+            print to, cc
             email = EmailMessage(oggetto, corpo, form.cleaned_data['mittente'],
-                [form.cleaned_data['destinatario']],
+                to,cc,
                 headers = {'Reply-To': form.cleaned_data['mittente']})
             template = webodt.ODFTemplate(f.template.template.name)
             context = dict(
@@ -532,7 +540,48 @@ def eliminaritenuta(request,i_id):
     #else:
     #    raise PermissionDenied
     
-    
+@login_required
+def nuovopagamento(request):
+    azione = 'Nuovo'
+    if request.method == 'POST':
+        form = PagamentoaForm(request.POST)
+        form.helper.form_action = '/pagamenti/nuovo/'
+        if form.is_valid():
+            t=form.save(commit=False)
+            t.user=request.user
+            t.save()
+            return HttpResponseRedirect('/fatture')
+    else:
+        form = PagamentoaForm()
+        form.helper.form_action = '/pagamenti/nuovo/'
+    return render_to_response('form_pagamento.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+
+@login_required
+def modificapagamento(request,i_id):
+    azione = 'Modifica'
+    i = Pagamento.objects.get(id=i_id)
+    #if i.user == request.user or request.user.is_superuser:
+    if request.method == 'POST':  # If the form has been submitted...
+        form = PagamentoaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+        form.helper.form_action = '/pagamenti/modifica/'+str(i.id)+'/'
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/fatture') # Redirect after POST
+    else:
+        form = PagamentoaForm(instance=i)
+        form.helper.form_action = '/pagamenti/modifica/'+str(i.id)+'/'
+    return render_to_response('form_pagamento.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+    #else:
+    #    raise PermissionDenied
+
+@login_required
+def eliminapagamento(request,i_id):
+    r = Pagamento.objects.get(id=i_id)
+    #if r.user == request.user or request.user.is_superuser: 
+    r.delete()
+    return HttpResponseRedirect('/fatture')
+    #else:
+    #    raise PermissionDenied
     
 def get_imposta(request):
     results = {}

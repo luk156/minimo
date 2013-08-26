@@ -46,6 +46,10 @@ urlpatterns = patterns('minimo.fattura.views',
     (r'^ritenute/nuovo/$', 'nuovoritenuta'),
     (r'^ritenute/modifica/(?P<i_id>\w+)/$', 'modificaritenuta'),
     (r'^ritenute/elimina/(?P<i_id>\w+)/$', 'eliminaritenuta'),
+    #pagamenti
+    (r'^pagamenti/nuovo/$', 'nuovopagamento'),
+    (r'^pagamenti/modifica/(?P<i_id>\w+)/$', 'modificapagamento'),
+    (r'^pagamenti/elimina/(?P<i_id>\w+)/$', 'eliminapagamento'),
     # bilancio
     (r'^bilancio/$', 'bilancio'),
 

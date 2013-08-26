@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Min, Sum, Max, Avg
 from minimo.cliente.models import Cliente
 from minimo.fattura.utils import *
+from datetime import datetime, timedelta
 
 import os
 import config
@@ -63,6 +64,27 @@ class Ritenuta(models.Model):
         return '%s (%s %%)' % (self.nome, str(self.aliquota))   
 
 
+class Pagamento(models.Model):
+    user = models.ForeignKey(User, editable=False)
+    nome = models.CharField('Pagamento',max_length=30)
+    giorni = models.IntegerField('Giorni', default=0)
+    
+    def __unicode__(self):
+        return self.nome
+    
+    def  giorni_scadenza(self):
+        pass
+    
+    def scadenza(self, data):
+        now = datetime.now().date()
+        delta = data + timedelta(days=self.giorni)
+        if now < delta :
+            return False
+        else:
+            return True
+    
+    
+
 TIPO_DOCUMENTO = (
     ('RA', 'Ritenuta acconto'),
     ('FA', 'Fattura'),
@@ -83,11 +105,12 @@ class Fattura(models.Model):
     p_iva = models.CharField('Partita IVA',max_length=30, blank=True, null=True)
     stato = models.BooleanField('Stato pagamento')
     template = models.ForeignKey(TemplateFattura, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
-    imposte = models.ManyToManyField(Imposta,  blank=True, null = True)
+    #imposte = models.ManyToManyField(Imposta,  blank=True, null = True)
     ritenute = models.ManyToManyField(Ritenuta,  blank=True, null = True)
     ritenuta = models.IntegerField('IVA', blank=True, null=True, default=None)
     bollo = models.CharField('ID Bollo',max_length=30, blank=True, null=True)
     valore_bollo = models.FloatField('Valore marca da bollo', blank=True, null=True)
+    pagamento = models.ForeignKey('Pagamento', verbose_name="condizioni pagamento", blank=True, null=True)
     
     
     def __unicode__(self):
@@ -111,7 +134,7 @@ class Fattura(models.Model):
                 tot += self.valore_bollo
             return round(tot,2)
         if self.tipo == 'RA':            
-            tot = self.totale() + self.tot_ritenute()
+            tot = self.totale() + self.tot_ritenute
             if self.valore_bollo:
                 tot += self.valore_bollo
             return round(tot,2)
@@ -124,13 +147,14 @@ class Fattura(models.Model):
         return round(t,2)
     
 
-    def tot_ritenute(self):
+    def _tot_ritenute(self):
         r=0
         for i in self.ritenute.all():
             r += i.calcola(self.totale())
         return round(r,2)
     
-
+    tot_ritenute = property(_tot_ritenute)
+    
     def totale(self):
         tot = 0
         if self.tipo =='FA':
@@ -164,6 +188,14 @@ class Fattura(models.Model):
             return "Da pagare"
     
     stato_pagamento = property(_stato_pagamento)
+    
+    def _scaduta(self):
+        if not self.stato:
+            return self.pagamento.scadenza(self.data)
+        else:
+            return False
+    
+    scaduta = property(_scaduta)
     
     def save(self, *args, **kwargs):
         if self.numero == 0:

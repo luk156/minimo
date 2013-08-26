@@ -21,7 +21,7 @@ class TemplateFatturaForm(forms.ModelForm):
             Field('descrizione'),
             Field('template'),
             FormActions(
-                Submit('save', 'Invia', css_class="btn-primary")
+                Submit('save', 'Salva', css_class="btn-primary")
             )
         )
         super(TemplateFatturaForm, self).__init__(*args, **kwargs)
@@ -50,7 +50,7 @@ class ImpostaForm(forms.ModelForm):
             Field('nome'),
             Field('aliquota'),
             FormActions(
-                Submit('save', 'Invia', css_class="btn-primary")
+                Submit('save', 'Salva', css_class="btn-primary")
             )
         )
         super(ImpostaForm, self).__init__(*args, **kwargs)  
@@ -68,10 +68,29 @@ class RitenutaForm(forms.ModelForm):
             Field('nome'),
             Field('aliquota'),
             FormActions(
-                Submit('save', 'Invia', css_class="btn-primary")
+                Submit('save', 'Salva', css_class="btn-primary")
             )
         )
         super(RitenutaForm, self).__init__(*args, **kwargs)
+
+
+class PagamentoaForm(forms.ModelForm):
+    
+    
+    class Meta:
+        model = Pagamento
+        
+        
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('nome'),
+            Field('giorni'),
+            FormActions(
+                Submit('save', 'Salva', css_class="btn-primary")
+            )
+        )
+        super(PagamentoaForm, self).__init__(*args, **kwargs)      
         
         
 class FatturaForm(forms.ModelForm):
@@ -87,7 +106,7 @@ class FatturaForm(forms.ModelForm):
         user_rid = kwargs.pop('user_rid')
         super(FatturaForm, self).__init__(*args, **kwargs)
         #self.fields['imposte'].queryset = Imposta.objects.filter(user_id=user_rid)
-        self.fields['imposte'].queryset = Imposta.objects.filter()
+        #self.fields['imposte'].queryset = Imposta.objects.filter()
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(
@@ -104,10 +123,11 @@ class FatturaForm(forms.ModelForm):
                     Field('ritenute'),
                     Field('bollo'),
                     Field('valore_bollo'),
+                    Field('pagamento'),
                 css_class="span6"),
             css_class="row-fluid"),
             FormActions(
-                Submit('save', 'Invia', css_class="btn-primary")
+                Submit('save', 'Salva', css_class="btn-primary")
             )
         )
     
@@ -116,7 +136,7 @@ class FatturaForm(forms.ModelForm):
 class FatturaInvioForm(forms.Form):
     mittente = forms.EmailField('Mittente')
     destinatario = forms.EmailField('Email destinatario')
-    #cc_destinatario = forms.EmailField('Emaild destinatario per cc')
+    cc_destinatario = forms.EmailField('Emaild destinatario per cc', required=False)
     oggetto = forms.CharField('Oggetto')
     messaggio = forms.CharField('Messaggio')
     
@@ -128,11 +148,11 @@ class FatturaInvioForm(forms.Form):
         self.helper.layout = Layout(
             AppendedText('mittente', '<i class="icon-user"></i>'),
             AppendedText('destinatario', '<i class="icon-user"></i>'),
-            #AppendedText('cc_destinatario', '<i class="icon-user"></i>'),
+            AppendedText('cc_destinatario', '<i class="icon-user"></i>'),
             AppendedText('oggetto', '<i class="icon-notes"></i>'),
             AppendedText('messaggio', '<i class="icon-notes"></i>'),
             FormActions(
-                Submit('save', 'Invia', css_class="btn-primary")
+                Submit('save', 'Salva', css_class="btn-primary")
             ),
         )
         super(FatturaInvioForm, self).__init__(*args, **kwargs)
@@ -172,7 +192,7 @@ class IntervalloForm(forms.Form):
             AppendedText('inizio', '<i class="icon-calendar"></i>', css_class='span12'),
             AppendedText('fine', '<i class="icon-calendar"></i>', css_class='span12'),
             FormActions(
-                Button('save', 'Invia', css_class="btn-primary", onclick="aggiorna_statistiche();"),
+                Button('save', 'Salva', css_class="btn-primary", onclick="aggiorna_statistiche();"),
                 Button('reset', 'Reset', onclick="reset_statistiche();"),
             ),
         )
@@ -191,7 +211,7 @@ class LoginForm(AuthenticationForm):
             Field('username', placeholder="username"),
             Field('password', placeholder="password"),
             FormActions(
-                Submit('save', 'Invia', css_class="btn-primary")
+                Submit('save', 'Salva', css_class="btn-primary")
             )
         )
 
@@ -206,7 +226,7 @@ class PasswordForm(PasswordChangeForm):
             Field('new_password1'),
             Field('new_password2'),
             FormActions(
-                Submit('save', 'Invia', css_class="btn-primary")
+                Submit('save', 'Salva', css_class="btn-primary")
             )
         )
         

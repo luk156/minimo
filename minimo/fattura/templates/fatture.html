@@ -29,13 +29,14 @@
 					<th>Cliente</th>
 					<th>Totale</th>
 					<th>Pagata</th>
+					<th>Scaduta</th>
 					<th></th>
 				</tr>
 				</thead>
 				<tbody>
 				{% for fattura in f %}
 
-				<tr {% if not fattura.stato %} class="error" {% endif %} >
+				<tr {% if not fattura.stato and not fattura.scaduta %}  class="error" {% else %} {% if fattura.scaduta %} class="info" {% endif %}{% endif %} >
 					<td><a href="{% url 'minimo.fattura.views.fattura' fattura.id %}" ><i class="icon-search"> </i> 
 						{{fattura}}</a></td>
 					<td>
@@ -49,6 +50,10 @@
 					<td><b>{{fattura.totale}} </b><i class="icon-eur"></i></td>
 					<td>
 						{% if fattura.stato %}<i class="icon-check icon-large"></i>
+						{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+					</td>
+					<td>
+						{% if fattura.scaduta %}<i class="icon-check icon-large"></i>
 						{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
 					</td>
 					<td><a href="{% url 'minimo.fattura.views.stampa_fattura' fattura.id %}" class="btn"><i class="icon-print"> </i>Stampa</a></td>
@@ -92,8 +97,22 @@
 			</div>
 			{{i.nome}} ({{i.aliquota}}%) 
 	</div>
-	{%endfor%}
+{%endfor%}
 	<a href="{% url 'minimo.fattura.views.nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
+	
+	<h4>Pagamenti diponibili</h4>
+	
+	{%for i in pagamenti %}
+		<div style="line-height:32px;">
+				<div class="btn-group pull-right">
+					<a href="{% url 'minimo.fattura.views.modificapagamento' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+					<a href="{% url 'minimo.fattura.views.eliminapagamento' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+				</div>
+				{{i.nome}} 
+		</div>
+	{%endfor%}
+
+	<a href="{% url 'minimo.fattura.views.nuovopagamento' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi pagamento</a>
 
 	<h4>Azioni</h4>
 	<a href="{% url 'minimo.fattura.views.nuovafattura' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi fattura</a>
