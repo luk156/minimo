@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}
+<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="#">Elenco Fatture</a></li>
+{% endblock %}
+
+{% block meta_title %}Elenco fatture{% endblock %}
+{% block title %}<i class="icon-file-text"></i>  Elenco Fatture {% endblock%}
+
+{% block main %}
+
+<div class="large-12 columns">
+</br>
+<div class="tabbable"> <!-- Only required for left/right tabs -->
+    <ul class="nav nav-tabs">
+		{% for anno in anni %}
+		<li {%if forloop.last %} class="active" {% endif%} ><a href="#tab-{{ forloop.counter }}" data-toggle="tab">{{anno}}</a></li>
+		{% endfor %}
+    </ul>
+    <div class="tab-content">
+		{% for anno,f in fatture %}
+		<div class="tab-pane fade in {%if forloop.last %}active{% endif%}" id="tab-{{ forloop.counter }}">
+			<table class="table table-striped" id="fatture-{{anno}}">
+				<thead>
+				<tr>
+					<th>ID</th>
+					<th>Data</th>
+					<th>Cliente</th>
+					<th>Totale</th>
+					<th>Pagata</th>
+					<th>Scaduta</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for fattura in f %}
+
+				<tr {% if not fattura.stato and not fattura.scaduta %}  class="error" {% else %} {% if fattura.scaduta %} class="info" {% endif %}{% endif %} >
+					<td><a href="{% url 'minimo.fattura.views.fattura' fattura.id %}" ><i class="icon-search"> </i> 
+						{{fattura}}</a></td>
+					<td>
+						
+						{{fattura.data}} {{fattura.progressivo}}</td>
+					{%if fattura.cliente.id %}
+						<td><a href="{% url 'minimo.cliente.views.cliente' fattura.cliente.id %}">{{fattura.ragione_sociale|truncatechars:30}}</a></td>
+					{% else %}
+						<td>{{fattura.ragione_sociale|truncatechars:30}}</td>
+					{% endif %}
+					<td><b>{{fattura.totale}} </b><i class="icon-eur"></i></td>
+					<td>
+						{% if fattura.stato %}<i class="icon-check icon-large"></i>
+						{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+					</td>
+					<td>
+						{% if fattura.scaduta %}<i class="icon-check icon-large"></i>
+						{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+					</td>
+					<td><a href="{% url 'minimo.fattura.views.stampa_fattura' fattura.id %}" class="btn"><i class="icon-print"> </i>Stampa</a></td>
+					<td><a href="{% url 'minimo.fattura.views.invio_fattura' fattura.id %}" class="btn"><i class="icon-envelope"> </i>Email</a></td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			</br>
+			</br>
+		</div>
+		{% endfor %}
+    </div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block left %}
+	<h4>Imposte disponibili</h4>
+	
+	{%for i in imposte %}
+	<div style="line-height:32px;">
+			<div class="btn-group pull-right">
+				<a href="{% url 'minimo.fattura.views.modificaimposta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'minimo.fattura.views.eliminaimposta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+			</div>
+			{{i.nome}} ({{i.aliquota}}%) 
+	</div>
+	{%endfor%}
+	<a href="{% url 'minimo.fattura.views.nuovoimposta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
+
+	<h4>Ritenute disponibili</h4>
+	
+	{%for i in ritenute %}
+	<div style="line-height:32px;">
+			<div class="btn-group pull-right">
+				<a href="{% url 'minimo.fattura.views.modificaritenuta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'minimo.fattura.views.eliminaritenuta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+			</div>
+			{{i.nome}} ({{i.aliquota}}%) 
+	</div>
+{%endfor%}
+	<a href="{% url 'minimo.fattura.views.nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
+	
+	<h4>Pagamenti diponibili</h4>
+	
+	{%for i in pagamenti %}
+		<div style="line-height:32px;">
+				<div class="btn-group pull-right">
+					<a href="{% url 'minimo.fattura.views.modificapagamento' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+					<a href="{% url 'minimo.fattura.views.eliminapagamento' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+				</div>
+				{{i.nome}} 
+		</div>
+	{%endfor%}
+
+	<a href="{% url 'minimo.fattura.views.nuovopagamento' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi pagamento</a>
+
+	<h4>Azioni</h4>
+	<a href="{% url 'minimo.fattura.views.nuovafattura' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi fattura</a>
+	<a href="{% url 'minimo.fattura.views.export_fatture' %}" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a>
+	
+{% endblock%}
