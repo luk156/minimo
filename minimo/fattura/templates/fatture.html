@@ -79,26 +79,26 @@
 	{%for i in imposte %}
 	<div style="line-height:32px;">
 			<div class="btn-group pull-right">
-				<a href="{% url 'minimo.fattura.views.modificaimposta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
-				<a href="{% url 'minimo.fattura.views.eliminaimposta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+				<a href="{% url 'minimo.tassa.views.modificaimposta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'minimo.tassa.views.eliminaimposta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
 			</div>
 			{{i.nome}} ({{i.aliquota}}%) 
 	</div>
 	{%endfor%}
-	<a href="{% url 'minimo.fattura.views.nuovoimposta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
+	<a href="{% url 'minimo.tassa.views.nuovoimposta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
 
 	<h4>Ritenute disponibili</h4>
 	
 	{%for i in ritenute %}
 	<div style="line-height:32px;">
 			<div class="btn-group pull-right">
-				<a href="{% url 'minimo.fattura.views.modificaritenuta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
-				<a href="{% url 'minimo.fattura.views.eliminaritenuta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+				<a href="{% url 'minimo.tassa.views.modificaritenuta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'minimo.tassa.views.eliminaritenuta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
 			</div>
 			{{i.nome}} ({{i.aliquota}}%) 
 	</div>
 {%endfor%}
-	<a href="{% url 'minimo.fattura.views.nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
+	<a href="{% url 'minimo.tassa.views.nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
 	
 	<h4>Pagamenti diponibili</h4>
 	

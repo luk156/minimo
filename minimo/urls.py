@@ -17,7 +17,8 @@ urlpatterns = patterns('minimo',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('minimo.fattura.urls')),
     url(r'^clienti/', include('minimo.cliente.urls')),
-    url(r'^template/', include('minimo.template.urls'))
+    url(r'^template/', include('minimo.template.urls')),
+    url(r'^tasse/', include('minimo.tassa.urls'))
     
 ) #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

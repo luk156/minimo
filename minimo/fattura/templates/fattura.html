@@ -23,7 +23,7 @@
 				}
 
 		$(function(){
-			$.getJSON("{% url 'minimo.fattura.views.get_imposta' %}", function(data){
+			$.getJSON("{% url 'minimo.tassa.views.get_imposta' %}", function(data){
 				var options = '';
 				$.each(data, function(key, val) {
 					options += '<option value="' + key + '">' + key + '</option>';

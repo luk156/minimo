@@ -33,15 +33,7 @@ urlpatterns = patterns('minimo.fattura.views',
     (r'^fatture/modifica/(?P<f_id>\w+)/$', 'modificafattura'),
     (r'^fatture/elimina/(?P<f_id>\w+)/$', 'eliminafattura'),
 
-    #imposte
-    (r'^imposte/nuovo/$', 'nuovoimposta'),
-    (r'^imposte/modifica/(?P<i_id>\w+)/$', 'modificaimposta'),
-    (r'^imposte/elimina/(?P<i_id>\w+)/$', 'eliminaimposta'),
-    (r'^imposte/get_imposta$', 'get_imposta'),
-    #ritenute
-    (r'^ritenute/nuovo/$', 'nuovoritenuta'),
-    (r'^ritenute/modifica/(?P<i_id>\w+)/$', 'modificaritenuta'),
-    (r'^ritenute/elimina/(?P<i_id>\w+)/$', 'eliminaritenuta'),
+
     #pagamenti
     (r'^pagamenti/nuovo/$', 'nuovopagamento'),
     (r'^pagamenti/modifica/(?P<i_id>\w+)/$', 'modificapagamento'),
