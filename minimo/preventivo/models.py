@@ -14,38 +14,32 @@ import os
 import config
 
 
-class Pagamento(models.Model):
-    user = models.ForeignKey(User, editable=False)
-    nome = models.CharField('Pagamento',max_length=30)
-    giorni = models.IntegerField('Giorni', default=0)
-    
-    def __unicode__(self):
-        return self.nome
-    
-    def  giorni_scadenza(self):
-        pass
-    
-    def scadenza(self, data):
-        now = datetime.now().date()
-        delta = data + timedelta(days=self.giorni)
-        if now < delta :
-            return False
-        else:
-            return True
-    
-    
-
-TIPO_DOCUMENTO = (
+TIPO_PREVENTIVO = (
     ('OF', 'Offerta cliente'),
     ('OR', 'Ordine cliente'),
 )
 
-class Fattura(models.Model):
+TIPO_DOCUMENTO = (
+    ('FA', 'Fattura'),
+    ('RA', 'Ritenuta'),
+)
+
+STATO_DOCUMENTO = (
+    ('BZ', 'Bozza'),
+    ('IN', 'Inviata'),
+    ('IC', 'In corso'),
+    ('CF', 'Confermato'),
+    ('FA', 'Fatturato'),
+    ('AN', 'Annullato'),
+)
+
+class Preventivo(models.Model):
     user = models.ForeignKey(User, editable=False, related_name='fattura_user')
-    tipo = models.CharField('Tipo documento', max_length=5, choices=TIPO_DOCUMENTO)
+    tipo_preventivo = models.CharField('Tipo preventivo', max_length=5, choices=TIPO_DOCUMENTO)
+    tipo_documento = models.CharField('Tipo documento', max_length=5, choices=TIPO_PREVENTIVO)
     numero = models.IntegerField('Numero progressivo', editable=False, default=0, unique_for_year="data")
     data = models.DateField('Data di emissione')
-    #cliente = models.ForeignKey(Cliente, blank=True, null = True, on_delete = models.SET_NULL)
+    data_consegna = models.DateField('Data di consegna prevista',null=True, blank=True)
     ragione_sociale = models.CharField('Ragione sociale',max_length=70,null=True, blank=True)
     via = models.CharField('Via',max_length=70, null=True, blank=True)
     cap = models.CharField('CAP',max_length=6, null=True, blank=True)
@@ -53,14 +47,13 @@ class Fattura(models.Model):
     provincia = models.CharField('Provincia',max_length=10, null=True, blank=True)
     cod_fiscale = models.CharField('Codice Fiscale',max_length=50, blank=True, null=True)
     p_iva = models.CharField('Partita IVA',max_length=30, blank=True, null=True)
-    stato = models.BooleanField('Stato pagamento')
-    template = models.ForeignKey(TemplateDocumento, related_name='fattura_template', null = True, on_delete = models.SET_NULL)
-    #imposte = models.ManyToManyField(Imposta,  blank=True, null = True)
-    ritenute = models.ManyToManyField(Ritenuta,  blank=True, null = True)
-    ritenuta = models.IntegerField('IVA', blank=True, null=True, default=None)
+    stato = models.models.CharField('Stato documento', max_length=5, choices=STATO_DOCUMENTO)
+    template = models.ForeignKey(TemplateDocumento, null = True, on_delete = models.SET_NULL)
+    descrizione_ritenuta = models.CharField('Descrizione ritenuta', null=True, blank=True, max_length=70)
+    ritenuta = models.IntegerField('Ritenuta', blank=True, null=True, default=None)
     bollo = models.CharField('ID Bollo',max_length=30, blank=True, null=True)
     valore_bollo = models.FloatField('Valore marca da bollo', blank=True, null=True)
-    pagamento = models.ForeignKey('Pagamento', verbose_name="condizioni pagamento", blank=True, null=True)
+    pagamento = models.ForeignKey('Pagamento previsto', verbose_name="condizioni pagamento", blank=True, null=True)
     
     
     def __unicode__(self):
@@ -73,9 +66,6 @@ class Fattura(models.Model):
         
     def imponibile(self):
         tot=0
-        #for p in self.prestazione_fattura.all():
-        #    i += p.importo
-        #return round(i,2)
         if self.tipo == 'FA':
             for p in self.prestazione_fattura.all():
                 tot += p.totale_netto
@@ -98,10 +88,9 @@ class Fattura(models.Model):
     
 
     def _tot_ritenute(self):
-        r=0
-        for i in self.ritenute.all():
-            r += i.calcola(self.totale())
-        return round(r,2)
+        perc = (100-self.ritenuta)/100.0
+        lordo = totale_netto / perc
+        return round(lordo - totale_netto , 2)
     
     tot_ritenute = property(_tot_ritenute)
     
@@ -131,29 +120,19 @@ class Fattura(models.Model):
     
     cliente = property(_get_cliente)
     
-    def _stato_pagamento(self):
-        if self.stato:
-            return "Pagata"
-        else:
-            return "Da pagare"
-    
-    stato_pagamento = property(_stato_pagamento)
-    
-    def _scaduta(self):
-        if not self.stato:
-            return self.pagamento.scadenza(self.data)
-        else:
-            return False
-    
-    scaduta = property(_scaduta)
+
     
     def save(self, *args, **kwargs):
+        try:
+            self.iva = Ritenuta.objects.get(nome=self.descrizione_ritenuta).aliquota
+        except Exception:
+            self.iva = 0
         if self.numero == 0:
-            fatture_anno = Fattura.objects.filter(data__year=self.data.year).aggregate(Max('numero'))
-            if not fatture_anno['numero__max']:
-                fatture_anno['numero__max'] = 0
-            self.numero = fatture_anno['numero__max'] + 1   
-        super(Fattura, self).save(*args, **kwargs)
+            p_anno = Preventivo.objects.filter(data__year=self.data.year).aggregate(Max('numero'))
+            if not p_anno['numero__max']:
+                p_anno['numero__max'] = 0
+            self.numero = p_anno['numero__max'] + 1   
+        super(Preventivo, self).save(*args, **kwargs)
         
 
 
@@ -166,7 +145,7 @@ class Prestazione(models.Model):
     descrizione_iva = models.CharField('Iva', max_length=70, blank=True, null=True, default=None)
     iva = models.IntegerField('IVA', blank=True, null=True, default=None)
     #importo = models.FloatField('Importo')
-    fattura = models.ForeignKey(Fattura, related_name='prestazione_fattura')
+    preventivo = models.ForeignKey(Preventivo)
     
     def _totale_netto(self):
         return self.quantita * self.importo_unitario

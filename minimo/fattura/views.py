@@ -185,7 +185,8 @@ def nuovafattura(request):
         if form.is_valid():
             cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
             f=form.save(commit=False)
-            ##f.cliente = cliente
+            f.descrizione_ritenuta = form.cleaned_data['descrizione_ritenuta']
+            f.ritenuta = Ritenuta.objects.get(nome=form.cleaned_data['descrizione_ritenuta']).aliquota
             f.user=request.user
             f.save()
             form.save_m2m()
@@ -201,18 +202,24 @@ def modificafattura(request,f_id):
     azione = 'Modifica'
     f = Fattura.objects.get(id=f_id)
     if request.method == 'POST':  # If the form has been submitted...
-        form = FatturaForm(request.POST, instance=f, user_rid=request.user.id)  # necessario per modificare la riga preesistente
+        form = FatturaForm(request.POST, instance=f)  # necessario per modificare la riga preesistente
         form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
         if form.is_valid():
             cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
             f=form.save(commit=False)
-            ##f.cliente = cliente
+            
+            f.descrizione_ritenuta = form.cleaned_data['descrizione_ritenuta']
+            try:
+                f.ritenuta = Ritenuta.objects.get(nome=form.cleaned_data['descrizione_ritenuta']).aliquota
+            except DoesNotExist:
+                pass
+            #f.ritenuta = Ritenuta.objects.get(nome=form.cleaned_data['descrizione_ritenuta']).aliquota
             f.save()
             form.save_m2m()
             copia_dati_fiscali(f, cliente)
             return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
     else:
-        form = FatturaForm(instance=f,user_rid=request.user.id)
+        form = FatturaForm(instance=f)
         form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
     return render_to_response('form_fattura.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
    
@@ -405,7 +412,6 @@ def bilancio_intervallo(request, inizio, fine):
 
 
 
-    
 @login_required
 def nuovopagamento(request):
     azione = 'Nuovo'

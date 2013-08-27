@@ -109,7 +109,7 @@
 			{% if f.tipo == "FA"%}
 				<td>{%if p.iva %}{{p.iva}} % {%endif%}</td>
 			{% endif %}
-			<td> {{p.importo}} €</td>
+			<td> {{p.totale_netto}} €</td>
 			<td>
 				<div class="btn-group">
 					<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.fattura.views.modificaprestazione' p.id %}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
@@ -168,13 +168,13 @@
 		<td>+ {{f.iva_totale}} <i class="icon-eur"></i></td>
 	</tr>
 	{% endif %}
-	{% for i in f.ritenute.all %}
+	{% if f.tipo == 'RA' %}
 	<tr>
-		<td>{{i.nome}}</td>
-		<td>{{i.aliquota}} %</td>
-		<td>- {{i|tot_imposta:f.totale}} <i class="icon-eur"></i></td>
+		<td>Totale ritenuta</td>
+		<td>{{f.ritenuta}} %</td>
+		<td>- {{f.tot_ritenute}} <i class="icon-eur"></i></td>
 	</tr>
-	{% endfor %}
+	{% endif %}
 	<tr >
 		<td>Marca da bollo</td>
 		<td></td>

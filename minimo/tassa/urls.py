@@ -21,6 +21,6 @@ urlpatterns = patterns('minimo.tassa.views',
     (r'^ritenute/nuovo/$', 'nuovoritenuta'),
     (r'^ritenute/modifica/(?P<i_id>\w+)/$', 'modificaritenuta'),
     (r'^ritenute/elimina/(?P<i_id>\w+)/$', 'eliminaritenuta'),
-
+    (r'^ritenute/get_ritenuta$', 'get_ritenuta'),
 
 )

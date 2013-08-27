@@ -15,6 +15,8 @@ from django.contrib.auth import authenticate, login
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, EmailMessage
+from django.core import serializers
+from django.utils import simplejson
 
 try:
     from cStringIO import StringIO
@@ -114,6 +116,16 @@ def get_imposta(request):
     results = {}
     if request.method == "GET":       
         model_results = Imposta.objects.all()
+        for x in model_results:
+            results[x.nome] = x.aliquota
+    json = simplejson.dumps(results)
+
+    return HttpResponse(json, mimetype='application/json')
+
+def get_ritenuta(request):
+    results = {}
+    if request.method == "GET":       
+        model_results = Ritenuta.objects.all()
         for x in model_results:
             results[x.nome] = x.aliquota
     json = simplejson.dumps(results)

@@ -31,18 +31,18 @@ class PagamentoaForm(forms.ModelForm):
         
 class FatturaForm(forms.ModelForm):
     #imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
-    ritenute = forms.ModelMultipleChoiceField(queryset=Ritenuta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
+    #descrizione_ritenuta = forms.ModelChoiceField(queryset=Ritenuta.objects.all(), required=False)
     stato = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     ragione_sociale = forms.CharField('Ragione sociale')
+    
     class Meta:
         model = Fattura
         
         
     def __init__(self, *args, **kwargs):
-        user_rid = kwargs.pop('user_rid')
         super(FatturaForm, self).__init__(*args, **kwargs)
-        #self.fields['imposte'].queryset = Imposta.objects.filter(user_id=user_rid)
-        #self.fields['imposte'].queryset = Imposta.objects.filter()
+  
+        #self.fields['descrizione_ritenuta'].choices=[ (o.nome, o.nome) for o in Ritenuta.objects.all()]
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(
@@ -56,7 +56,7 @@ class FatturaForm(forms.ModelForm):
                 css_class="span6"),
                 Div(
                     #Field('imposte'),
-                    Field('ritenute'),
+                    Field('descrizione_ritenuta'),
                     Field('bollo'),
                     Field('valore_bollo'),
                     Field('pagamento'),

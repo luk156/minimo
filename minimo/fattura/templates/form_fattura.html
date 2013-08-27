@@ -28,7 +28,12 @@
                 },
             });
 		$(document).ready(function(){
-			$("#div_id_ritenute").hide('slow');
+			if ($("select#id_tipo").val() == 'RA'){
+				$("#div_id_descrizione_ritenuta").show('slow');
+			}else{
+				$("#div_id_descrizione_ritenuta").hide('slow');
+			}
+			
 			if ("{{azione}}" != "Modifica") {
 				$("input#submit-id-save").hide('slow');
 			}
@@ -38,10 +43,10 @@
 				if ($("select#id_tipo").val()){
 					$("input#submit-id-save").show('slow');
 					if ($("select#id_tipo").val() == 'FA'){
-						$("#div_id_ritenute").hide('slow');
+						$("#div_id_descrizione_ritenuta").hide('slow');
 					
 					}else{
-						$("#div_id_ritenute").show('slow');
+						$("#div_id_descrizione_ritenuta").show('slow');
 					
 					}
 				}else{
@@ -49,6 +54,7 @@
 				}
 			});
 		});
+
 	</script>
 
 {% endblock %}
