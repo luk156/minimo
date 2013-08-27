@@ -21,7 +21,18 @@
 						document.location.href = "{% url 'minimo.fattura.views.eliminafattura' f.id %}";
 						}
 				}
-
+		function IncassaFattura() {
+				if ( confirm("Dal momento che si incassa una fattura non è più possibile modifcarla, occore prima sbloccarla. Incassare la fattura {{f}}?") ) {
+						document.location.href = "{% url 'minimo.fattura.views.incassa_fattura' f.id %}";
+						}
+				}
+		
+		function SbloccaFattura() {
+				if ( confirm("Stai per sbloccare una fattura già incassata. Modificare la fattura {{f}}?") ) {
+						document.location.href = "{% url 'minimo.fattura.views.sblocca_fattura' f.id %}";
+						}
+				}
+				
 		$(function(){
 			$.getJSON("{% url 'minimo.tassa.views.get_imposta' %}", function(data){
 				var options = '';
@@ -191,9 +202,9 @@
 
 {% block left %}
 <h4>Azioni</h4>
-<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.fattura.views.incassa_fattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
+<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
 <a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.fattura.views.modificafattura' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
-<a {% if f.stato %} href="{% url 'minimo.fattura.views.sblocca_fattura' f.id %}" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Sblocca</a>
+<a {% if f.stato %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Sblocca</a>
 <a href="#" class="btn btn-block " onClick="CancellaFattura();"><i class="icon-trash"></i> elimina</a>
 <a href="{% url 'minimo.fattura.views.stampa_fattura' f.id %}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
 <a href="{% url 'minimo.fattura.views.invio_fattura' f.id %}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>
