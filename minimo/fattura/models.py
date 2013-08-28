@@ -94,25 +94,24 @@ class Fattura(models.Model):
             return round(tot,2)
     
     
-    def iva_totale(self):
+    def _iva_totale(self):
         t=0
         for p in self.prestazione_fattura.all():
             t += p.totale_iva
         return round(t,2)
     
+    iva_totale = property(_iva_totale)
 
     def _tot_ritenute(self):
         print 'r'
         perc = (100-self.ritenuta)/100.0
-        print perc, '-', self.totale
-        lordo = self.totale() / perc
-        print 'lordo', lordo
-        return round(lordo - self.totale() , 2)
+        lordo = self.totale / perc
+        return round(lordo - self._totale() , 2)
         
     
     tot_ritenute = property(_tot_ritenute)
     
-    def totale(self):
+    def _totale(self):
         tot = 0
         if self.tipo =='FA':
             for p in self.prestazione_fattura.all():
@@ -124,7 +123,9 @@ class Fattura(models.Model):
             for p in self.prestazione_fattura.all():
                 tot += p.totale_netto
             return round(tot,2)
-        
+    
+    totale = property(_totale)
+      
     def progressivo(self):
         return self.numero
     

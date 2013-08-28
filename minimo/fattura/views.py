@@ -379,17 +379,64 @@ def bilancio(request):
     form=IntervalloForm()
     if request.method == 'POST':  # If the form has been submitted...
         form = IntervalloForm(request.POST) 
-    anno=dt.datetime.today().year
-    fatturato=bilancio_intervallo(request,dt.date(anno,1,1),dt.datetime.now().date())
+    anno = dt.datetime.today().year
+    fatt = bilancio_intervallo(request,dt.date(anno,1,1),dt.datetime.now().date())
+    dati = fatturato(request,dt.date(anno,1,1),dt.date(anno,12,31))
+    return render_to_response( 'bilancio.html', {'request':request, 'fatturato': fatt,'form':form, 'dati': dati }, RequestContext(request))
+
+class fatturato():
     
-    return render_to_response( 'bilancio.html', {'request':request, 'fatturato': fatturato,'form':form, }, RequestContext(request))
+    def __init__(self,request, inizio, fine):
+        self.fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
+    
+    def iva(self):
+        totale = 0
+        for f in self.fatture:
+            if f.tipo == 'FA' and f.stato:
+                totale += f.iva_totale
+        return totale
+    
+    def ritenute(self):    
+        totale = 0
+        for f in self.fatture:
+            if f.tipo == 'RA' and f.stato:
+                totale += f.tot_ritenute
+        return totale
+    
+    def totale(self):
+        totale = 0
+        for f in self.fatture:
+            totale += f.totale
+        return totale
+    
+    def incassato(self):
+        totale = 0
+        for f in self.fatture:
+            if f.stato:
+                totale += f.totale
+        return totale
+    
+    def incassare(self):
+        totale = 0
+        for f in self.fatture:
+            if not f.stato:
+                totale += f.totale
+        return totale
+    
+    def scadute(self):
+        totale = 0
+        for f in self.fatture:
+            if f.scaduta:
+                totale += f.totale
+        return totale
+
+    def sbilancio(self):
+        return self.totale() - self.incassare()
+    
+    
 
 @login_required
 def bilancio_intervallo(request, inizio, fine):
-    #if request.user.is_superuser:
-    #    fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
-    #else:
-    #    fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine,user=request.user)
     fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
     f_data=[]
     f_tot=[]
@@ -398,10 +445,10 @@ def bilancio_intervallo(request, inizio, fine):
 
     for f in fatture:
         if f.data == data_precedente:
-            f_tot[-1]+=f.totale()
+            f_tot[-1]+=f.totale
         else:
             f_data.append(f.data)
-            f_tot.append(f.totale())
+            f_tot.append(f.totale)
         data_precedente = f.data
     
     fatturato.append(f_data)
