@@ -84,13 +84,12 @@ class Fattura(models.Model):
         if self.tipo == 'FA':
             for p in self.prestazione_fattura.all():
                 tot += p.totale_netto
-            if self.valore_bollo:
-                tot += self.valore_bollo
             return round(tot,2)
-        if self.tipo == 'RA':            
-            tot = self.totale() + self._tot_ritenute()
+        if self.tipo == 'RA':
+            tot = self.totale 
             if self.valore_bollo:
-                tot += self.valore_bollo
+                tot -= self.valore_bollo
+            tot = tot + self.tot_ritenute
             return round(tot,2)
     
     
@@ -103,10 +102,12 @@ class Fattura(models.Model):
     iva_totale = property(_iva_totale)
 
     def _tot_ritenute(self):
-        print 'r'
+        tot = self.totale
+        if self.valore_bollo:
+            tot -= self.valore_bollo
         perc = (100-self.ritenuta)/100.0
-        lordo = self.totale / perc
-        return round(lordo - self._totale() , 2)
+        lordo = tot / perc
+        return round(lordo - tot , 2)
         
     
     tot_ritenute = property(_tot_ritenute)
@@ -122,6 +123,8 @@ class Fattura(models.Model):
         if self.tipo == 'RA':
             for p in self.prestazione_fattura.all():
                 tot += p.totale_netto
+            if self.valore_bollo:
+                tot += self.valore_bollo
             return round(tot,2)
     
     totale = property(_totale)
