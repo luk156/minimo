@@ -69,32 +69,35 @@ class Preventivo(models.Model):
         if self.tipo == 'FA':
             for p in self.prestazione_fattura.all():
                 tot += p.totale_netto
-                print tot
-            if self.valore_bollo:
-                tot += self.valore_bollo
             return round(tot,2)
-        if self.tipo == 'RA':            
-            tot = self.totale() + self.tot_ritenute
+        if self.tipo == 'RA':
+            tot = self.totale 
             if self.valore_bollo:
-                tot += self.valore_bollo
+                tot -= self.valore_bollo
+            tot = tot + self.tot_ritenute
             return round(tot,2)
     
     
-    def iva_totale(self):
+    def _iva_totale(self):
         t=0
         for p in self.prestazione_fattura.all():
             t += p.totale_iva
         return round(t,2)
     
+    iva_totale = property(_iva_totale)
 
     def _tot_ritenute(self):
+        tot = self.totale
+        if self.valore_bollo:
+            tot -= self.valore_bollo
         perc = (100-self.ritenuta)/100.0
-        lordo = totale_netto / perc
-        return round(lordo - totale_netto , 2)
+        lordo = tot / perc
+        return round(lordo - tot , 2)
+        
     
     tot_ritenute = property(_tot_ritenute)
     
-    def totale(self):
+    def _totale(self):
         tot = 0
         if self.tipo =='FA':
             for p in self.prestazione_fattura.all():
@@ -105,9 +108,12 @@ class Preventivo(models.Model):
         if self.tipo == 'RA':
             for p in self.prestazione_fattura.all():
                 tot += p.totale_netto
-            
+            if self.valore_bollo:
+                tot += self.valore_bollo
             return round(tot,2)
-        
+    
+    totale = property(_totale)
+      
     def progressivo(self):
         return self.numero
     
@@ -120,23 +126,32 @@ class Preventivo(models.Model):
     
     cliente = property(_get_cliente)
     
-
+    def _stato_pagamento(self):
+        if self.stato:
+            return "Pagata"
+        else:
+            return "Da pagare"
+    
+    stato_pagamento = property(_stato_pagamento)
+    
+    def _scaduta(self):
+        if not self.stato:
+            return self.pagamento.scadenza(self.data)
+        else:
+            return False
+    
+    scaduta = property(_scaduta)
     
     def save(self, *args, **kwargs):
-        try:
-            self.iva = Ritenuta.objects.get(nome=self.descrizione_ritenuta).aliquota
-        except Exception:
-            self.iva = 0
+                    
         if self.numero == 0:
-            p_anno = Preventivo.objects.filter(data__year=self.data.year).aggregate(Max('numero'))
-            if not p_anno['numero__max']:
-                p_anno['numero__max'] = 0
-            self.numero = p_anno['numero__max'] + 1   
-        super(Preventivo, self).save(*args, **kwargs)
+            fatture_anno = Fattura.objects.filter(data__year=self.data.year).aggregate(Max('numero'))
+            if not fatture_anno['numero__max']:
+                fatture_anno['numero__max'] = 0
+            self.numero = fatture_anno['numero__max'] + 1   
+        super(Fattura, self).save(*args, **kwargs)
         
-
-
-         
+        
 
 class Prestazione(models.Model):
     descrizione = models.TextField('Descrizione')
@@ -144,7 +159,6 @@ class Prestazione(models.Model):
     importo_unitario = models.FloatField('Prezzo unitario', default=1)
     descrizione_iva = models.CharField('Iva', max_length=70, blank=True, null=True, default=None)
     iva = models.IntegerField('IVA', blank=True, null=True, default=None)
-    #importo = models.FloatField('Importo')
     preventivo = models.ForeignKey(Preventivo)
     
     def _totale_netto(self):
@@ -175,3 +189,9 @@ class Prestazione(models.Model):
         super(Prestazione, self).save(*args, **kwargs)
 
 
+class FatturePreventivo(models.Model):
+    preventivo = models.ForeignKey(Preventivo)
+    fattura = models.ForeignKey(Fattura)
+    data = models.DateField(auto_now_add=True)
+    importo = models.IntegerField()
+    
