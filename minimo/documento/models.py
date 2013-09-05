@@ -184,7 +184,7 @@ class Documento(models.Model):
     stato_documento = property(_stato_documento)
     
     def _scaduto(self):
-        if not self.stato:
+        if not self.stato and self.pagamento:
             return self.pagamento.scadenza(self.data)
         else:
             return False

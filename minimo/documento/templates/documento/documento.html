@@ -111,6 +111,12 @@
 			<td>{{f.note}}</td>
 		</tr>
 	{% endif %}
+	{% if f.riferimento %}
+		<tr>
+			<td><h5>Documento collegato</h5></td>
+			<td>{{f.riferimento.tipo_documento}} <a href="{% url 'minimo.documento.views.dettagli_documento' f.riferimento.id %}">{{f.riferimento}}</a></td>
+		</tr>
+	{% endif %}
 </table>
 
 <h3>Prestazioni:</h3>

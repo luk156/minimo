@@ -26,15 +26,32 @@
 	<h2>Dati statistici pagamenti anno: {{anno}}</h2>
 	<table class="table table-striped" id="fatture-{{anno}}">
 		<tr>
-			<td><strong>Totale documentoto:</strong> {{dati.totale}}</td>
-			<td><strong>Totale documentoto incassato:</strong> {{dati.incassato}}</td>
-			<td><strong>Totale documentoto da incassare:</strong> {{dati.incassare}}</td>
+			<td><strong>Totale fatturato:</strong> {{dati.totale}}</td>
+			<td><strong>Totale incassato:</strong> {{dati.incassato}}</td>
+			<td><strong>Totale da incassare:</strong> {{dati.incassare}}</td>
 			<td><strong>Totale pagamenti scaduti:</strong> {{dati.scadute}}</td>
 		</tr>
 		<tr>
 			<td><strong>Totale iva:</strong> {{dati.iva}}</td>
 			<td><strong>Totale ritenute:</strong> {{dati.ritenute}}</td>
 			<td><strong>Sbilancio:</strong> {{dati.sbilancio}}</td>
+			<td></td>
+		</tr>
+	</table>
+</div>
+<div id="preventivato">
+	<h2>Dati statistici preventivi e ordini anno: {{anno}}</h2>
+	<table class="table table-striped" id="fatture-{{anno}}">
+		<tr>
+			<td><strong>Totale preventivi:</strong> {{prev.tot_preventivi}}</td>
+			<td><strong>Preventivi emessi:</strong> {{prev.num_preventivi}}</td>
+			<td><strong>Ordini emessi:</strong> {{prev.num_ordini}}</td>
+			<td><strong>Preventivi e ordini fatturati:</strong> {{prev.doc_fatturati}}</td>
+		</tr>
+		<tr>
+			<td><strong>Totale ordini:</strong> {{prev.tot_ordini}}</td>
+			<td></td>
+			<td></td>
 			<td></td>
 		</tr>
 	</table>

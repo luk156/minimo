@@ -350,6 +350,8 @@ def fattura_documento(request,d_id):
         riga.id = None
         riga.documento = fattura
         riga.save()
+    preventivo.riferimento = fattura
+    preventivo.save()
     return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(fattura.id),))) 
     
 @login_required
@@ -424,13 +426,14 @@ def bilancio(request):
         form = IntervalloForm(request.POST) 
     anno = dt.datetime.today().year
     fatt = bilancio_intervallo(request,dt.date(anno,1,1),dt.datetime.now().date())
-    dati = fatturato(request,dt.date(anno,1,1),dt.date(anno,12,31))
-    return render_to_response( 'documento/bilancio.html', {'request':request, 'documenti': fatt,'form':form, 'dati': dati }, RequestContext(request))
+    doc = fatturato(request,dt.date(anno,1,1),dt.date(anno,12,31))
+    prev = preventivato(request,dt.date(anno,1,1),dt.date(anno,12,31))
+    return render_to_response( 'documento/bilancio.html', {'request':request, 'documenti': fatt,'form':form, 'dati': doc, 'prev': prev, 'anno': anno}, RequestContext(request))
 
 class fatturato():
     
     def __init__(self,request, inizio, fine):
-        self.documenti=Documento.objects.filter(data__gte=inizio,data__lte=fine)
+        self.documenti=Documento.objects.filter(data__gte=inizio,data__lte=fine, tipo__in=['RA', 'FA'],)
     
     def iva(self):
         totale = 0
@@ -476,11 +479,40 @@ class fatturato():
     def sbilancio(self):
         return self.totale() - self.incassare()
     
+class preventivato():
+    def __init__(self,request, inizio, fine):
+        self.documenti=Documento.objects.filter(data__gte=inizio,data__lte=fine, tipo__in=['PR', 'OR'],)
+        
+    def tot_preventivi(self):
+        totale = 0
+        for f in self.documenti.filter(tipo='PR'):
+            totale += f.totale
+        return totale
     
+    def tot_ordino(self):
+        totale = 0
+        for f in self.documenti.filter(tipo='OR'):
+            totale += f.totale
+        return totale
+    
+    def num_preventivi(self):
+        return self.documenti.filter(tipo='PR').count()
+    
+    def num_ordini(self):
+        return self.documenti.filter(tipo='OR').count()
+    
+    def doc_fatturati(self):
+        return self.documenti.filter(riferimento__isnull=False).count()
+    
+
+    def sbilancio(self):
+        return self.totale() - self.incassare()
+    
+
 
 @login_required
 def bilancio_intervallo(request, inizio, fine):
-    docs=Documento.objects.filter(data__gte=inizio,data__lte=fine)
+    docs=Documento.objects.filter(data__gte=inizio,data__lte=fine, tipo__in=['RA', 'FA'],)
     f_data=[]
     f_tot=[]
     documenti=[]
