@@ -7,3 +7,4 @@ django-dajaxice==0.5.5
 lxml==3.2.1
 wsgiref==0.1.2
 -e hg+http://bitbucket.org/bkroeze/django-livesettings/#egg=django-livesettings
+abiword (per la conversione in pdf)
