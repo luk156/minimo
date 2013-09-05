@@ -35,7 +35,7 @@ def nuovoimposta(request):
             t=form.save(commit=False)
             t.user=request.user
             t.save()
-            return HttpResponseRedirect(reverse('minimo.fattura.views.fatture'))
+            return HttpResponseRedirect(reverse('minimo.documento.views.home'))
     else:
         form = ImpostaForm()
         form.helper.form_action = reverse('minimo.tassa.views.nuovoimposta')
@@ -51,7 +51,7 @@ def modificaimposta(request,i_id):
         form.helper.form_action = reverse('minimo.tassa.views.modificaimposta', args=(str(i.id),)) #'/tasse/imposta/modifica/'+str(i.id)+'/'
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('minimo.fattura.views.fatture')) # Redirect after POST
+            return HttpResponseRedirect(reverse('minimo.documento.views.home')) # Redirect after POST
     else:
         form = ImpostaForm(instance=i)
         form.helper.form_action = reverse('minimo.tassa.views.modificaimposta', args=(str(i.id),)) #'/tasse/imposte/modifica/'+str(i.id)+'/'
@@ -78,7 +78,7 @@ def nuovoritenuta(request):
             t=form.save(commit=False)
             t.user=request.user
             t.save()
-            return HttpResponseRedirect(reverse('minimo.fattura.views.fatture'))
+            return HttpResponseRedirect(reverse('minimo.documento.views.home'))
     else:
         form = RitenutaForm()
         form.helper.form_action = reverse('minimo.tassa.views.nuovoritenuta')
@@ -94,7 +94,7 @@ def modificaritenuta(request,i_id):
         form.helper.form_action = reverse('minimo.tassa.views.modificaritenuta', args=(str(i.id),))
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('minimo.fattura.views.fatture')) # Redirect after POST
+            return HttpResponseRedirect(reverse('minimo.documento.views.home')) # Redirect after POST
     else:
         form = RitenutaForm(instance=i)
         form.helper.form_action = reverse('minimo.tassa.views.modificaritenuta', args=(str(i.id),))
@@ -107,7 +107,7 @@ def eliminaritenuta(request,i_id):
     r = Ritenuta.objects.get(id=i_id)
     #if r.user == request.user or request.user.is_superuser: 
     r.delete()
-    return HttpResponseRedirect(reverse('minimo.fattura.views.fatture'))
+    return HttpResponseRedirect(reverse('minimo.documento.views.home'))
     #else:
     #    raise PermissionDenied
 

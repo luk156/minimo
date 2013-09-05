@@ -1,9 +1,9 @@
-{% extends "base.html" %}
+{% extends "documento/base.html" %}
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block meta_title %}{{azione}} fattura{% endblock %}
-{% block title %} {{azione}} Fattura {% endblock %}	
+{% block meta_title %}{{azione}} Documento {% endblock %}
+{% block title %} {{azione}} Documento {% endblock %}	
 
 {% block head %}
 	<link href="/static/css/datetimepicker.css" rel="stylesheet">
@@ -61,8 +61,8 @@
 
 {% block breadcrumb %}
 <li><a href="/">Home</a> <span class="divider">/</span></li>
-<li><a href="{% url 'minimo.fattura.views.fatture' %}">Elenco Fatture</a> <span class="divider">/</span></li>
-<li><a href="#">{{azione}} Fattura</a></li>
+<li><a href="{% url 'minimo.documento.views.home' %}">Elenco Documenti</a> <span class="divider">/</span></li>
+<li><a href="#">{{azione}} Docuemnto </a></li>
 {% endblock %}
 
 

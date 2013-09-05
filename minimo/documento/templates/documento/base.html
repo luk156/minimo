@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block js %}
+	<script type="text/javascript" charset="utf-8">
+		$(document).ready(function() {
+			// to show it in an alert window
+			var url = $(location).attr('href');
+			var match = url.match(/documenti\/(\w{2})/);
+			if (match[1] == 'FA') {
+				$( "#fattura" ).addClass("active");
+			};
+            if (match[1] == 'RA') {
+				$( "#ritenuta" ).addClass("active");
+			};
+            if (match[1] == 'PR') {
+				$( "#preventivo" ).addClass("active");
+			}
+            if (match[1] == 'OR') {
+				$( "#ordine" ).addClass("active");
+			}
+		});
+	</script>
+{% endblock %}
+
+{% block submenu %}
+    <ul class="nav nav-pills">
+        <li id="fattura"><a href="{% url 'minimo.documento.views.documenti' 'FA'%}">Fatture</a></li>
+        <li id="ritenuta"><a href="{% url 'minimo.documento.views.documenti' 'RA'%}">Ritenute</a></li>
+        <li id="preventivo"><a href="{% url 'minimo.documento.views.documenti' 'PR'%}">Preventivi</a></li>
+        <li id="ordine"><a href="{% url 'minimo.documento.views.documenti' 'OR'%}">Ordini</a></li>
+    </ul>
+{% endblock %}

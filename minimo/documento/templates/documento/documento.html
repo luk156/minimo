@@ -1,0 +1,219 @@
+{% extends "documento/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load documento_extras %}
+
+{% block meta_title %}Dettaglio documento{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="{% url 'minimo.documento.views.documenti' f.tipo %}">Elenco Documenti</a> <span class="divider">/</span></li>
+<li><a href="#"><i class="icon-file-text"></i> {{f.tipo_documento}} {{f}}
+</a></li>
+{% endblock %}
+
+{% block title %}
+	<i class="icon-file-text"></i> {{f.tipo_documento}}
+{% endblock%}
+
+{% block js %}
+	<script type="text/javascript" charset="utf-8">
+		function CreaFattura() {
+				if ( confirm("Creare una fattura dal preventivo/ordine {{f}}?") ) {
+						document.location.href = "{% url 'minimo.documento.views.fattura_documento' f.id %}";
+						}
+				}
+		function CancellaFattura() {
+				if ( confirm("Vuoi veramente cancellare la documento {{f}}?") ) {
+						document.location.href = "{% url 'minimo.documento.views.eliminadocumento' f.id %}";
+						}
+				}
+		function IncassaFattura() {
+				if ( confirm("Dal momento che si incassa una documento non è più possibile modifcarla, occore prima sbloccarla. Incassare la documento {{f}}?") ) {
+						document.location.href = "{% url 'minimo.documento.views.incassa_documento' f.id %}";
+						}
+				}
+		
+		function SbloccaFattura() {
+				if ( confirm("Stai per sbloccare una documento già incassata. Modificare la documento {{f}}?") ) {
+						document.location.href = "{% url 'minimo.documento.views.sblocca_documento' f.id %}";
+						}
+				}
+				
+		$(function(){
+			$.getJSON("{% url 'minimo.tassa.views.get_imposta' %}", function(data){
+				var options = '';
+				$.each(data, function(key, val) {
+					options += '<option value="' + key + '">' + key + '</option>';
+				});
+			  $("#id_descrizione_imposta").html(options);
+			})
+		})
+	</script>
+
+{% endblock %}
+
+{% block main %}
+
+<h3>Informazioni:</h3>
+<table class="table">
+	<tr>
+		<td><h5>Data</h5></td>
+		<td>{{f.data}}</td>
+	</tr>
+	<tr>
+		<td><h5>Cliente</h5></td>
+		<td>{{f.ragione_sociale}}</td>
+	</tr>
+	<tr>
+			<td><h5>Tipo documento</h5></td>
+			<td>{{f.tipo_documento}}</td>
+	</tr>
+	
+	<tr> 
+		<td><h5>Marca da bollo</h5></td>
+		<td>
+		{%if f.valore_bollo %}
+		{{f.bollo}} ({{f.valore_bollo}} €)
+		{%else%}
+		No
+		{%endif%}
+		</td>
+	</tr>
+	<tr {% if not f.stato %} class="error" {% endif %} > 
+		<td><h5>Stato documento</h5></td>
+		<td>
+			{{ f.stato_documento }}
+		</td>
+	</tr>
+	<tr>
+		<td><h5>Template</h5></td>
+		<td>{{f.template}}</td>
+	</tr>
+	<tr>
+		<td><h5>Tipo pagamento</h5></td>
+		<td>{{f.pagamento}}</td>
+	</tr>	
+</table>
+
+<h3>Prestazioni:</h3>
+
+<table class="table table-striped" id="fatture">
+	<thead>
+		<tr>
+			<th>Descrizione</th>
+			<th>Prezzo unitario</th>
+			<th>Quantità</th>
+			
+			{% if not f.ritenuta %}
+				<th>IVA</th>
+			{% endif %}
+			<th>Importo</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for p in f.righe %}
+		<tr>
+			<td>{{p.descrizione}}</td>
+			<td>{{p.importo_unitario}}</td>
+			<td>{{p.quantita}}</td>
+			{% if not f.ritenuta %}
+				<td>{%if p.imposta %} {{p.imposta}} % {%endif%}</td>
+			{% endif %}
+			<td> {{p.totale_netto}} €</td>
+			<td>
+				<div class="btn-group">
+					<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.documento.views.modificariga' p.id %}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+					<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.documento.views.eliminariga' p.id %}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-trash"></i> elimina</a>
+				</div>
+			</td>
+		</tr>
+	{% endfor %}
+		{% if not f.stato %}
+		<tr>
+		<td> 
+		 	<form  method="post" action="{% url 'minimo.documento.views.nuovariga' f.id %}">{% csrf_token %}
+		 	<textarea class="textarea" id="id_descrizione" name="descrizione" rows="5" style="width:90%;"></textarea>
+		 </td>
+		 <td>
+		 	<div class="input-append">
+		 	<input class="textinput textInput" id="id_importo_unitario" name="importo_unitario" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
+		 	</div>
+		 </td>
+		 <td>
+		 	<div class="input-append">
+		 	<input class="textinput textInput" id="id_quantita" name="quantita" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
+		 	</div>
+		 </td>
+		{% if not f.ritenuta %}
+			<td>
+				<div class="input-append">
+					<!--<input class="textinput textInput" id="id_iva" name="iva" type="text" /> <span class="add-on"><i class="icon-tag"></i></span>-->
+					<select name="descrizione_imposta" id="id_descrizione_imposta"><option value="1">---</option></select>
+				</div>
+			</td>
+		{% endif %}
+		 <td>
+		 	<input type="submit" name="save" value="Aggiungi" class="btn btn-primary btn-primary" id="submit-id-save"/> </form>
+    	</td>
+		
+		</tr>
+		{% endif %}
+	</tbody>
+</table>
+
+<h3>Importo:</h3>
+
+<table class="table table-striped" id="fatture">
+
+	<tr>
+		<td>Imponibile</td>
+		<td></td>
+		<td>{{f.imponibile}} <i class="icon-eur"></i></td>
+	</tr>
+	
+	{% if not f.ritenuta %}
+		<tr>
+			<td>Totale Imposte</td>
+			<td></td>
+			<td>+ {{f.imposta_totale}} <i class="icon-eur"></i></td>
+		</tr>
+	{% else %}
+		<tr>
+			<td>Totale ritenuta</td>
+			<td>{{f.ritenuta}} %</td>
+			<td>- {{f.tot_ritenute}} <i class="icon-eur"></i></td>
+		</tr>
+	{% endif %}
+	<tr >
+		<td>Marca da bollo</td>
+		<td></td>
+		<td>{%if f.valore_bollo %}+ {{f.valore_bollo}}{%else%}0{%endif%} <i class="icon-eur"></i></td>
+	</tr>
+	<tr class="totale">
+		<td>totale</td>
+		<td></td>
+		<td>{{ f.totale }} <i class="icon-eur"></i></td>
+	</tr>
+</table>
+
+{% endblock %}
+
+{% block left %}
+<h4>Azioni</h4>
+{% if f.tipo == 'RA' or f.tipo == 'FA' %}
+	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
+	<a {% if f.stato %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Sblocca</a>
+{%else %}
+	<a {% if f.stato %} href="#" {% else %} href="#" onClick="CreaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Crea fattura</a>
+	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Accetta</a>
+	<a {% if f.stato %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Sblocca</a>
+{% endif %}
+<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.documento.views.modificadocumento' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+
+<a href="#" class="btn btn-block " onClick="CancellaFattura();"><i class="icon-trash"></i> elimina</a>
+<a href="{% url 'minimo.documento.views.stampa_documento' f.id %}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
+<a href="{% url 'minimo.documento.views.invio_documento' f.id %}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>
+
+{% endblock%}

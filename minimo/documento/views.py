@@ -2,28 +2,29 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext, Context
-from minimo.fattura.models import *
-from minimo.fattura.forms import *
-import webodt
-import cStringIO as StringIO
 from django.template.loader import render_to_string
-import pdb
-import os
 from django.conf import settings
 from django.db.models import Sum
-from webodt.converters import converter
-import datetime as dt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-import csv, codecs
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, EmailMessage
 from django.core import serializers
 from django.utils import simplejson
 
-from minimo.fattura.utils import *
+import webodt
+import pdb
+import os
+from webodt.converters import converter
+import datetime as dt
+import csv, codecs
+from copy import deepcopy
 
+from minimo.documento.utils import *
+from minimo.documento.models import *
+from minimo.documento.forms import *
+from minimo.tassa.models import *
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -119,91 +120,107 @@ corrente = dt.datetime.today().year
 precedente = corrente -1
 anni=(precedente,corrente)
 
-
+@login_required
 def home(request):
-    return True
+    documenti = Documento.objects.all()
+    imposte = Imposta.objects.all()
+    ritenute = Ritenuta.objects.all()
+    pagamenti = Pagamento.objects.all()
+    print 'home'
+    Documenti=[]
+    f=[]
+    Documenti.append(anni)
+    for anno in anni:
+        f.append(documenti.filter(data__year=anno))
+    Documenti.append(f)
+    Documenti=zip(*Documenti)
+    return render_to_response( 'documento/documenti.html', {'request':request, 'pagamenti': pagamenti, 'ritenute': ritenute ,'documenti': Documenti, 'anni': anni, 'imposte':imposte}, RequestContext(request))
+
 
 @login_required
-def nuovaprestazione(request,f_id):
+def nuovariga(request,f_id):
     azione = 'nuovo'
-    f=Fattura.objects.get(id=f_id)
+    f=Documento.objects.get(id=f_id)
     if request.method == 'POST':
-        form = PrestazioneForm(request.POST)
-        form.helper.form_action = '/prestazioni/nuova/'+str(f.id)
+        form = RigaForm(request.POST)
+        form.helper.form_action = reverse('minimo.documento.views.nuovariga', args=(str(f.id)))
         if form.is_valid():
             data = form.cleaned_data
-            p=Prestazione(descrizione=data['descrizione'],importo_unitario=data['importo_unitario'], quantita=data['quantita'],fattura=f, descrizione_iva=data['descrizione_iva'])
-            p.save()
-            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
+            print '--', data['descrizione_imposta']
+            r=Riga(descrizione=data['descrizione'],importo_unitario=data['importo_unitario'], quantita=data['quantita'],documento=f, descrizione_imposta=data['descrizione_imposta'])
+            r.save()
+            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id)))) 
     else:
-        form = PrestazioneForm()
-        form.helper.form_action = '/prestazioni/nuova/'+str(f.id)
-    return render_to_response('form_prestazione.html',{'request':request, 'form': form,'azione': azione, 'f': f_id}, RequestContext(request))
+        form = RigaForm()
+        form.helper.form_action = reverse('minimo.documento.views.nuovariga', args=(str(f.id)))
+    return render_to_response('documento/form_riga.html',{'request':request, 'form': form,'azione': azione, 'f': f_id}, RequestContext(request))
  
 
 @login_required
-def modificaprestazione(request,p_id):
+def modificariga(request,p_id):
     azione = 'Modifica'
-    prestazione = Prestazione.objects.get(id=p_id)
-    f=prestazione.fattura
+    riga = Riga.objects.get(id=p_id)
+    f=riga.documento
     if request.method == 'POST': 
-        form = PrestazioneForm(request.POST, instance=prestazione,)
-        form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
+        form = RigaForm(request.POST, instance=riga,)
+        form.helper.form_action = reverse('minimo.documento.views.modificariga', args=(str(f.id)))
         if form.is_valid():
             data = form.cleaned_data             
             form.save()
-            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
+            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id)))) 
     else:
-        form = PrestazioneForm(instance=prestazione)
-        form.helper.form_action = '/prestazioni/modifica/'+str(prestazione.id)+'/'
-    return render_to_response('form_prestazione.html',{'request':request, 'form': form,'azione': azione, 'p': prestazione,}, RequestContext(request))
+        form = RigaForm(instance=riga)
+        form.helper.form_action = reverse('minimo.documento.views.modificariga', args=(str(f.id)))
+    return render_to_response('documento/form_riga.html',{'request':request, 'form': form,'azione': azione, 'p': riga,}, RequestContext(request))
 
 
 @login_required
-def eliminaprestazione(request,p_id):
-    prestazione = Prestazione.objects.get(id=p_id)
-    f=prestazione.fattura
-    prestazione.delete()
-    return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+def eliminariga(request,p_id):
+    riga = Riga.objects.get(id=p_id)
+    d=riga.documento.id
+   
+    riga.delete()
+    return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(d,)))
 
 
 @login_required
-def prestazioni(request):
-    if request.user.is_superuser:
-        prestazioni=Prestazione.objects.all()
-    else:
-        prestazioni=Prestazione.objects.filter(fattura_user=request.user)
-    return render_to_response( 'prestazioni.html', {'request':request, 'prestazioni': prestazioni}, RequestContext(request))
+def righe(request):
+    righe=Riga.objects.all()
+    return render_to_response( 'righe.html', {'request':request, 'righe': righe}, RequestContext(request))
 
+#TODO: passare come parametro il tipo di documento da creare
 @login_required
-def nuovafattura(request):
-    azione = 'Nuova'
-    #pdb.set_trace()
+def nuovodocumento(request):
+    azione = 'Nuovo'
     if request.method == 'POST':
-        form = FatturaForm(request.POST,user_rid=request.user.id)
-        form.helper.form_action = '/fatture/nuovo/'
+        form = DocumentoForm(request.POST)
+        form.helper.form_action = reverse('minimo.documento.views.nuovodocumento')
         if form.is_valid():
             cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
             f=form.save(commit=False)
-            f.descrizione_ritenuta = form.cleaned_data['descrizione_ritenuta']
-            f.ritenuta = Ritenuta.objects.get(nome=form.cleaned_data['descrizione_ritenuta']).aliquota
+            try:
+                f.descrizione_ritenuta = form.cleaned_data['descrizione_ritenuta']
+                f.ritenuta = Ritenuta.objects.get(nome=form.cleaned_data['descrizione_ritenuta']).aliquota
+            except Exception:
+                pass
             f.user=request.user
             f.save()
-            form.save_m2m()
+            print f
             copia_dati_fiscali(f, cliente)
-            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id),),))
     else:
-        form = FatturaForm(user_rid=request.user.id)
-        form.helper.form_action = '/fatture/nuovo/'
-    return render_to_response('form_fattura.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+        form = DocumentoForm()
+        form.helper.form_action = reverse('minimo.documento.views.nuovodocumento')
+    return render_to_response('documento/form_documento.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+
 
 @login_required
-def modificafattura(request,f_id):
+def modificadocumento(request,f_id):
     azione = 'Modifica'
-    f = Fattura.objects.get(id=f_id)
+    f = Documento.objects.get(id=f_id)
     if request.method == 'POST':  # If the form has been submitted...
-        form = FatturaForm(request.POST, instance=f)  # necessario per modificare la riga preesistente
-        form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
+        form = DocumentoForm(request.POST, instance=f)  # necessario per modificare la riga preesistente
+        form.helper.form_action = reverse('minimo.documento.views.modificadocumento', args=(str(f.id),))
         if form.is_valid():
             cliente = Cliente.objects.get(ragione_sociale=form.cleaned_data['ragione_sociale'])
             f=form.save(commit=False)
@@ -215,69 +232,85 @@ def modificafattura(request,f_id):
                 pass
             #f.ritenuta = Ritenuta.objects.get(nome=form.cleaned_data['descrizione_ritenuta']).aliquota
             f.save()
-            form.save_m2m()
             copia_dati_fiscali(f, cliente)
-            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) # Redirect after POST
+            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id),))) # Redirect after POST
     else:
-        form = FatturaForm(instance=f)
-        form.helper.form_action = '/fatture/modifica/'+str(f.id)+'/'
-    return render_to_response('form_fattura.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
+        form = DocumentoForm(instance=f)
+        form.helper.form_action = reverse('minimo.documento.views.modificadocumento', args=(str(f.id),))
+    return render_to_response('documento/form_documento.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
    
 
 @login_required    
-def sblocca_fattura(request, f_id):
-    azione = 'i'
-    f = Fattura.objects.get(id=f_id)
-    f.stato = False
-    f.save()
-    return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+def sblocca_documento(request, d_id):
+    azione = 'sblocca'
+    d = Documento.objects.get(id=d_id)
+    d.stato = False
+    d.save()
+    return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(d.id),)))
 
 
 
 @login_required    
-def incassa_fattura(request, f_id):
-    azione = 'i'
-    f = Fattura.objects.get(id=f_id)
-    f.stato = True
-    f.save()
-    return HttpResponseRedirect('/fatture/dettagli/'+str(f.id))
+def incassa_documento(request, d_id):
+    azione = 'incassa'
+    d = Documento.objects.get(id=d_id)
+    d.stato = True
+    d.save()
+    return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(d.id),)))
 
 
     
 @login_required
-def eliminafattura(request,f_id):
-    fattura = Fattura.objects.get(id=f_id)
-    fattura.delete()
-    return HttpResponseRedirect('/fatture')
+def eliminadocumento(request,d_id):
+    documento = Documento.objects.get(id=d_id)
+    tipo = documento.tipo
+    documento.delete()
+    return HttpResponseRedirect(reverse('minimo.documento.views.home'))
+
+@login_required
+def dettagli_documento(request, d_num):
+    d = Documento.objects.get(id=d_num)
+    form_riga = RigaForm()
+    return render_to_response( 'documento/documento.html', {'request':request, 'f': d,'form':form_riga }, RequestContext(request))
+     
 
 
 @login_required
-def fatture(request):
-    fatture = Fattura.objects.all()
+def documenti(request, d_tipo):
+    documenti = Documento.objects.filter(tipo=d_tipo)
     imposte = Imposta.objects.all()
     ritenute = Ritenuta.objects.all()
     pagamenti = Pagamento.objects.all()
-    
-    Fatture=[]
+    print documenti
+    Documenti=[]
     f=[]
-    Fatture.append(anni)
+    Documenti.append(anni)
     for anno in anni:
-        f.append(fatture.filter(data__year=anno))
-    Fatture.append(f)
-    Fatture=zip(*Fatture)
-    return render_to_response( 'fatture.html', {'request':request, 'pagamenti': pagamenti, 'ritenute': ritenute ,'fatture': Fatture, 'anni': anni, 'imposte':imposte}, RequestContext(request))
+        f.append(documenti.filter(data__year=anno))
+    Documenti.append(f)
+    Documenti=zip(*Documenti)
+    context = {
+        'request':request,
+        'pagamenti': pagamenti,
+        'ritenute': ritenute ,
+        'documenti': Documenti,
+        'anni': anni,
+        'imposte':imposte,
+        'filtro': d_tipo
+        }
+    return render_to_response( 'documento/documenti.html', context, RequestContext(request))
 
 
 @login_required
-def export_fatture(request):
+def export_documenti(request, d_tipo):
     #if request.user.is_superuser:
-     #   fatture=Fattura.objects.all()
+     #   documenti=Fattura.objects.all()
     #else:
-     #   fatture=Fattura.objects.filter(fattura_user=request.user)
-    fatture=Fattura.objects.all()
+     #   documenti=Fattura.objects.filter(documento_user=request.user)
+    documenti=Documenti.objects.filter(tipo=d_tipo)
     # Create the HttpResponse object with the appropriate CSV header
     if settings.TIPO_FATTURA=="standard":
-        return export_csv(request, fatture, [('Data','data'),
+        return export_csv(request, documenti, [('Data','data'),
         ('Cliente','ragione_sociale'),
         ('Via', 'via'),
         ('Cap', 'cap'),
@@ -285,13 +318,13 @@ def export_fatture(request):
         ('Provincia', 'provincia'),
         ('Aliquota IVA','IVA'),
         ('Pagata','stato_pagamento'),
-        ('Prestazioni','prestazione_fattura.all'),
+        ('Prestazioni','riga_documento.all'),
         ('Imponibile','imponibile'),
         ('IVA','iva'),
         ('Totale','totale'),
         ])
     elif settings.TIPO_FATTURA=="minimo":
-        return export_csv(request, fatture, [('Data','data'),
+        return export_csv(request, documenti, [('Data','data'),
         ('Cliente','cliente'),
         ('Stato','stato'),
         ('ID Bollo','bollo'),
@@ -302,20 +335,29 @@ def export_fatture(request):
         ])
 
 @login_required
-def fattura(request, f_id):
-    f=Fattura.objects.get(id=f_id)
-    form_prestazione = PrestazioneForm()
-    if f.user == request.user or request.user.is_superuser:
-        return render_to_response( 'fattura.html', {'request':request, 'f': f,'form':form_prestazione }, RequestContext(request))
+def fattura_documento(request,d_id):
+    preventivo = Documento.objects.get(id=d_id)
+    fattura = Documento.objects.get(id=d_id)
+    fattura.id = None
+    fattura.save()
+    if fattura.ritenuta:
+        fattura.tipo = 'RA'
     else:
-        raise PermissionDenied      
-
+        fattura.tipo = 'FA'
+    fattura.riferimento = preventivo
+    fattura.data = dt.datetime.today()
+    fattura.numero = 0
+    fattura.save()
+    for riga in preventivo.righe:
+        riga.id = None
+        riga.documento = fattura
+        riga.save()
+    return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(fattura.id),))) 
+    
 @login_required
-def stampa_fattura(request,f_id):
-    f=Fattura.objects.get(id=f_id)
-    #if f.user == request.user or request.user.is_superuser:
-    #pdb.set_trace()
-    #f.template
+def stampa_documento(request,f_id):
+    f = Documento.objects.get(id=f_id)
+
     template = webodt.ODFTemplate(f.template.template.name)
     context = dict(
         data=str(f.data),
@@ -325,19 +367,22 @@ def stampa_fattura(request,f_id):
     document = template.render(Context(context))
     conv = converter()
     pdf = conv.convert(document, format='pdf')
-    #return render_to_response( 'modello_fattura.html', {'request':request, 'f': f})
+    #return render_to_response( 'modello_documento.html', {'request':request, 'f': f})
     response = HttpResponse(pdf, mimetype='application/pdf')
     if f.tipo == 'RA':
         response['Content-Disposition'] = 'attachment; filename=RitenutaAcconto-%s-%s.pdf' % (f.progressivo(),f.data.year)
     if f.tipo == 'FA':
         response['Content-Disposition'] = 'attachment; filename=Fattura-%s-%s.pdf' % (f.progressivo(),f.data.year)
+    if f.tipo == 'PR':
+        response['Content-Disposition'] = 'attachment; filename=Offerta-%s-%s.pdf' % (f.progressivo(),f.data.year)
+    if f.tipo == 'OD':
+        response['Content-Disposition'] = 'attachment; filename=Ordine-%s-%s.pdf' % (f.progressivo(),f.data.year)
     return response
-    #else:
-    #    raise PermissionDenied      
+
 
 @login_required
-def invio_fattura(request,f_id):
-    f=Fattura.objects.get(id=f_id)
+def invio_documento(request,f_id):
+    f = Documento.objects.get(id=f_id)
     azione = 'Invio'
     data = {
         'mittente' : f.user.email,
@@ -346,7 +391,7 @@ def invio_fattura(request,f_id):
    
     if request.method == 'POST': 
         form = FatturaInvioForm(request.POST, data,)
-        #form.helper.form_action = 'fatture/invio/'+ str(f.id)+'/'
+        #form.helper.form_action = 'documenti/invio/'+ str(f.id)+'/'
         if form.is_valid():
             oggetto = form.cleaned_data['oggetto']
             corpo = form.cleaned_data['messaggio']
@@ -359,18 +404,18 @@ def invio_fattura(request,f_id):
             template = webodt.ODFTemplate(f.template.template.name)
             context = dict(
                 data=str(f.data),
-                fattura=f,
+                documento=f,
                 )
     
             document = template.render(Context(context))
             conv = converter()
             pdf = conv.convert(document, format='pdf')
             email.attach_file(pdf.name)
-            return HttpResponseRedirect('/fatture/dettagli/'+str(f.id)) 
+            return HttpResponseRedirect(reverse('minimo.documento.views.documento', args=(str(f.id)))) 
     else:
         form = FatturaInvioForm(data)
         #form.helper.form_action = '/'
-    return render_to_response('InvioFattura.html',{'request':request, 'form':form, }, RequestContext(request))
+    return render_to_response('documento/InvioDocumento.html',{'request':request, 'form':form, }, RequestContext(request))
     
 
 @login_required
@@ -382,51 +427,51 @@ def bilancio(request):
     anno = dt.datetime.today().year
     fatt = bilancio_intervallo(request,dt.date(anno,1,1),dt.datetime.now().date())
     dati = fatturato(request,dt.date(anno,1,1),dt.date(anno,12,31))
-    return render_to_response( 'bilancio.html', {'request':request, 'fatturato': fatt,'form':form, 'dati': dati }, RequestContext(request))
+    return render_to_response( 'documento/bilancio.html', {'request':request, 'documenti': fatt,'form':form, 'dati': dati }, RequestContext(request))
 
 class fatturato():
     
     def __init__(self,request, inizio, fine):
-        self.fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
+        self.documenti=Documento.objects.filter(data__gte=inizio,data__lte=fine)
     
     def iva(self):
         totale = 0
-        for f in self.fatture:
+        for f in self.documenti:
             if f.tipo == 'FA' and f.stato:
                 totale += f.iva_totale
         return totale
     
     def ritenute(self):    
         totale = 0
-        for f in self.fatture:
+        for f in self.documenti:
             if f.tipo == 'RA' and f.stato:
                 totale += f.tot_ritenute
         return totale
     
     def totale(self):
         totale = 0
-        for f in self.fatture:
+        for f in self.documenti:
             totale += f.totale
         return totale
     
     def incassato(self):
         totale = 0
-        for f in self.fatture:
+        for f in self.documenti:
             if f.stato:
                 totale += f.totale
         return totale
     
     def incassare(self):
         totale = 0
-        for f in self.fatture:
+        for f in self.documenti:
             if not f.stato:
                 totale += f.totale
         return totale
     
     def scadute(self):
         totale = 0
-        for f in self.fatture:
-            if f.scaduta:
+        for f in self.documenti:
+            if f.scaduto:
                 totale += f.totale
         return totale
 
@@ -437,13 +482,13 @@ class fatturato():
 
 @login_required
 def bilancio_intervallo(request, inizio, fine):
-    fatture=Fattura.objects.filter(data__gte=inizio,data__lte=fine)
+    docs=Documento.objects.filter(data__gte=inizio,data__lte=fine)
     f_data=[]
     f_tot=[]
-    fatturato=[]
+    documenti=[]
     data_precedente=dt.date(1,1,1)
 
-    for f in fatture:
+    for f in docs:
         if f.data == data_precedente:
             f_tot[-1]+=f.totale
         else:
@@ -451,11 +496,11 @@ def bilancio_intervallo(request, inizio, fine):
             f_tot.append(f.totale)
         data_precedente = f.data
     
-    fatturato.append(f_data)
-    fatturato.append(f_tot)
-    fatturato=zip(*fatturato)
+    documenti.append(f_data)
+    documenti.append(f_tot)
+    documenti=zip(*documenti)
 
-    return fatturato
+    return documenti
 
 
 
@@ -464,16 +509,16 @@ def nuovopagamento(request):
     azione = 'Nuovo'
     if request.method == 'POST':
         form = PagamentoaForm(request.POST)
-        form.helper.form_action = '/pagamenti/nuovo/'
+        form.helper.form_action = reverse('minimo.documento.views.nuovopagamento')
         if form.is_valid():
             t=form.save(commit=False)
             t.user=request.user
             t.save()
-            return HttpResponseRedirect('/fatture')
+            return HttpResponseRedirect(reverse('minimo.documento.views.home'))
     else:
         form = PagamentoaForm()
-        form.helper.form_action = '/pagamenti/nuovo/'
-    return render_to_response('form_pagamento.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+        form.helper.form_action = reverse('minimo.documento.views.nuovopagamento')
+    return render_to_response('documento/form_pagamento.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
 
 @login_required
 def modificapagamento(request,i_id):
@@ -482,23 +527,21 @@ def modificapagamento(request,i_id):
     #if i.user == request.user or request.user.is_superuser:
     if request.method == 'POST':  # If the form has been submitted...
         form = PagamentoaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
-        form.helper.form_action = '/pagamenti/modifica/'+str(i.id)+'/'
+        form.helper.form_action = reverse('minimo.documento.views.modificapagamento', args=(str(i.id)))
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/fatture') # Redirect after POST
+            return HttpResponseRedirect('/documenti') # Redirect after POST
     else:
         form = PagamentoaForm(instance=i)
-        form.helper.form_action = '/pagamenti/modifica/'+str(i.id)+'/'
-    return render_to_response('form_pagamento.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+        form.helper.form_action = reverse('minimo.documento.views.modificapagamento', args=(str(i.id)))
+    return render_to_response('documento/form_pagamento.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
     #else:
     #    raise PermissionDenied
 
 @login_required
 def eliminapagamento(request,i_id):
     r = Pagamento.objects.get(id=i_id)
-    #if r.user == request.user or request.user.is_superuser: 
     r.delete()
-    return HttpResponseRedirect('/fatture')
-    #else:
-    #    raise PermissionDenied
+    return HttpResponseRedirect(reverse('minimo.documento.views.home'))
+
     

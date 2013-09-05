@@ -5,7 +5,7 @@ from livesettings.values import *
 # First, setup a grup to hold all our possible configs
 FATTURA_GROUP = ConfigurationGroup(
     'Fattura',               # key: internal name of the group to be created
-    _('Configurazione fattura'),  # name: verbose name which can be automatically translated
+    _('Configurazione documento'),  # name: verbose name which can be automatically translated
     ordering=0             # ordering: order of group in the list (default is 1)
     )
 

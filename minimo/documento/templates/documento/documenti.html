@@ -1,0 +1,144 @@
+{% extends "documento/base.html" %}
+
+{% block breadcrumb %}
+<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="#">Elenco Documenti</a></li>
+{% endblock %}
+
+{% block meta_title %}Elenco Documenti{% endblock %}
+{% block title %}<i class="icon-file-text"></i>
+	Elenco
+	
+	{% if filtro == 'RA'%}
+		Ritenute d'acconto
+	{% endif %}
+	{% if filtro == 'FA'%}
+		Fatture
+	{% endif %}
+	{% if filtro == 'PR'%}
+		Preventivi
+	{% endif %}
+	{% if filtro == 'OR'%}
+		Ordini cliente
+	{% endif %}
+{% endblock%}
+
+
+
+{% block main %}
+
+<div class="large-12 columns">
+</br>
+<div class="tabbable"> <!-- Only required for left/right tabs -->
+    <ul class="nav nav-tabs">
+		{% for anno in anni %}
+		<li {%if forloop.last %} class="active" {% endif%} ><a href="#tab-{{ forloop.counter }}" data-toggle="tab">{{anno}}</a></li>
+		{% endfor %}
+    </ul>
+    <div class="tab-content">
+		{% for anno,f in documenti %}
+		<div class="tab-pane fade in {%if forloop.last %}active{% endif%}" id="tab-{{ forloop.counter }}">
+			<table class="table table-striped" id="fatture-{{anno}}">
+				<thead>
+				<tr>
+					<th>ID</th>
+					<th>Data</th>
+					<th>Cliente</th>
+					<th>Totale</th>
+					<th id="stato_documento">Pagata</th>
+					<th id="stato_pagamento">Scaduta</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for documento in f %}
+
+				<tr {% if not documento.stato and not documento.scaduto %}  class="error" {% else %} {% if documento.scaduto %} class="info" {% endif %}{% endif %} >
+					<td><a href="{% url 'minimo.documento.views.dettagli_documento' documento.id %}" ><i class="icon-search"> </i> 
+						{{documento}}</a></td>
+					<td>
+						
+						{{documento.data}} {{documento.progressivo}}</td>
+					{%if documento.cliente.id %}
+						<td><a href="{% url 'minimo.cliente.views.cliente' documento.cliente.id %}">{{documento.ragione_sociale|truncatechars:30}}</a></td>
+					{% else %}
+						<td>{{documento.ragione_sociale|truncatechars:30}}</td>
+					{% endif %}
+					<td><b>{{documento.totale}} </b><i class="icon-eur"></i></td>
+					{% if documento.tipo == 'FA' or documento.tipo == 'RA' %}
+						<td>
+							{% if documento.stato %}<i class="icon-check icon-large"></i>
+							{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+						</td>
+						<td>
+							{% if documento.scaduto %}<i class="icon-check icon-large"></i>
+							{% else %}<i class="icon-check-empty icon-large"></i>{% endif %}
+						</td>
+					{% else %}
+						<td></td>
+						<td></td>
+					{% endif %}
+					<td><a href="{% url 'minimo.documento.views.stampa_documento' documento.id %}" class="btn"><i class="icon-print"> </i>Stampa</a></td>
+					<td><a href="{% url 'minimo.documento.views.invio_documento' documento.id %}" class="btn"><i class="icon-envelope"> </i>Email</a></td>
+					<td> {{documento.tipo_documento}} </td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			</br>
+			</br>
+		</div>
+		{% endfor %}
+    </div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block left %}
+	<h4>Imposte disponibili</h4>
+	
+	{%for i in imposte %}
+	<div style="line-height:32px;">
+			<div class="btn-group pull-right">
+				<a href="{% url 'minimo.tassa.views.modificaimposta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'minimo.tassa.views.eliminaimposta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+			</div>
+			{{i.nome}} ({{i.aliquota}}%) 
+	</div>
+	{%endfor%}
+	<a href="{% url 'minimo.tassa.views.nuovoimposta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
+
+	<h4>Ritenute disponibili</h4>
+	
+	{%for i in ritenute %}
+	<div style="line-height:32px;">
+			<div class="btn-group pull-right">
+				<a href="{% url 'minimo.tassa.views.modificaritenuta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+				<a href="{% url 'minimo.tassa.views.eliminaritenuta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+			</div>
+			{{i.nome}} ({{i.aliquota}}%) 
+	</div>
+{%endfor%}
+	<a href="{% url 'minimo.tassa.views.nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
+	
+	<h4>Pagamenti diponibili</h4>
+	
+	{%for i in pagamenti %}
+		<div style="line-height:32px;">
+				<div class="btn-group pull-right">
+					<a href="{% url 'minimo.documento.views.modificapagamento' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+					<a href="{% url 'minimo.documento.views.eliminapagamento' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+				</div>
+				{{i.nome}} 
+		</div>
+	{%endfor%}
+
+	<a href="{% url 'minimo.documento.views.nuovopagamento' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi pagamento</a>
+
+	<h4>Azioni</h4>
+	<a href="{% url 'minimo.documento.views.nuovodocumento' %}" class="btn btn-block "><i class="icon-plus"> </i> Crea un nuovo documento</a>
+	<a href="{% url 'minimo.documento.views.export_documenti' 'RA' %}" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a>
+	
+{% endblock%}

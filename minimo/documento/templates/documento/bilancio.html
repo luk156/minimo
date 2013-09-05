@@ -1,4 +1,4 @@
-{% extends "base.html" %}	
+{% extends "documento/base.html" %}	
 {% load crispy_forms_tags %}
 
 {% block head %}
@@ -23,21 +23,21 @@
 </div>
 
 <div id="fatturato">
-<h2>Dati statistici pagamenti anno: {{anno}}</h2>
-<table class="table table-striped" id="fatture-{{anno}}">
-	<tr>
-		<td><strong>Totale fatturato:</strong> {{dati.totale}}</td>
-		<td><strong>Totale fatturato incassato:</strong> {{dati.incassato}}</td>
-		<td><strong>Totale fatturato da incassare:</strong> {{dati.incassare}}</td>
-		<td><strong>Totale pagamenti scaduti:</strong> {{dati.scadute}}</td>
-	</tr>
-	<tr>
-		<td><strong>Totale iva:</strong> {{dati.iva}}</td>
-		<td><strong>Totale ritenute:</strong> {{dati.ritenute}}</td>
-		<td><strong>Sbilancio:</strong> {{dati.sbilancio}}</td>
-		<td></td>
-	</tr>
-</table>
+	<h2>Dati statistici pagamenti anno: {{anno}}</h2>
+	<table class="table table-striped" id="fatture-{{anno}}">
+		<tr>
+			<td><strong>Totale documentoto:</strong> {{dati.totale}}</td>
+			<td><strong>Totale documentoto incassato:</strong> {{dati.incassato}}</td>
+			<td><strong>Totale documentoto da incassare:</strong> {{dati.incassare}}</td>
+			<td><strong>Totale pagamenti scaduti:</strong> {{dati.scadute}}</td>
+		</tr>
+		<tr>
+			<td><strong>Totale iva:</strong> {{dati.iva}}</td>
+			<td><strong>Totale ritenute:</strong> {{dati.ritenute}}</td>
+			<td><strong>Sbilancio:</strong> {{dati.sbilancio}}</td>
+			<td></td>
+		</tr>
+	</table>
 </div>
 
 {% endblock %}
@@ -54,13 +54,13 @@ window.onload = function()
 
 
 function aggiorna_statistiche(){
-	Dajaxice.fattura.aggiorna_bilancio(Dajax.process,{'inizio':$("#div_id_inizio input").val(),'fine':$("#div_id_fine input").val()});
+	Dajaxice.documento.aggiorna_bilancio(Dajax.process,{'inizio':$("#div_id_inizio input").val(),'fine':$("#div_id_fine input").val()});
 };
 
 function reset_statistiche(){
 	$("#div_id_inizio input").val('');
 	$("#div_id_fine input").val('');
-	Dajaxice.fattura.aggiorna_bilancio(Dajax.process,{'inizio':'0','fine':$("#div_id_fine input").val()});
+	Dajaxice.documento.aggiorna_bilancio(Dajax.process,{'inizio':'0','fine':$("#div_id_fine input").val()});
 };
 </script>
 

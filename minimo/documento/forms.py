@@ -6,7 +6,7 @@ from crispy_forms.bootstrap import *
 
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
-from minimo.fattura.models import *
+from minimo.documento.models import *
 from minimo.cliente.models import *
     
 
@@ -29,18 +29,18 @@ class PagamentoaForm(forms.ModelForm):
         super(PagamentoaForm, self).__init__(*args, **kwargs)      
         
         
-class FatturaForm(forms.ModelForm):
+class DocumentoForm(forms.ModelForm):
     #imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
     #descrizione_ritenuta = forms.ModelChoiceField(queryset=Ritenuta.objects.all(), required=False)
     stato = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     ragione_sociale = forms.CharField('Ragione sociale')
     
     class Meta:
-        model = Fattura
+        model = Documento
         
         
     def __init__(self, *args, **kwargs):
-        super(FatturaForm, self).__init__(*args, **kwargs)
+        super(DocumentoForm, self).__init__(*args, **kwargs)
   
         #self.fields['descrizione_ritenuta'].choices=[ (o.nome, o.nome) for o in Ritenuta.objects.all()]
         self.helper = FormHelper()
@@ -95,12 +95,12 @@ class FatturaInvioForm(forms.Form):
         super(FatturaInvioForm, self).__init__(*args, **kwargs)
  
  
-class PrestazioneForm(forms.ModelForm):
+class RigaForm(forms.ModelForm):
     
     
     class Meta:
-        model = Prestazione
-        exclude = ('fattura', 'iva')
+        model = Riga
+        exclude = ('documento', 'imposta')
         
         
     def __init__(self, *args, **kwargs):
@@ -109,12 +109,12 @@ class PrestazioneForm(forms.ModelForm):
             Field('descrizione'),
             Field('quantita'),
             AppendedText('importo_unitario', '<i class="icon-money"></i>'),
-            Field('descrizione_iva'),
+            Field('descrizione_imposta'),
             FormActions(
                 Submit('save', 'Aggiungi', css_class="btn-primary")
             )
         )
-        super(PrestazioneForm, self).__init__(*args, **kwargs)
+        super(RigaForm, self).__init__(*args, **kwargs)
 
 class IntervalloForm(forms.Form):
     inizio = forms.DateField()
