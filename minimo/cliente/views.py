@@ -3,9 +3,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext, Context
-from minimo.cliente.models import *
-from minimo.cliente.forms import *
-from minimo.fattura.models import *
+
 import webodt
 import cStringIO as StringIO
 from django.template.loader import render_to_string
@@ -24,6 +22,9 @@ from django.core.mail import send_mail, EmailMessage
 from django.core import serializers
 from django.utils import simplejson
 
+from minimo.cliente.models import *
+from minimo.cliente.forms import *
+from minimo.documento.models import *
 
 try:
     from cStringIO import StringIO

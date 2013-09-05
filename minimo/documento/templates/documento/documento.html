@@ -69,7 +69,12 @@
 			<td><h5>Tipo documento</h5></td>
 			<td>{{f.tipo_documento}}</td>
 	</tr>
-	
+	{% if f.data_consegna %}
+		<tr>
+			<td><h5>Data di consegna</h5></td>
+			<td>{{f.data_consegna}}</td>
+		</tr>
+	{% endif %}
 	<tr> 
 		<td><h5>Marca da bollo</h5></td>
 		<td>
@@ -86,14 +91,26 @@
 			{{ f.stato_documento }}
 		</td>
 	</tr>
+	{% if f.sconto %}
+		<tr>
+			<td><h5>Sconto</h5></td>
+			<td>{{f.sconto}}</td>
+		</tr>
+	{% endif %}
+	<tr>
+		<td><h5>Tipo pagamento</h5></td>
+		<td>{{f.pagamento}}</td>
+	</tr>
 	<tr>
 		<td><h5>Template</h5></td>
 		<td>{{f.template}}</td>
 	</tr>
-	<tr>
-		<td><h5>Tipo pagamento</h5></td>
-		<td>{{f.pagamento}}</td>
-	</tr>	
+	{% if f.note %}
+		<tr>
+			<td><h5>Note</h5></td>
+			<td>{{f.note}}</td>
+		</tr>
+	{% endif %}
 </table>
 
 <h3>Prestazioni:</h3>

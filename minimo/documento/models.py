@@ -56,6 +56,7 @@ class Documento(models.Model):
     tipo = models.CharField('Tipo documento', max_length=5, choices=TIPO_DOCUMENTO)
     numero = models.IntegerField('Numero progressivo', editable=False, default=0, unique_for_year="data")
     data = models.DateField('Data di emissione')
+    data_consegna = models.DateField('Data di consegna', null=True, blank=True)
     ragione_sociale = models.CharField('Ragione sociale',max_length=70,null=True, blank=True)
     via = models.CharField('Via',max_length=70, null=True, blank=True)
     cap = models.CharField('CAP',max_length=6, null=True, blank=True)
@@ -71,6 +72,8 @@ class Documento(models.Model):
     valore_bollo = models.FloatField('Valore marca da bollo', blank=True, null=True)
     pagamento = models.ForeignKey(Pagamento, verbose_name="condizioni pagamento", blank=True, null=True)
     riferimento = models.ForeignKey('Documento', verbose_name="Documento collegato", blank=True, null=True)
+    note = models.TextField('Note', max_length=1024, null=True, blank=True)
+    sconto = models.IntegerField('Sconto', blank=True, null=True, default=None)
     
     def __unicode__(self):
         return '%s-%s' % (self.progressivo(),self.data.year)

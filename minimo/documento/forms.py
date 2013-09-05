@@ -53,6 +53,8 @@ class DocumentoForm(forms.ModelForm):
                     #Field('cliente'),
                     Field('stato'),
                     Field('template'),
+                    Field('data_consegna'),
+                    Field('sconto'),
                 css_class="span6"),
                 Div(
                     #Field('imposte'),
@@ -60,6 +62,7 @@ class DocumentoForm(forms.ModelForm):
                     Field('bollo'),
                     Field('valore_bollo'),
                     Field('pagamento'),
+                    Field('note'),
                 css_class="span6"),
             css_class="row-fluid"),
             FormActions(

@@ -28,6 +28,11 @@
                 },
             });
 		$(document).ready(function(){
+			if ($("select#id_tipo").val() == 'OR'){
+				$("#div_id_data_consegna").show('slow');
+			}else{
+				$("#div_id_data_consegna").hide('slow');
+			}
 			if ($("select#id_tipo").val() == 'RA'){
 				$("#div_id_descrizione_ritenuta").show('slow');
 			}else{
@@ -48,6 +53,11 @@
 					}else{
 						$("#div_id_descrizione_ritenuta").show('slow');
 					
+					};
+					if ($("select#id_tipo").val() == 'OR'){
+						$("#div_id_data_consegna").show('slow');
+					}else{
+						$("#div_id_data_consegna").hide('slow');
 					}
 				}else{
 					$("input#submit-id-save").hide('slow');
