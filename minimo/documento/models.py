@@ -47,9 +47,8 @@ TIPO_DOCUMENTO = (
 
 RITENUTA = []
 RITENUTA = lambda: [(m.nome, m.nome) for m in Ritenuta.objects.all()]
-#for r in Ritenuta.objects.all():
-# 
 
+#TODO: implementare sconto
 
 class Documento(models.Model):
     user = models.ForeignKey(User, editable=False)
@@ -63,7 +62,7 @@ class Documento(models.Model):
     citta = models.CharField('Citt?',max_length=70, null=True, blank=True)
     provincia = models.CharField('Provincia',max_length=10, null=True, blank=True)
     cod_fiscale = models.CharField('Codice Fiscale',max_length=50, blank=True, null=True)
-    p_imposta = models.CharField('Partita IVA',max_length=30, blank=True, null=True)
+    p_iva = models.CharField('Partita IVA',max_length=30, blank=True, null=True)
     stato = models.BooleanField('Stato pagamento')
     template = models.ForeignKey(TemplateDocumento, related_name='documento_template', null = True, on_delete = models.SET_NULL)
     descrizione_ritenuta = models.CharField('Descrizione ritenuta', max_length=70, null=True, blank=True, choices=RITENUTA())
@@ -99,7 +98,7 @@ class Documento(models.Model):
     class Meta:
         ordering = ['data']
         
-    #TODO: se ritenuta a null allora iva    
+            
     def imponibile(self):
         tot=0
         #calcolo con iva
@@ -125,12 +124,15 @@ class Documento(models.Model):
     imposta_totale = property(_imposta_totale)
 
     def _tot_ritenute(self):
-        tot = self.totale
-        if self.valore_bollo:
-            tot -= self.valore_bollo
-        perc = (100-self.ritenuta)/100.0
-        lordo = tot / perc
-        return round(lordo - tot , 2)
+        if self.ritenuta:
+            tot = self.totale
+            if self.valore_bollo:
+                tot -= self.valore_bollo
+            perc = (100-self.ritenuta)/100.0
+            lordo = tot / perc
+            return round(lordo - tot , 2)
+        else:
+            return 0
         
     
     tot_ritenute = property(_tot_ritenute)
@@ -223,8 +225,10 @@ class Riga(models.Model):
     totale_lordo = property(_totale_lordo)
     
     def _totale_imposta(self):
-        print 'imposta:', (self.imposta/100), 'netto:', self.totale_netto
-        return round(self.totale_netto*(self.imposta/100.0), 2)
+        if self.imposta:
+            return round(self.totale_netto*(self.imposta/100.0), 2)
+        else:
+            return 0
     totale_imposta = property(_totale_imposta)
     
     def __unicode__(self):

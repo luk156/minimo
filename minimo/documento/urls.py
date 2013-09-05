@@ -21,7 +21,7 @@ urlpatterns = patterns('minimo.documento.views',
     (r'^documenti/riga/elimina/(?P<p_id>\w+)/$', 'eliminariga'),
     # fatture
     
-    (r'^documenti/export/(?P<d_tipo>\w+)/$', 'export_documenti'),
+    (r'^documenti/esporta/(?P<d_tipo>\w+)/$', 'esportadocumenti'),
     (r'^documenti/nuovo/$', 'nuovodocumento'),
     (r'^documenti/dettagli/(?P<d_num>\w+)/$', 'dettagli_documento'),
     (r'^documenti/stampa/(?P<f_id>\w+)/$', 'stampa_documento'),

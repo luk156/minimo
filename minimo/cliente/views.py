@@ -89,7 +89,7 @@ def export_clienti(request):
 def cliente(request,c_id):
     c= Cliente.objects.get(id=c_id)
     #if c.user == request.user or request.user.is_superuser:
-    return render_to_response( 'cliente/cliente.html', {'request':request, 'c':c , 'f': Fattura.objects.filter(ragione_sociale=c.ragione_sociale)}, RequestContext(request))
+    return render_to_response( 'cliente/cliente.html', {'request':request, 'c':c , 'f': Documento.objects.filter(ragione_sociale=c.ragione_sociale)}, RequestContext(request))
     #else:
     #    raise PermissionDenied
 

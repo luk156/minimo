@@ -302,37 +302,35 @@ def documenti(request, d_tipo):
 
 
 @login_required
-def export_documenti(request, d_tipo):
-    #if request.user.is_superuser:
-     #   documenti=Fattura.objects.all()
-    #else:
-     #   documenti=Fattura.objects.filter(documento_user=request.user)
-    documenti=Documenti.objects.filter(tipo=d_tipo)
-    # Create the HttpResponse object with the appropriate CSV header
-    if settings.TIPO_FATTURA=="standard":
-        return export_csv(request, documenti, [('Data','data'),
-        ('Cliente','ragione_sociale'),
-        ('Via', 'via'),
-        ('Cap', 'cap'),
-        ('Città', 'citta'),
-        ('Provincia', 'provincia'),
-        ('Aliquota IVA','IVA'),
-        ('Pagata','stato_pagamento'),
-        ('Prestazioni','riga_documento.all'),
-        ('Imponibile','imponibile'),
-        ('IVA','iva'),
-        ('Totale','totale'),
-        ])
-    elif settings.TIPO_FATTURA=="minimo":
-        return export_csv(request, documenti, [('Data','data'),
-        ('Cliente','cliente'),
-        ('Stato','stato'),
-        ('ID Bollo','bollo'),
-        ('Valore Bollo','valore_bollo'),
-        ('Imponibile','imponibile'),
-        ('Rivalsa INPS','rivalsa'),
-        ('Totale','totale'),
-        ])
+def esportadocumenti(request, d_tipo):
+    if d_tipo != 'ALL':
+        documenti=Documento.objects.filter(tipo=d_tipo)
+    else:
+        documenti=Documento.objects.all()
+    return export_csv(request, documenti, [
+    ('Tipo documento', 'tipo_documento'),
+    ('Data','data'),
+    ('Data consegna', 'data_consegna'),
+    ('Cliente','ragione_sociale'),
+    ('Via', 'via'),
+    ('Cap', 'cap'),
+    ('Città', 'citta'),
+    ('Provincia', 'provincia'),
+    ('Pagata','stato_pagamento'),
+    ('Metodo pagamento','pagamento'),
+    ('Prestazioni','righe'),
+    ('Imponibile','imponibile'),
+    ('IVA','imposta_totale'),
+    ('Desc ritenuta','descrizione_ritenuta'),
+    ('Aliquota ritenuta','ritenuta'),
+    ('Ritenuta totale','tot_ritenute'),
+    ('Totale','totale'),
+    ('Sconto', 'sconto'),
+    ('Note', 'note'),
+    ('Documento di riferimento', 'riferimento'),
+    
+    ])
+
 
 @login_required
 def fattura_documento(request,d_id):
@@ -530,7 +528,7 @@ def modificapagamento(request,i_id):
         form.helper.form_action = reverse('minimo.documento.views.modificapagamento', args=(str(i.id)))
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/documenti') # Redirect after POST
+            return HttpResponseRedirect(reverse('minimo.documento.views.home')) # Redirect after POST
     else:
         form = PagamentoaForm(instance=i)
         form.helper.form_action = reverse('minimo.documento.views.modificapagamento', args=(str(i.id)))

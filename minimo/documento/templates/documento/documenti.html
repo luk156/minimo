@@ -2,7 +2,7 @@
 
 {% block breadcrumb %}
 <li><a href="#">Home</a> <span class="divider">/</span></li>
-<li><a href="#">Elenco Documenti</a></li>
+<li><a href="{% url 'minimo.documento.views.home' %}">Elenco Documenti</a></li>
 {% endblock %}
 
 {% block meta_title %}Elenco Documenti{% endblock %}
@@ -139,6 +139,9 @@
 
 	<h4>Azioni</h4>
 	<a href="{% url 'minimo.documento.views.nuovodocumento' %}" class="btn btn-block "><i class="icon-plus"> </i> Crea un nuovo documento</a>
-	<a href="{% url 'minimo.documento.views.export_documenti' 'RA' %}" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a>
-	
+	{% if filtro %}
+		<a href="{% url 'minimo.documento.views.esportadocumenti' filtro %}" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a>
+	{% else %}
+		<a href="{% url 'minimo.documento.views.esportadocumenti' 'ALL' %}" class="btn btn-block "><i class="icon-download"> </i> Scarica .csv</a>
+	{% endif %}
 {% endblock%}

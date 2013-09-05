@@ -6,9 +6,6 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 
 
-
-
-
 class Imposta(models.Model):
     user = models.ForeignKey(User, editable=False)
     nome = models.CharField('Nome Imposta',max_length=30)

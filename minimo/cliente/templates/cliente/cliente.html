@@ -68,7 +68,7 @@
 				{% for fattura in f %}
 
 				<tr>
-					<td><a href="{% url 'minimo.fattura.views.fattura' fattura.id %}" ><i class="icon-search"> </i> 
+					<td><a href="{% url 'minimo.documento.views.dettagli_documento' fattura.id %}" ><i class="icon-search"> </i> 
 						{{fattura}}</a></td>
 					<td>{{fattura.data}}</td>
 					<td>{{fattura.totale}} €</td>
