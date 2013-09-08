@@ -27,7 +27,20 @@ class PagamentoaForm(forms.ModelForm):
             )
         )
         super(PagamentoaForm, self).__init__(*args, **kwargs)      
-        
+
+class IncassaForm(forms.Form):
+    
+    importo = forms.FloatField()
+       
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            AppendedText('importo', '<i class="icon-money"></i>'),
+            FormActions(
+                Submit('save', 'Salva', css_class="btn-primary")
+            )
+        )
+        super(IncassaForm, self).__init__(*args, **kwargs)        
         
 class DocumentoForm(forms.ModelForm):
     #imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)

@@ -73,6 +73,8 @@ class Documento(models.Model):
     riferimento = models.ForeignKey('Documento', verbose_name="Documento collegato", blank=True, null=True)
     note = models.TextField('Note', max_length=1024, null=True, blank=True)
     sconto = models.IntegerField('Sconto', blank=True, null=True, default=None)
+    importo_residuo = models.FloatField('Importo residuo da incassare', blank=True, null=True)
+    
     
     def __unicode__(self):
         return '%s-%s' % (self.progressivo(),self.data.year)
@@ -191,8 +193,7 @@ class Documento(models.Model):
     
     scaduto = property(_scaduto)
     
-    def save(self, *args, **kwargs):
-                    
+    def save(self, *args, **kwargs):          
         if self.numero == 0:
             d_anno = Documento.objects.filter(data__year=self.data.year, tipo=self.tipo).aggregate(Max('numero'))
             if not d_anno['numero__max']:

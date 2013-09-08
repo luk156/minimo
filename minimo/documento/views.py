@@ -19,12 +19,13 @@ import os
 from webodt.converters import converter
 import datetime as dt
 import csv, codecs
-from copy import deepcopy
 
 from minimo.documento.utils import *
 from minimo.documento.models import *
 from minimo.documento.forms import *
 from minimo.tassa.models import *
+from minimo.movimento.models import *
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -246,6 +247,19 @@ def sblocca_documento(request, d_id):
     d = Documento.objects.get(id=d_id)
     d.stato = False
     d.save()
+    movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='U')
+    movimento.importo = d.totale
+    if d.importo_residuo:
+        movimento.importo = d.totale - d.importo_residuo
+        movimento.descrizione = "Storno incasso parziale fattura %s del %s cliente %s per errato incasso" %(d, d.data, d.cliente)
+    else:
+        movimento.importo = d.totale
+        movimento.descrizione = "Storno fattura %s del %s cliente %s per errato incasso" %(d, d.data, d.cliente)
+    movimento.documento = d
+    movimento.data_movimento = dt.datetime.today()
+    d.importo_residuo = 0
+    d.save()
+    movimento.save()
     return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(d.id),)))
 
 
@@ -256,8 +270,50 @@ def incassa_documento(request, d_id):
     d = Documento.objects.get(id=d_id)
     d.stato = True
     d.save()
+    movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='E')
+    if d.importo_residuo:
+        movimento.importo = d.importo_residuo
+        movimento.descrizione = "Incasso residuo fattura %s del %s cliente %s" %(d, d.data, d.cliente)
+    else:
+        movimento.importo = d.totale
+        movimento.descrizione = "Incasso fattura %s del %s cliente %s" %(d, d.data, d.cliente)
+    movimento.documento = d
+    movimento.data_movimento = dt.datetime.today()
+    d.importo_residuo = 0
+    d.save()
+    movimento.save()
     return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(d.id),)))
 
+#TODO: controllare se l'importo incassato è minore del residuo e ritornare 
+def incassa_parziale_documento(request, d_id):
+
+    d = Documento.objects.get(id=d_id)
+    azione = 'Incassa parzialmente doumento %s' %d
+    residuo = 0.0
+    if d.importo_residuo:
+        residuo = d.residuo
+    else:
+        residuo = d.totale
+    if request.method == 'POST':  # If the form has been submitted...
+        form = IncassaForm(request.POST)  # necessario per modificare la riga preesistente
+        form.helper.form_action = reverse('minimo.documento.views.incassa_parziale_documento', args=(str(d.id)))
+        if form.is_valid():
+            movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='E')
+            movimento.importo = form.cleaned_data['importo']
+            movimento.documento = d
+            movimento.descrizione = "Incasso parziale fattura %s del %s cliente %s" %(d, d.data, d.cliente)
+            movimento.data_movimento = dt.datetime.today()
+            if d.importo_residuo:
+                d.importo_residuo -= form.cleaned_data['importo']
+            else:
+                d.importo_residuo = d.totale - form.cleaned_data['importo']
+            d.save()
+            movimento.save()
+            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(d.id),))) # Redirect after POST
+    else:
+        form = IncassaForm()
+        form.helper.form_action = reverse('minimo.documento.views.incassa_parziale_documento', args=(str(d.id)))
+    return render_to_response('documento/form_incassa.html',{'request': request, 'form': form,'azione': azione, 'residuo': residuo}, RequestContext(request))
 
     
 @login_required
@@ -375,7 +431,7 @@ def stampa_documento(request,f_id):
         response['Content-Disposition'] = 'attachment; filename=Fattura-%s-%s.pdf' % (f.progressivo(),f.data.year)
     if f.tipo == 'PR':
         response['Content-Disposition'] = 'attachment; filename=Offerta-%s-%s.pdf' % (f.progressivo(),f.data.year)
-    if f.tipo == 'OD':
+    if f.tipo == 'OR':
         response['Content-Disposition'] = 'attachment; filename=Ordine-%s-%s.pdf' % (f.progressivo(),f.data.year)
     return response
 
@@ -397,7 +453,6 @@ def invio_documento(request,f_id):
             corpo = form.cleaned_data['messaggio']
             cc = [form.cleaned_data['cc_destinatario']]
             to = [form.cleaned_data['destinatario']]
-            print to, cc
             email = EmailMessage(oggetto, corpo, form.cleaned_data['mittente'],
                 to,cc,
                 headers = {'Reply-To': form.cleaned_data['mittente']})

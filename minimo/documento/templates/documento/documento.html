@@ -34,6 +34,12 @@
 						}
 				}
 		
+		function IncassaParzialeFattura() {
+				if ( confirm("Attenzione si sta per incassare parzialmente la fattura {{f}}. procedere ?") ) {
+						document.location.href = "{% url 'minimo.documento.views.incassa_parziale_documento' f.id %}";
+						}
+				}
+		
 		function SbloccaFattura() {
 				if ( confirm("Stai per sbloccare una documento già incassata. Modificare la documento {{f}}?") ) {
 						document.location.href = "{% url 'minimo.documento.views.sblocca_documento' f.id %}";
@@ -91,6 +97,12 @@
 			{{ f.stato_documento }}
 		</td>
 	</tr>
+	{% if f.importo_residuo %}
+		<tr>
+			<td><h5><span style="color: red;">Importo ancora da incassare:</span></h5></td>
+			<td><span style="color: red;">{{f.importo_residuo}}</span> </td>
+		</tr>
+	{% endif%}
 	{% if f.sconto %}
 		<tr>
 			<td><h5>Sconto</h5></td>
@@ -117,6 +129,7 @@
 			<td>{{f.riferimento.tipo_documento}} <a href="{% url 'minimo.documento.views.dettagli_documento' f.riferimento.id %}">{{f.riferimento}}</a></td>
 		</tr>
 	{% endif %}
+	
 </table>
 
 <h3>Prestazioni:</h3>
@@ -227,7 +240,8 @@
 <h4>Azioni</h4>
 {% if f.tipo == 'RA' or f.tipo == 'FA' %}
 	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
-	<a {% if f.stato %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Sblocca</a>
+	<a {% if f.stato or f.importo_residuo %} href="#" {% else %} href="#" onClick="IncassaParzialeFattura()" {% endif %} class="btn btn-block {% if f.stato or f.importo_residuo %} disabled {% endif %}"><i class="icon-money"> </i>Incassa parzialemnte</a>
+	<a {% if f.stato or f.importo_residuo %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato or f.importo_residuo %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Storna incasso</a>
 {%else %}
 	<a {% if f.stato %} href="#" {% else %} href="#" onClick="CreaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Crea fattura</a>
 	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Accetta</a>
