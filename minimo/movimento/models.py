@@ -73,19 +73,7 @@ TIPO_FATTURA = (
 
 
 class FattureFornitore(models.Model):
-    
-    def attachment_upload(instance, filename):
-    
-        print 'wow ', 'attachments/%s/%s/%s' % (
-                '%s_%s' % (instance._meta.app_label,
-                           instance._meta.object_name.lower()),
-                           instance.content_object.pk,
-                           filename)
-        return 'attachments/%s/%s/%s' % (
-                '%s_%s' % (instance._meta.app_label,
-                           instance._meta.object_name.lower()),
-                           instance.content_object.pk,
-                           filename)
+
 
     user = models.ForeignKey(User, editable=False)
     tipo = models.CharField('Tipo fattura', max_length=70, choices=TIPO_FATTURA)
@@ -94,7 +82,7 @@ class FattureFornitore(models.Model):
     scadenza_pagamento = models.DateField('Data scadenza documento', null=True, blank=True)
     descrizione = models.TextField('Descrizione', max_length=1024, null=True, blank=True)
     importo = models.FloatField('Importo')
-    #stato = models.BooleanField(default=False)
+    stato = models.BooleanField(default=False)
     
     class Meta:
         verbose_name = 'Fatture Fornitore'
