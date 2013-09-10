@@ -22,7 +22,7 @@ import csv, codecs
 
 from minimo.documento.utils import *
 from minimo.documento.models import *
-from minimo.documento.forms import *
+from minimo.movimento.forms import *
 from minimo.movimento.models import *
 
 try:
@@ -39,7 +39,6 @@ anni=(precedente,corrente)
 def movimenti(request):
     movimenti = Movimento.objects.all()
     conto = Conto.objects.all()[0]
-    print movimenti
     Movimenti=[]
     m=[]
     Movimenti.append(anni)
@@ -56,63 +55,137 @@ def movimenti(request):
     return render_to_response( 'movimento/movimenti.html', context, RequestContext(request))
 
 @login_required
-def documenti(request, d_tipo):
-    documenti = Documento.objects.filter(tipo=d_tipo)
-    print documenti
+def documenti(request):
+    documenti = FattureFornitore.objects.all()
     Documenti=[]
     f=[]
     Documenti.append(anni)
     for anno in anni:
-        f.append(documenti.filter(data__year=anno))
+        f.append(documenti.filter(data_documento__year=anno))
     Documenti.append(f)
     Documenti=zip(*Documenti)
     context = {
         'request':request,
         'documenti': Documenti,
         'anni': anni,
-        
         }
     return render_to_response( 'movimento/documenti.html', context, RequestContext(request))
 
 
 @login_required
-def nuovopagamento(request):
+def nuovomovimento(request):
+    azione = 'Nuovo'
+    conto = Conto.objects.all()[0]
+    if request.method == 'POST':
+        form = MovimentoForm(request.POST)
+        form.helper.form_action = reverse('minimo.movimento.views.nuovomovimento')
+        if form.is_valid():
+            t=form.save(commit=False)
+            t.conto = conto
+            t.user=request.user
+            t.save()
+            return HttpResponseRedirect(reverse('minimo.movimento.views.movimenti'))
+    else:
+        form = MovimentoForm()
+        form.helper.form_action = reverse('minimo.movimento.views.nuovomovimento')
+    return render_to_response('movimento/form_movimento.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+
+
+@login_required
+def modificamovimento(request,i_id):
+    azione = 'Modifica'
+    i = Movimento.objects.get(id=i_id)
+    importo_old = i.importo
+    tipo_old = i.tipo
+    if request.method == 'POST':  # If the form has been submitted...
+        form = MovimentoForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+        form.helper.form_action = reverse('minimo.movimento.views.modificamovimento', args=(str(i.id),))
+        if form.is_valid():
+            #riporto il saldo alla situazione precedente
+            if tipo_old == 'U':
+                i.conto.saldo += importo_old
+            if tipo_old == 'E':
+                i.conto.saldo -= importo_old
+            i.conto.save()
+            #salvo le modifche
+            form.save()
+             
+            return HttpResponseRedirect(reverse('minimo.movimento.views.movimenti')) # Redirect after POST
+    else:
+        form = MovimentoForm(instance=i)
+        form.helper.form_action = reverse('minimo.movimento.views.modificamovimento', args=(str(i.id),))
+    return render_to_response('movimento/form_movimento.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+
+
+@login_required
+def eliminamovimento(request,i_id):
+    r = Movimento.objects.get(id=i_id)
+    r.delete()
+    return HttpResponseRedirect(reverse('minimo.movimento.views.movimenti'))
+
+
+@login_required
+def nuovodocumento(request):
     azione = 'Nuovo'
     if request.method == 'POST':
-        form = PagamentoaForm(request.POST)
-        form.helper.form_action = reverse('minimo.documento.views.nuovopagamento')
+        form = RegistraDocumentoForm(request.POST)
+        form.helper.form_action = reverse('minimo.movimento.views.nuovodocumento')
         if form.is_valid():
             t=form.save(commit=False)
             t.user=request.user
             t.save()
-            return HttpResponseRedirect(reverse('minimo.documento.views.home'))
+            return HttpResponseRedirect(reverse('minimo.movimento.views.modificadocumento', args=(str(t.id),)))
     else:
-        form = PagamentoaForm()
-        form.helper.form_action = reverse('minimo.documento.views.nuovopagamento')
-    return render_to_response('documento/form_pagamento.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+        form = RegistraDocumentoForm()
+        form.helper.form_action = reverse('minimo.movimento.views.nuovodocumento')
+    return render_to_response('movimento/form_registrazione.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
+
 
 @login_required
-def modificapagamento(request,i_id):
+def modificadocumento(request,t_id):
     azione = 'Modifica'
-    i = Pagamento.objects.get(id=i_id)
-    #if i.user == request.user or request.user.is_superuser:
+    i = FattureFornitore.objects.get(id=t_id)
     if request.method == 'POST':  # If the form has been submitted...
-        form = PagamentoaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
-        form.helper.form_action = reverse('minimo.documento.views.modificapagamento', args=(str(i.id)))
+        form = RegistraDocumentoForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+        form.helper.form_action = reverse('minimo.movimento.views.modificadocumento', args=(str(i.id),))
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('minimo.documento.views.home')) # Redirect after POST
+            t=form.save(commit=False)
+            t.user=request.user
+            t.save()
+             
+            return HttpResponseRedirect(reverse('minimo.movimento.views.documenti')) # Redirect after POST
     else:
-        form = PagamentoaForm(instance=i)
-        form.helper.form_action = reverse('minimo.documento.views.modificapagamento', args=(str(i.id)))
-    return render_to_response('documento/form_pagamento.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
-    #else:
-    #    raise PermissionDenied
+        form = RegistraDocumentoForm(instance=i)
+        form.helper.form_action = reverse('minimo.movimento.views.modificadocumento', args=(str(i.id),))
+    return render_to_response('movimento/form_registrazione.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+
 
 @login_required
-def eliminapagamento(request,i_id):
-    r = Pagamento.objects.get(id=i_id)
-    r.delete()
-    return HttpResponseRedirect(reverse('minimo.documento.views.home'))
+def eliminadocumento(request,i_id):
+    f = FattureFornitore.objects.get(id=i_id)
+    try:
+        m = Movimento.objects.get(documento=f)
+        if tipo_old == 'U':
+            m.conto.saldo += f.importo
+        if tipo_old == 'E':
+            m.conto.saldo -= f.importo
+        i.conto.save()
+        f.delete()
+    except:
+        f.delete()
+    return HttpResponseRedirect(reverse('minimo.movimento.views.documenti'))
 
-    
+
+@login_required
+def pagadocumento(request,i_id):
+    f = FattureFornitore.objects.get(id=i_id)
+    conto = Conto.objects.all()[0]
+    movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='U')
+    movimento.importo = f.importo
+    movimento.descrizione = "Pagamento fattura %s del %s %s" %(f.numero, f.data_documento, f.descrizione)
+    movimento.documento = f
+    movimento.data_movimento = dt.datetime.today()
+    movimento.save()
+    f.stato = True
+    f.save()
+    return HttpResponseRedirect(reverse('minimo.movimento.views.documenti'))

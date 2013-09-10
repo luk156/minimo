@@ -15,10 +15,7 @@ from django.contrib.contenttypes import generic
 import os
 
 
-TIPO = (
-    ('E', 'Entrata'),
-    ('U', 'Uscita'),
-)
+
 
 class Conto(models.Model):
     nome = models.CharField('Nome conto', max_length=70)
@@ -31,14 +28,17 @@ class Conto(models.Model):
         verbose_name_plural='Conti'
         ordering=['nome']
         
-        
+TIPO = (
+        ('E', 'Entrata'),
+        ('U', 'Uscita'),
+    )    
 class Movimento(models.Model):
     user = models.ForeignKey(User, editable=False)
     conto = models.ForeignKey('Conto', null=True, blank=True)
     tipo = models.CharField('Tipo movimento', max_length=70, choices=TIPO)
     data_movimento = models.DateField('Data movimnto', null=True, blank=True)
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
+    object_id = models.PositiveIntegerField( null=True, blank=True)
     documento = generic.GenericForeignKey('content_type', 'object_id')
     descrizione = models.TextField('Descrizione', max_length=1024, null=True, blank=True)
     importo = models.FloatField('Importo')
@@ -70,14 +70,31 @@ TIPO_FATTURA = (
     ('S', 'Servizi'),
 )
 
+
+
 class FattureFornitore(models.Model):
+    
+    def attachment_upload(instance, filename):
+    
+        print 'wow ', 'attachments/%s/%s/%s' % (
+                '%s_%s' % (instance._meta.app_label,
+                           instance._meta.object_name.lower()),
+                           instance.content_object.pk,
+                           filename)
+        return 'attachments/%s/%s/%s' % (
+                '%s_%s' % (instance._meta.app_label,
+                           instance._meta.object_name.lower()),
+                           instance.content_object.pk,
+                           filename)
+
     user = models.ForeignKey(User, editable=False)
     tipo = models.CharField('Tipo fattura', max_length=70, choices=TIPO_FATTURA)
     data_documento = models.DateField('Data Emissione documento', null=True, blank=True)
-    numero = models.CharField('Descrizione ritenuta', max_length=70, choices=TIPO_FATTURA)
+    numero = models.CharField('Numero documento', max_length=70)
     scadenza_pagamento = models.DateField('Data scadenza documento', null=True, blank=True)
     descrizione = models.TextField('Descrizione', max_length=1024, null=True, blank=True)
     importo = models.FloatField('Importo')
+    #stato = models.BooleanField(default=False)
     
     class Meta:
         verbose_name = 'Fatture Fornitore'

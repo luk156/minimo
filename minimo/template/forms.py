@@ -4,7 +4,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Field, MultiField, HTML, Button
 from crispy_forms.bootstrap import *
 
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
 from minimo.template.models import *
 

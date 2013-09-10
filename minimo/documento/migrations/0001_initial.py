@@ -41,6 +41,7 @@ class Migration(SchemaMigration):
             ('riferimento', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['documento.Documento'], null=True, blank=True)),
             ('note', self.gf('django.db.models.fields.TextField')(max_length=1024, null=True, blank=True)),
             ('sconto', self.gf('django.db.models.fields.IntegerField')(default=None, null=True, blank=True)),
+            ('importo_residuo', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
         ))
         db.send_create_signal(u'documento', ['Documento'])
 
@@ -116,6 +117,7 @@ class Migration(SchemaMigration):
             'data_consegna': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'descrizione_ritenuta': ('django.db.models.fields.CharField', [], {'max_length': '70', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'importo_residuo': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'note': ('django.db.models.fields.TextField', [], {'max_length': '1024', 'null': 'True', 'blank': 'True'}),
             'numero': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'p_iva': ('django.db.models.fields.CharField', [], {'max_length': '30', 'null': 'True', 'blank': 'True'}),

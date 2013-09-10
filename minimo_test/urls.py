@@ -16,6 +16,7 @@ urlpatterns = patterns('minimo',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('minimo.urls')),
     url(r'^settings/', include('livesettings.urls')),
+    (r'^attachments/', include('attachments.urls')),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

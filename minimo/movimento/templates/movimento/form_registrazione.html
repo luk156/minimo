@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load attachments_tags %}
 
 {% block meta_title %}{{azione}} regitra documento{% endblock %}
-{% block title %}<i class="icon-picture"></i> {{azione}} {% endblock %}	
+{% block title %}<i class="icon-picture"></i> {{azione}} documento acquisto{% endblock %}	
 
 {% block head %}
 	<link href="/static/css/datetimepicker.css" rel="stylesheet">
@@ -14,13 +15,48 @@
 {% block breadcrumb %}
 <li><a href="/">Home</a> <span class="divider">/</span></li>
 <li><a href="{% url 'minimo.documento.views.home' %}">Elenco documenti</a> <span class="divider">/</span></li>
-<li><a href="#"> {{azione}} Imposta</a></li>
+<li><a href="#"> {{azione}} documento acquisto</a></li>
 {% endblock %}
 
 
 
-{% block main-large %}
+{% block main %}
 
-  {% crispy form %}
+    {% crispy form %}
+    {% if i %}
+    {% get_attachments_for i as "allegati" %}
+										
+    {% if allegati %}
+    <ul>
+        {% for allegato in allegati %}
+            <li>
+                <a href="{{ allegato.attachment_file.url }}">{{ allegato.filename }}</a>
+                {% attachment_delete_link allegato %}
+            </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    
+        {% attachment_form i %}
 
-{% endblock %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endif %}
+    
+{% endblock main %}   
+{% block js %}
+    <script type="text/javascript">
+        window.onload = function() 
+            { 
+                $(".dateinput").datetimepicker({format: 'dd/mm/yyyy',autoclose: true, minView:2, language: 'it'});
+            };
+
+    </script>
+{% endblock js %}

@@ -1,8 +1,8 @@
-{% extends "base.html" %}
+{% extends "movimento/base.html" %}
 
 {% block breadcrumb %}
 <li><a href="#">Home</a> <span class="divider">/</span></li>
-<li><a href="{% url 'minimo.documento.views.home' %}">Elenco Movimento</a></li>
+<li><a href="{% url 'minimo.movimento.views.movimenti' %}">Elenco Movimento</a></li>
 {% endblock %}
 
 {% block meta_title %}Elenco Movimenti{% endblock %}
@@ -54,7 +54,7 @@
 											{{movimento.importo}}
 										{% endif %}
 									</td>
-									<td><a {% if movimento.documento %} href="#" {% else %} href="#" {% endif %} class="btn  btn-small {% if movimento.documento %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a></td>
+									<td><a {% if movimento.documento %} href="#" {% else %} href="{% url 'minimo.movimento.views.modificamovimento' movimento.id %}" {% endif %} class="btn  btn-small {% if movimento.documento %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a></td>
 								</tr>
 							{% endfor %}
 							<tr>
@@ -70,10 +70,3 @@
 </div>
 	{% endblock main %}
 	
-	{% block left %}
-	
-	<h4>Azioni</h4>
-	<a href="#" class="btn btn-block "><i class="icon-plus"> </i> Registra un nuovo documento</a>
-	<a href="#" class="btn btn-block "><i class="icon-plus"> </i> Inserisci un movimento</a>
-	
-{% endblock left %}

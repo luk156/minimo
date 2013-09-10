@@ -73,14 +73,14 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'tassa.imposta': {
-            'Meta': {'object_name': 'Imposta'},
+            'Meta': {'ordering': "['nome']", 'object_name': 'Imposta'},
             'aliquota': ('django.db.models.fields.IntegerField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         },
         u'tassa.ritenuta': {
-            'Meta': {'object_name': 'Ritenuta'},
+            'Meta': {'ordering': "['nome']", 'object_name': 'Ritenuta'},
             'aliquota': ('django.db.models.fields.FloatField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'max_length': '30'}),

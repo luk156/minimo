@@ -8,29 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Conto'
-        db.create_table(u'movimento_conto', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('nome', self.gf('django.db.models.fields.CharField')(max_length=70)),
-            ('numeto', self.gf('django.db.models.fields.CharField')(max_length=70)),
-            ('saldo', self.gf('django.db.models.fields.FloatField')(default=0)),
-            ('data_ultimo_aggiornamento', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
-        ))
-        db.send_create_signal(u'movimento', ['Conto'])
-
-        # Adding field 'Movimento.conto'
-        db.add_column(u'movimento_movimento', 'conto',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['movimento.Conto'], null=True, blank=True),
-                      keep_default=False)
+        # Deleting field 'FattureFornitore.stato'
+        db.delete_column(u'movimento_fatturefornitore', 'stato')
 
 
     def backwards(self, orm):
-        # Deleting model 'Conto'
-        db.delete_table(u'movimento_conto')
-
-        # Deleting field 'Movimento.conto'
-        db.delete_column(u'movimento_movimento', 'conto_id')
+        # Adding field 'FattureFornitore.stato'
+        db.add_column(u'movimento_fatturefornitore', 'stato',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
 
 
     models = {
@@ -72,12 +58,11 @@ class Migration(SchemaMigration):
         },
         u'movimento.conto': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Conto'},
-            'data_ultimo_aggiornamento': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'data_ultimo_aggiornamento': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'numeto': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
-            'saldo': ('django.db.models.fields.FloatField', [], {'default': '0'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
+            'saldo': ('django.db.models.fields.FloatField', [], {'default': '0'})
         },
         u'movimento.fatturefornitore': {
             'Meta': {'ordering': "['data_documento']", 'object_name': 'FattureFornitore'},
@@ -92,13 +77,13 @@ class Migration(SchemaMigration):
         },
         u'movimento.movimento': {
             'Meta': {'ordering': "['data_movimento']", 'object_name': 'Movimento'},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']", 'null': 'True', 'blank': 'True'}),
             'conto': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['movimento.Conto']", 'null': 'True', 'blank': 'True'}),
             'data_movimento': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'descrizione': ('django.db.models.fields.TextField', [], {'max_length': '1024', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'importo': ('django.db.models.fields.FloatField', [], {}),
-            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'tipo': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         }

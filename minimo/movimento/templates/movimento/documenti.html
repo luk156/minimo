@@ -1,12 +1,13 @@
-{% extends "documento/base.html" %}
+{% extends "movimento/base.html" %}
+{% load attachments_tags %}
 
 {% block breadcrumb %}
-<li><a href="#">Home</a> <span class="divider">/</span></li>
-<li><a href="{% url 'minimo.documento.views.home' %}">Elenco Documenti</a></li>
+<li><a href="{% url 'minimo.documento.views.home' %}">Home</a> <span class="divider">/</span></li>
+<li><a href="{% url 'minimo.movimento.views.documenti' %}">Elenco Documenti</a></li>
 {% endblock %}
 
-{% block meta_title %}Elenco Documenti {% endblock %}
-{% block title %}<i class="icon-file-text"></i>
+{% block meta_title %}Elenco Documenti {% endblock meta_title %}
+{% block title %}<i class="icon-file-text"></i> Elenco Documenti {% endblock title %}
 
 
 
@@ -27,21 +28,21 @@
 				<table class="table table-striped" id="movimenti-{{anno}}">
 								<thead>
 								<tr>
-									<th>Data</th>
+									
 									<th>Data documento</th>
 									<th>Numero</th>
 									<th>Scadenza</th>
 									<th>Descrizione</th>
+									<th>Allegati</th>
 									<th>Importo</th>
+									<th></th>
 								</tr>
 								</thead>
 								<tbody>
 								{% for fattura in f %}
 				
 								<tr>
-									<td>
-										{{fattura.data}}
-									</td>
+									
 									<td>
 										{{fattura.data_documento}}
 									</td>
@@ -55,11 +56,33 @@
 										{{fattura.descrizione}}
 									</td>
 									<td>
+										
+										{% get_attachments_for fattura as "allegati" %}
+										
+										{% if allegati %}
+										<ul>
+											{% for allegato in allegati %}
+												<li>
+													<a href="{{ allegato.attachment_file.url }}">{{ allegato.filename }}</a>
+													{% attachment_delete_link allegato %}
+												</li>
+											{% endfor %}
+										</ul>
+										{% endif %}
+									</td>
+									<td>
 										{{fattura.importo}}
 									</td>
+									<td>
+										<a {% if fattura.stato %} href="#" {% else %} href="{% url 'minimo.movimento.views.pagadocumento' fattura.id %}" {% endif %} class="btn  btn-small {% if fattura.stato %} disabled {% endif %}"><i class="icon-edit"></i> Paga</a>
+										<a {% if fattura.stato %} href="#" {% else %} href="{% url 'minimo.movimento.views.modificadocumento' fattura.id %}" {% endif %}class="btn  btn-small {% if fattura.stato %} disabled {% endif %}"><i class="icon-edit"></i> Modifica</a>
+										<a {% if fattura.stato %} href="#" {% else %} href="{% url 'minimo.movimento.views.eliminadocumento' fattura.id %}" {% endif %}class="btn  btn-small {% if fattura.stato %} disabled {% endif %}"><i class="icon-edit"></i> Elimina</a>
+									</td>
 								</tr>
+								{% endfor %}
 								</tbody>
 				</table>
 			</div>
         {% endfor %}
 </div>
+{% endblock main %}

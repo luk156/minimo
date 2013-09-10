@@ -43,19 +43,21 @@ class IncassaForm(forms.Form):
         super(IncassaForm, self).__init__(*args, **kwargs)        
         
 class DocumentoForm(forms.ModelForm):
+    RITENUTA = lambda: [(m.nome, m.nome) for m in Ritenuta.objects.all()]
     #imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
-    #descrizione_ritenuta = forms.ModelChoiceField(queryset=Ritenuta.objects.all(), required=False)
+    descrizione_ritenuta = forms.ChoiceField(choices=RITENUTA(), required=False)
     stato = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     ragione_sociale = forms.CharField('Ragione sociale')
     
     class Meta:
         model = Documento
         
+    
         
     def __init__(self, *args, **kwargs):
         super(DocumentoForm, self).__init__(*args, **kwargs)
   
-        #self.fields['descrizione_ritenuta'].choices=[ (o.nome, o.nome) for o in Ritenuta.objects.all()]
+        #self.fields['descrizione_ritenuta'].choices=RITENUTA()
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(

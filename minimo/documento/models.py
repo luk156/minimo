@@ -45,8 +45,8 @@ TIPO_DOCUMENTO = (
     ('DT', 'Documento di trasporto'),
 )
 
-RITENUTA = []
-RITENUTA = lambda: [(m.nome, m.nome) for m in Ritenuta.objects.all()]
+RITENUTA = ()
+
 
 #TODO: implementare sconto
 
@@ -65,7 +65,7 @@ class Documento(models.Model):
     p_iva = models.CharField('Partita IVA',max_length=30, blank=True, null=True)
     stato = models.BooleanField('Stato pagamento')
     template = models.ForeignKey(TemplateDocumento, related_name='documento_template', null = True, on_delete = models.SET_NULL)
-    descrizione_ritenuta = models.CharField('Descrizione ritenuta', max_length=70, null=True, blank=True, choices=RITENUTA())
+    descrizione_ritenuta = models.CharField('Descrizione ritenuta', max_length=70, null=True, blank=True, choices=RITENUTA)
     ritenuta = models.IntegerField('Ritenuta', blank=True, null=True, default=None)
     bollo = models.CharField('ID Bollo',max_length=30, blank=True, null=True)
     valore_bollo = models.FloatField('Valore marca da bollo', blank=True, null=True)

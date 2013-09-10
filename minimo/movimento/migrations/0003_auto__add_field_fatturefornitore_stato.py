@@ -8,22 +8,16 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Conto.user'
-        db.delete_column(u'movimento_conto', 'user_id')
-
-
-        # Changing field 'Conto.data_ultimo_aggiornamento'
-        db.alter_column(u'movimento_conto', 'data_ultimo_aggiornamento', self.gf('django.db.models.fields.DateField')(auto_now=True, default=datetime.datetime(2013, 9, 7, 0, 0)))
-
-    def backwards(self, orm):
-        # Adding field 'Conto.user'
-        db.add_column(u'movimento_conto', 'user',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['auth.User']),
+        # Adding field 'FattureFornitore.stato'
+        db.add_column(u'movimento_fatturefornitore', 'stato',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
 
 
-        # Changing field 'Conto.data_ultimo_aggiornamento'
-        db.alter_column(u'movimento_conto', 'data_ultimo_aggiornamento', self.gf('django.db.models.fields.DateField')(null=True))
+    def backwards(self, orm):
+        # Deleting field 'FattureFornitore.stato'
+        db.delete_column(u'movimento_fatturefornitore', 'stato')
+
 
     models = {
         u'auth.group': {
@@ -78,18 +72,19 @@ class Migration(SchemaMigration):
             'importo': ('django.db.models.fields.FloatField', [], {}),
             'numero': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'scadenza_pagamento': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'stato': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'tipo': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         },
         u'movimento.movimento': {
             'Meta': {'ordering': "['data_movimento']", 'object_name': 'Movimento'},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']", 'null': 'True', 'blank': 'True'}),
             'conto': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['movimento.Conto']", 'null': 'True', 'blank': 'True'}),
             'data_movimento': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'descrizione': ('django.db.models.fields.TextField', [], {'max_length': '1024', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'importo': ('django.db.models.fields.FloatField', [], {}),
-            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'tipo': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         }

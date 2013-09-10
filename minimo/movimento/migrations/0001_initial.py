@@ -8,14 +8,25 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'Conto'
+        db.create_table(u'movimento_conto', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('nome', self.gf('django.db.models.fields.CharField')(max_length=70)),
+            ('numeto', self.gf('django.db.models.fields.CharField')(max_length=70)),
+            ('saldo', self.gf('django.db.models.fields.FloatField')(default=0)),
+            ('data_ultimo_aggiornamento', self.gf('django.db.models.fields.DateField')(auto_now=True, blank=True)),
+        ))
+        db.send_create_signal(u'movimento', ['Conto'])
+
         # Adding model 'Movimento'
         db.create_table(u'movimento_movimento', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('conto', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['movimento.Conto'], null=True, blank=True)),
             ('tipo', self.gf('django.db.models.fields.CharField')(max_length=70)),
             ('data_movimento', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
+            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'], null=True, blank=True)),
+            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True)),
             ('descrizione', self.gf('django.db.models.fields.TextField')(max_length=1024, null=True, blank=True)),
             ('importo', self.gf('django.db.models.fields.FloatField')()),
         ))
@@ -31,11 +42,15 @@ class Migration(SchemaMigration):
             ('scadenza_pagamento', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
             ('descrizione', self.gf('django.db.models.fields.TextField')(max_length=1024, null=True, blank=True)),
             ('importo', self.gf('django.db.models.fields.FloatField')()),
+            ('stato', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal(u'movimento', ['FattureFornitore'])
 
 
     def backwards(self, orm):
+        # Deleting model 'Conto'
+        db.delete_table(u'movimento_conto')
+
         # Deleting model 'Movimento'
         db.delete_table(u'movimento_movimento')
 
@@ -80,6 +95,14 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'movimento.conto': {
+            'Meta': {'ordering': "['nome']", 'object_name': 'Conto'},
+            'data_ultimo_aggiornamento': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'nome': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
+            'numeto': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
+            'saldo': ('django.db.models.fields.FloatField', [], {'default': '0'})
+        },
         u'movimento.fatturefornitore': {
             'Meta': {'ordering': "['data_documento']", 'object_name': 'FattureFornitore'},
             'data_documento': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
@@ -88,17 +111,19 @@ class Migration(SchemaMigration):
             'importo': ('django.db.models.fields.FloatField', [], {}),
             'numero': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'scadenza_pagamento': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'stato': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'tipo': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         },
         u'movimento.movimento': {
             'Meta': {'ordering': "['data_movimento']", 'object_name': 'Movimento'},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']", 'null': 'True', 'blank': 'True'}),
+            'conto': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['movimento.Conto']", 'null': 'True', 'blank': 'True'}),
             'data_movimento': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'descrizione': ('django.db.models.fields.TextField', [], {'max_length': '1024', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'importo': ('django.db.models.fields.FloatField', [], {}),
-            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'tipo': ('django.db.models.fields.CharField', [], {'max_length': '70'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         }
