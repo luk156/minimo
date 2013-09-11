@@ -31,7 +31,8 @@ class Conto(models.Model):
 TIPO = (
         ('E', 'Entrata'),
         ('U', 'Uscita'),
-    )    
+    )
+
 class Movimento(models.Model):
     user = models.ForeignKey(User, editable=False)
     conto = models.ForeignKey('Conto', null=True, blank=True)
@@ -55,13 +56,7 @@ class Movimento(models.Model):
         return self.documento
     
     def save(self, *args, **kwargs):
-        conto = Conto.objects.all()[0]
-        self.conto = conto
-        if self.tipo == 'E':
-            conto.saldo += self.importo
-        if self.tipo == 'U':
-            conto.saldo -= self.importo
-        conto.save()
+        aggiorna_saldo(nome=None, importo=self.importo, operazione=self.tipo)
         super(Movimento, self).save(*args, **kwargs)
         
 
@@ -73,7 +68,6 @@ TIPO_FATTURA = (
 
 
 class FattureFornitore(models.Model):
-
 
     user = models.ForeignKey(User, editable=False)
     tipo = models.CharField('Tipo fattura', max_length=70, choices=TIPO_FATTURA)
@@ -95,5 +89,51 @@ class FattureFornitore(models.Model):
 
 class ContoOption(admin.ModelAdmin):
     pass
+
+
+def aggiorna_saldo(nome=None, importo=0, operazione=''):
+    if nome == None:
+        conto, created = Conto.objects.get_or_create(nome='default')
+        if created:
+            conto.numero='000000'
+            conto.importo = 0
+            conto.save()
+    else:
+        conto = Conto.objects.get(nome=nome)
+    if operazione == 'E':
+        conto.saldo += importo
+    if operazione == 'U':
+        conto.saldo -= importo
+    conto.save()
+
+
+def ripristina_saldo(nome=None, importo=0, operazione=''):
+    if nome == None:
+        conto, created = Conto.objects.get_or_create(nome='default')
+        if created:
+            conto.numero='000000'
+            conto.importo = 0
+            conto.save()
+    else:
+        conto = Conto.objects.get(nome=conto)
+    if operazione == 'U':
+        conto.saldo += importo
+    if operazione == 'E':
+        conto.saldo -= importo
+    conto.save()
+
+
+def get_conto(nome=None):
+    if nome == None:
+        conto, created = Conto.objects.get_or_create(nome='default')
+        if created:
+            conto.numero='000000'
+            conto.importo = 0
+            conto.save()
+    else:
+        conto = Conto.objects.get(nome=nome)
+    return conto
+
+
 
 admin.site.register(Conto, ContoOption)

@@ -38,7 +38,7 @@ anni=(precedente,corrente)
 @login_required
 def movimenti(request):
     movimenti = Movimento.objects.all()
-    conto = Conto.objects.all()[0]
+    conto = get_conto(nome=None)
     Movimenti=[]
     m=[]
     Movimenti.append(anni)
@@ -75,7 +75,7 @@ def documenti(request):
 @login_required
 def nuovomovimento(request):
     azione = 'Nuovo'
-    conto = Conto.objects.all()[0]
+    conto = get_conto(nome=None)
     if request.method == 'POST':
         form = MovimentoForm(request.POST)
         form.helper.form_action = reverse('minimo.movimento.views.nuovomovimento')
@@ -102,12 +102,7 @@ def modificamovimento(request,i_id):
         form.helper.form_action = reverse('minimo.movimento.views.modificamovimento', args=(str(i.id),))
         if form.is_valid():
             #riporto il saldo alla situazione precedente
-            if tipo_old == 'U':
-                i.conto.saldo += importo_old
-            if tipo_old == 'E':
-                i.conto.saldo -= importo_old
-            i.conto.save()
-            #salvo le modifche
+            ripristina_saldo(nome=i.conto.nome, importo=importo_old, operazione=tipo_old)
             form.save()
              
             return HttpResponseRedirect(reverse('minimo.movimento.views.movimenti')) # Redirect after POST
@@ -120,6 +115,7 @@ def modificamovimento(request,i_id):
 @login_required
 def eliminamovimento(request,i_id):
     r = Movimento.objects.get(id=i_id)
+    ripristina_saldo(nome=r.conto.nome, importo=r.importo, operazione=r.tipo)
     r.delete()
     return HttpResponseRedirect(reverse('minimo.movimento.views.movimenti'))
 
@@ -165,11 +161,7 @@ def eliminadocumento(request,i_id):
     f = FattureFornitore.objects.get(id=i_id)
     try:
         m = Movimento.objects.get(documento=f)
-        if tipo_old == 'U':
-            m.conto.saldo += f.importo
-        if tipo_old == 'E':
-            m.conto.saldo -= f.importo
-        i.conto.save()
+        ripristina_saldo(nome=m.conto.nome, importo=m.importo, operazione=m.tipo)
         f.delete()
     except:
         f.delete()
