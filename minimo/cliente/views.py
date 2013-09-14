@@ -40,7 +40,7 @@ def nuovocliente(request):
             c=form.save(commit=False)
             c.user=request.user
             c.save()
-            return HttpResponseRedirect('/clienti') 
+            return HttpResponseRedirect(reverse('minimo.cliente.views.clienti', )) 
     else:
         form = ClienteForm()
     return render_to_response('cliente/form_cliente.html',{'request':request, 'form': form,'azione': azione}, RequestContext(request))
@@ -50,12 +50,11 @@ def nuovocliente(request):
 def modificacliente(request,c_id):
     azione = 'modifica'
     cliente = Cliente.objects.get(id=c_id)
-    #if cliente.user == request.user or request.user.is_superuser:
     if request.method == 'POST': 
         form = ClienteForm(request.POST, instance=cliente,)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/clienti') 
+            return HttpResponseRedirect(reverse('minimo.cliente.views.clienti', )) 
     else:
         form = ClienteForm(instance=cliente)
     return render_to_response('cliente/form_cliente.html',{'request':request, 'form': form,'azione': azione, 'c': cliente,}, RequestContext(request))
@@ -64,19 +63,12 @@ def modificacliente(request,c_id):
     
 @login_required
 def clienti(request):
-    #if request.user.is_superuser:
     clienti=Cliente.objects.all()
-    #else:
-    #    clienti=Cliente.objects.filter(user=request.user)
     return render_to_response( 'cliente/clienti.html', {'request':request, 'clienti': clienti}, RequestContext(request))
 
 @login_required
 def export_clienti(request):
-    #if request.user.is_superuser:
     clienti=Cliente.objects.all()
-    #else:
-    #    clienti=Cliente.objects.filter(user=request.user)   
-    # Create the HttpResponse object with the appropriate CSV header
     return export_csv(request, clienti, [('Ragione Sociale','ragione_sociale'),
         ('Indirizzo','indirizzo'),
         ('Codice Fiscale','codice_fiscale'),
@@ -88,19 +80,15 @@ def export_clienti(request):
 @login_required
 def cliente(request,c_id):
     c= Cliente.objects.get(id=c_id)
-    #if c.user == request.user or request.user.is_superuser:
     return render_to_response( 'cliente/cliente.html', {'request':request, 'c':c , 'f': Documento.objects.filter(ragione_sociale=c.ragione_sociale)}, RequestContext(request))
-    #else:
-    #    raise PermissionDenied
+
 
 @login_required
 def eliminacliente(request,c_id):
     cliente = Cliente.objects.get(id=c_id)
-    #if cliente.user == request.user or request.user.is_superuser:
     cliente.delete()
-    return HttpResponseRedirect('/clienti')
-    #else:
-    #    raise PermissionDenied
+    return HttpResponseRedirect(reverse('minimo.cliente.views.clienti', ))
+
 
 
 def get_clienti(request):

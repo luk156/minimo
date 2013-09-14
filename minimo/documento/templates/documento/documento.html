@@ -29,7 +29,7 @@
 						}
 				}
 		function IncassaFattura() {
-				if ( confirm("Dal momento che si incassa una documento non è più possibile modifcarla, occore prima sbloccarla. Incassare la documento {{f}}?") ) {
+				if ( confirm("Dal momento che si incassa una documento non è più possibile modifcarlo. Incassare la documento {{f}}?") ) {
 						document.location.href = "{% url 'minimo.documento.views.incassa_documento' f.id %}";
 						}
 				}
@@ -41,7 +41,7 @@
 				}
 		
 		function SbloccaFattura() {
-				if ( confirm("Stai per sbloccare una documento già incassata. Modificare la documento {{f}}?") ) {
+				if ( confirm("Stai per stornare un documento già incassata. Stornare la documento {{f}}?") ) {
 						document.location.href = "{% url 'minimo.documento.views.sblocca_documento' f.id %}";
 						}
 				}
@@ -239,18 +239,18 @@
 {% block left %}
 <h4>Azioni</h4>
 {% if f.tipo == 'RA' or f.tipo == 'FA' %}
-	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Incassa</a>
-	<a {% if f.stato or f.importo_residuo %} href="#" {% else %} href="#" onClick="IncassaParzialeFattura()" {% endif %} class="btn btn-block {% if f.stato or f.importo_residuo %} disabled {% endif %}"><i class="icon-money"> </i>Incassa parzialemnte</a>
-	<a {% if f.stato or f.importo_residuo %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato or f.importo_residuo %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Storna incasso</a>
+	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block  {% if f.stato %} disabled {% endif %}" title="Incassa un documento, questa operazione renderà inmodificabile il documento. Per modifcare il documento stornare l'incasso."><i class="icon-money"></i>Incassa</a>
+	<a {% if f.stato or f.importo_residuo %} href="#" {% else %} href="#" onClick="IncassaParzialeFattura()" {% endif %} class="btn btn-block {% if f.stato or f.importo_residuo %} disabled {% endif %}" title="Incassa parzialemte l'importo del documento, questa operazione renderà inmodificabile il documento. Per modifcare il documento stornare l'incasso."><i class="icon-money"> </i>Incassa parzialemnte</a>
+	<a {% if f.stato or f.importo_residuo %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato or f.importo_residuo %} enabled {% else %} disabled {% endif %}" title="Storna l'incasso del documento. Sornando l'incasso del documento questo torna modificabile."><i class="icon-lock"></i> Storna incasso</a>
 {%else %}
-	<a {% if f.stato %} href="#" {% else %} href="#" onClick="CreaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Crea fattura</a>
-	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-money"> </i>Accetta</a>
+	<a {% if f.stato %} href="#" {% else %} href="#" onClick="CreaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}" title="Genera una fattura dal preventivo/ordine cliente."><i class="icon-money"> </i>Crea fattura</a>
+	<a {% if f.stato %} href="#" {% else %} href="#" onClick="IncassaFattura()" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}" title="Imposta lo stato del documento come accettato. Per modificarlo occorre sloccarlo."><i class="icon-money"> </i>Accetta</a>
 	<a {% if f.stato %} href="#" onClick="SbloccaFattura()" {% else %} href="#" {% endif %} class="btn btn-block {% if f.stato %} enabled {% else %} disabled {% endif %}"><i class="icon-lock"></i> Sblocca</a>
 {% endif %}
-<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.documento.views.modificadocumento' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.documento.views.modificadocumento' f.id %}" {% endif %} class="btn btn-block {% if f.stato %} disabled {% endif %}" title="Modifica il documento."><i class="icon-edit"></i> modifica</a>
 
-<a href="#" class="btn btn-block " onClick="CancellaFattura();"><i class="icon-trash"></i> elimina</a>
-<a href="{% url 'minimo.documento.views.stampa_documento' f.id %}" class="btn btn-block "><i class="icon-print"></i> stampa</a>
-<a href="{% url 'minimo.documento.views.invio_documento' f.id %}" class="btn btn-block"><i class="icon-envelope"> </i>Email</a>
+<a href="#" class="btn btn-block " onClick="CancellaFattura();" title="Elimina il documento, non sarà più possibile recuperarlo"><i class="icon-trash"></i> elimina</a>
+<a href="{% url 'minimo.documento.views.stampa_documento' f.id %}" class="btn btn-block " title="Genera il documento in formato pdf per la stampao l'invio."><i class="icon-print"></i> stampa</a>
+<a href="{% url 'minimo.documento.views.invio_documento' f.id %}" class="btn btn-block" title="Invia direttamente il documento in pdf tramite email."><i class="icon-envelope" > </i>Email</a>
 
 {% endblock%}
