@@ -494,7 +494,7 @@ class fatturato():
         totale = 0
         for f in self.documenti:
             if f.tipo == 'FA' and f.stato:
-                totale += f.iva_totale
+                totale += f.imposta_totale
         return totale
     
     def ritenute(self):    
