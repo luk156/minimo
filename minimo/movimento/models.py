@@ -115,7 +115,7 @@ def ripristina_saldo(nome=None, importo=0, operazione=''):
             conto.importo = 0
             conto.save()
     else:
-        conto = Conto.objects.get(nome=conto)
+        conto = Conto.objects.get(nome=nome)
     if operazione == 'U':
         conto.saldo += importo
     if operazione == 'E':

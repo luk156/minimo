@@ -52,8 +52,8 @@ def get_ritenute():
 
 class DocumentoForm(forms.ModelForm):
 
-    RITENUTA = ()
-    #imposte = forms.ModelMultipleChoiceField(queryset=Imposta.objects.all(), widget=forms.CheckboxSelectMultiple, required=False)
+    #RITENUTA = ()
+    #pagamento = forms.ModelChoiceField(queryset=Pagamento.objects.filter(stato=True), required=False)
     #descrizione_ritenuta = forms.ChoiceField(choices=RITENUTA, required=False)
     stato = forms.BooleanField(widget=forms.HiddenInput(), required=False)
     ragione_sociale = forms.CharField('Ragione sociale')
@@ -67,6 +67,7 @@ class DocumentoForm(forms.ModelForm):
         super(DocumentoForm, self).__init__(*args, **kwargs)
   
         self.fields['descrizione_ritenuta'] = forms.ChoiceField(choices=get_ritenute(), required=False )
+        #self.fields['pagamento'] = forms.ModelChoiceField(queryset=Pagamento.objects.filter(stato=True))
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(

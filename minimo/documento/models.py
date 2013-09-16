@@ -20,6 +20,8 @@ import config
 class Pagamento(models.Model):
     nome = models.CharField('Pagamento',max_length=30)
     giorni = models.IntegerField('Giorni', default=0)
+    stato = models.BooleanField('Stato', default=True )
+        
     
     def __unicode__(self):
         return self.nome
