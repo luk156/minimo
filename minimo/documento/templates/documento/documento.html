@@ -111,7 +111,7 @@
 	{% endif %}
 	<tr>
 		<td><h5>Tipo pagamento</h5></td>
-		<td>{{f.pagamento}}</td>
+		<td>{{f.pagamento}} {% if f.pagamento.iban %} su {{f.pagamento.iban}} {% endif %}</td>
 	</tr>
 	<tr>
 		<td><h5>Template</h5></td>

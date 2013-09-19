@@ -21,6 +21,9 @@ class PagamentoaForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Field('nome'),
+            Field('iban'),
+            Field('istituto'),
+            Field('intestazione'),
             Field('giorni'),
             FormActions(
                 Submit('save', 'Salva', css_class="btn-primary")
