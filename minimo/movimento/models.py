@@ -19,7 +19,9 @@ import os
 
 class Conto(models.Model):
     nome = models.CharField('Nome conto', max_length=70)
-    numeto = models.CharField('Numero conto', max_length=70)
+    iban = models.CharField('IBAN', max_length=70, null=True, blank=True)
+    istituto = models.CharField('Istituto bancario',max_length=70, null=True, blank=True)
+    intestazione = models.CharField('Intestato',max_length=70, null=True, blank=True)
     saldo = importo = models.FloatField('Saldo', default=0)
     data_ultimo_aggiornamento = models.DateField('Data ultimo aggiornamento', auto_now=True)
     

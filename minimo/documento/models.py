@@ -21,6 +21,9 @@ class Pagamento(models.Model):
     nome = models.CharField('Pagamento',max_length=30)
     giorni = models.IntegerField('Giorni', default=0)
     stato = models.BooleanField('Stato', default=True )
+    iban = models.CharField('IBAN',max_length=70, null=True, blank=True)
+    istituto = models.CharField('Istituto bancario',max_length=70, null=True, blank=True)
+    intestazione = models.CharField('Intestato',max_length=70, null=True, blank=True)
         
     
     def __unicode__(self):
