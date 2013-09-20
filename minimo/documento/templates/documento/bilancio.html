@@ -1,0 +1,86 @@
+{% extends "documento/base.html" %}	
+{% load crispy_forms_tags %}
+
+{% block head %}
+	<script src="/static/js/highcharts/highcharts.js"></script>
+	<link href="/static/css/datetimepicker.css" rel="stylesheet">
+	<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+	<script src="/static/js/locales/bootstrap-datetimepicker.it.js"></script>
+{%endblock%}
+
+{% block meta_title %}Bilancio{% endblock %}
+{% block title %} Bilancio {% endblock %}	
+
+{% block breadcrumb %}
+<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="#">Bilancio</a></li>
+{% endblock %}
+
+{% block main %}
+
+<div id="fatturato">
+{% include 'bilancio/fatturato.html' %}
+</div>
+
+<div id="fatturato">
+	<h2>Dati statistici pagamenti anno: {{anno}}</h2>
+	<table class="table table-striped" id="fatture-{{anno}}">
+		<tr>
+			<td><strong>Totale fatturato:</strong> {{dati.totale}}</td>
+			<td><strong>Totale incassato:</strong> {{dati.incassato}}</td>
+			<td><strong>Totale da incassare:</strong> {{dati.incassare}}</td>
+			<td><strong>Totale pagamenti scaduti:</strong> {{dati.scadute}}</td>
+		</tr>
+		<tr>
+			<td><strong>Totale iva:</strong> {{dati.iva}}</td>
+			<td><strong>Totale ritenute:</strong> {{dati.ritenute}}</td>
+			<td><strong>Sbilancio:</strong> {{dati.sbilancio}}</td>
+			<td></td>
+		</tr>
+	</table>
+</div>
+<div id="preventivato">
+	<h2>Dati statistici preventivi e ordini anno: {{anno}}</h2>
+	<table class="table table-striped" id="fatture-{{anno}}">
+		<tr>
+			<td><strong>Totale preventivi:</strong> {{prev.tot_preventivi}}</td>
+			<td><strong>Preventivi emessi:</strong> {{prev.num_preventivi}}</td>
+			<td><strong>Ordini emessi:</strong> {{prev.num_ordini}}</td>
+			<td><strong>Preventivi e ordini fatturati:</strong> {{prev.doc_fatturati}}</td>
+		</tr>
+		<tr>
+			<td><strong>Totale ordini:</strong> {{prev.tot_ordini}}</td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</table>
+</div>
+
+{% endblock %}
+
+
+{% block left %}
+
+
+<script type="text/javascript">
+window.onload = function() 
+{ 
+	$(".dateinput").datetimepicker({format: 'dd/mm/yyyy',autoclose: true, minView:2, language: 'it'});
+};
+
+
+function aggiorna_statistiche(){
+	Dajaxice.documento.aggiorna_bilancio(Dajax.process,{'inizio':$("#div_id_inizio input").val(),'fine':$("#div_id_fine input").val()});
+};
+
+function reset_statistiche(){
+	$("#div_id_inizio input").val('');
+	$("#div_id_fine input").val('');
+	Dajaxice.documento.aggiorna_bilancio(Dajax.process,{'inizio':'0','fine':$("#div_id_fine input").val()});
+};
+</script>
+
+	<h4>Intervallo</h4>
+	 {% crispy form %}
+{% endblock%}

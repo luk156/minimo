@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block meta_title %}Template{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="#">Elenco Template</a></li>
+{% endblock %}
+
+{% block main %}
+
+<table class="table table-striped">
+	<thead>
+	<tr>
+		<th>Nome</th>
+		<th>Descrizione</th>
+		<th>Template</th>
+		
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+
+{% for t in templates %}
+	<tr>
+		<td>
+			{{t.nome}}
+		</td>
+		<td>
+			{{t.descrizione}}
+		</td>
+		<td>
+			<a href="{{ t.template.url }}"> {{t.template}}</a>
+		</td>
+		<td>
+			<div class="btn-group">
+				<a href="{% url 'minimo.template.views.modificatemplate' t.id %}" class="btn"><i class="icon-edit"></i> modifica</a>
+				<a href="{% url 'minimo.template.views.eliminatemplate' t.id %}" class="btn"><i class="icon-trash"></i> elimina</a>
+			</div>
+		</td>
+	</tr>
+{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}
+
+{% block left %}
+	<h4>Azioni</h4>
+	<a href="{% url 'minimo.template.views.nuovotemplate' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Template</a>
+	<a href="/static/{{template_esempio}}" class="btn btn-block "><i class="icon-download"> </i> Scarica Template Esempio</a>
+{% endblock%}

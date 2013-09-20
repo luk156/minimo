@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block meta_title %}{{azione}} movimento{% endblock %}
+{% block title %}<i class="icon-picture"></i> {{azione}} movimento {% endblock %}	
+
+{% block head %}
+	<link href="/static/css/datetimepicker.css" rel="stylesheet">
+	<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+	<script src="/static/js/locales/bootstrap-datetimepicker.it.js"></script>
+{% endblock%}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="{% url 'minimo.movimento.views.movimenti' %}">{{azione}} movimento</a> <span class="divider">/</span></li>
+<li><a href="#"> {{azione}} movimento</a></li>
+{% endblock %}
+
+
+
+{% block main%}
+
+  {% crispy form %}
+
+{% endblock main %}
+
+{% block js %}
+<script type="text/javascript">
+window.onload = function() 
+    { 
+        $("#id_data_movimento").datetimepicker({format: 'dd/mm/yyyy',autoclose: true, minView:2, language: 'it'});
+    };
+
+</script>
+{% endblock js %}

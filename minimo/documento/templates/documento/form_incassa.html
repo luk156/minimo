@@ -1,0 +1,24 @@
+{% extends "documento/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block meta_title %}Incassa pazialemte{% endblock %}
+{% block title %}Incassa pazialemte {% endblock %}	
+
+{% block head %}
+
+{% endblock%}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="#">{{azione}} Incassa pazialemte</a></li>
+{% endblock %}
+
+
+
+{% block main %}
+    <h3>Importo massimo incassabile: {{residuo}}</h3>
+  {% crispy form %}
+
+{% endblock %}
