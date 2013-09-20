@@ -1,0 +1,72 @@
+{% extends "movimento/base.html" %}
+
+{% block breadcrumb %}
+<li><a href="#">Home</a> <span class="divider">/</span></li>
+<li><a href="{% url 'minimo.movimento.views.movimenti' %}">Elenco Movimento</a></li>
+{% endblock %}
+
+{% block meta_title %}Elenco Movimenti{% endblock %}
+{% block title %}<i class="icon-file-text"></i> Elenco movimenti{% endblock title %}
+
+
+
+
+{% block main %}
+
+<div class="large-12 columns">
+</br>
+<div class="tabbable"> <!-- Only required for left/right tabs -->
+    <ul class="nav nav-tabs">
+		{% for anno in anni %}
+		<li {%if forloop.last %} class="active" {% endif%} ><a href="#tab-{{ forloop.counter }}" data-toggle="tab">{{anno}}</a></li>
+		{% endfor %}
+    </ul>
+    <div class="tab-content">
+		{% for anno,m in movimenti %}
+			<div class="tab-pane fade in {%if forloop.last %}active{% endif%}" id="tab-{{ forloop.counter }}">
+				<table class="table table-striped" id="movimenti-{{anno}}">
+								<thead>
+								<tr>
+									<th>Data</th>
+									<th>Descrizione</th>
+									<th>Entrate</th>
+									<th>Uscite</th>
+									<th></th>
+								</tr>
+								</thead>
+								<tbody>
+								{% for movimento in m %}
+				
+								<tr>
+									<td>
+										{{movimento.data_movimento}}
+									</td>
+									<td>
+										{{movimento.descrizione}}
+									</td>
+									<td>
+										{% if movimento.tipo == 'E' %}
+											{{movimento.importo}}
+										{% endif %}
+									</td>
+									<td>
+										{% if movimento.tipo == 'U' %}
+											{{movimento.importo}}
+										{% endif %}
+									</td>
+									<td><a {% if movimento.documento %} href="#" {% else %} href="{% url 'minimo.movimento.views.modificamovimento' movimento.id %}" {% endif %} class="btn  btn-small {% if movimento.documento %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a></td>
+								</tr>
+							{% endfor %}
+							<tr>
+								<td></td>
+								<td></td>
+								<td>Saldo:</td>
+								<td>{%if saldo > 0 %} <span style="color: green;">{{saldo}}</span>{% else %} <span style="color: red;">{{saldo}}</span>{% endif %}</td>
+							</tr>
+								</tbody>
+				</table>
+			</div>
+        {% endfor %}
+</div>
+	{% endblock main %}
+	

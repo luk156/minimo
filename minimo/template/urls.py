@@ -6,19 +6,18 @@ from django.conf.urls.static import static
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
+from minimo.template.models import *
+from minimo.template.forms import *
 
-
-
-urlpatterns = patterns('minimo',
+urlpatterns = patterns('minimo.template.views',
     # Examples:
     url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
+
+
+    #template
+    (r'^$', 'template'),
+    (r'^nuovo/$', 'nuovotemplate'),
+    (r'^modifica/(?P<t_id>\w+)/$', 'modificatemplate'),
+    (r'^elimina/(?P<t_id>\w+)/$', 'eliminatemplate'),
     
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include('minimo.urls')),
-    url(r'^settings/', include('livesettings.urls')),
-    (r'^attachments/', include('attachments.urls')),
-) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-
-
+    )

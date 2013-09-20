@@ -1,0 +1,24 @@
+{% extends "documento/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block meta_title %}{{azione}} prestazione{% endblock %}
+{% block title %} {{azione}} Prestazione {% endblock %}	
+
+{% block head %}
+
+{% endblock%}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="#">{{azione}} Prestazione</a></li>
+{% endblock %}
+
+
+
+{% block main %}
+
+  {% crispy form %}
+
+{% endblock %}

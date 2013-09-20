@@ -1,0 +1,93 @@
+{% extends "documento/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block meta_title %}{{azione}} Documento {% endblock %}
+{% block title %} {{azione}} Documento {% endblock %}	
+
+{% block head %}
+	<link href="/static/css/datetimepicker.css" rel="stylesheet">
+	<script src="/static/js/bootstrap-datetimepicker.min.js"></script>
+	<script src="/static/js/locales/bootstrap-datetimepicker.it.js"></script>
+{% endblock%}
+
+{% block js %}
+	<script>
+
+		
+		$("input#id_ragione_sociale").autocomplete({
+                url:"{{BASE_URL}}/clienti/get_clienti",
+                remoteDataType: 'json',
+                minChars: 1,
+                mustMatch: true,
+                maxItemsToShow: 5,
+                selectFirst: false,
+                useCache: false,
+                showResult: function(value, data) {
+                    return value ;
+                },
+            });
+		$(document).ready(function(){
+			if ($("select#id_tipo").val() == 'OR'){
+				$("#div_id_data_consegna").show('slow');
+			}else{
+				$("#div_id_data_consegna").hide('slow');
+			}
+			if ($("select#id_tipo").val() == 'RA'){
+				$("#div_id_descrizione_ritenuta").show('slow');
+			}else{
+				$("#div_id_descrizione_ritenuta").hide('slow');
+			}
+			
+			if ("{{azione}}" != "Modifica") {
+				$("input#submit-id-save").hide('slow');
+			}
+			
+			
+			$("select#id_tipo").change(function(){
+				if ($("select#id_tipo").val()){
+					$("input#submit-id-save").show('slow');
+					if ($("select#id_tipo").val() == 'FA'){
+						$("#div_id_descrizione_ritenuta").hide('slow');
+					
+					}else{
+						$("#div_id_descrizione_ritenuta").show('slow');
+					
+					};
+					if ($("select#id_tipo").val() == 'OR'){
+						$("#div_id_data_consegna").show('slow');
+					}else{
+						$("#div_id_data_consegna").hide('slow');
+					}
+				}else{
+					$("input#submit-id-save").hide('slow');
+				}
+			});
+		});
+
+	</script>
+
+{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="{% url 'minimo.documento.views.home' %}">Elenco Documenti</a> <span class="divider">/</span></li>
+<li><a href="#">{{azione}} Docuemnto </a></li>
+{% endblock %}
+
+
+
+{% block main-large %}
+
+<script>
+window.onload = function() 
+{ 
+	$(".dateinput").datetimepicker({format: 'dd/mm/yyyy',autoclose: true, minView:2, language: 'it'});
+};
+</script>
+
+  {% crispy form %}
+
+</div>
+
+{% endblock %}

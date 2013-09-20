@@ -6,8 +6,8 @@ from django.conf.urls.static import static
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
-from minimo.fattura.models import *
-from minimo.fattura.forms import *
+from minimo.documento.models import *
+from minimo.documento.forms import *
 
 
 urlpatterns = patterns('minimo',
@@ -15,9 +15,13 @@ urlpatterns = patterns('minimo',
     url(dajaxice_config.dajaxice_url, include('dajaxice.urls')),
     
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include('minimo.fattura.urls')),
-    url(r'^clienti/', include('minimo.cliente.urls'))
-) #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^', include('minimo.documento.urls')),
+    url(r'^clienti/', include('minimo.cliente.urls')),
+    url(r'^template/', include('minimo.template.urls')),
+    url(r'^tasse/', include('minimo.tassa.urls')),
+    url(r'^movimenti/', include('minimo.movimento.urls')),
+    url(r'^allegati/', include('attachments.urls')),
+) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += patterns('django.contrib.auth.views',
     #utente

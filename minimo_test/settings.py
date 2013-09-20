@@ -84,7 +84,9 @@ ROOT_URLCONF = "%s.urls" % PROJECT_DIRNAME
 # or "C:/www/django/templates".
 # Always use forward slashes, even on Windows.
 # Don't forget to use absolute paths, not relative paths.
-TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, "templates"),)
+TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, "templates"),
+                 os.path.join(PROJECT_ROOT, "../minimo/templates"),
+                 )
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -132,9 +134,14 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+    'livesettings',
     'south',
-    'minimo.fattura',
+    'attachments',
     'minimo.cliente',
+    'minimo.template',
+    'minimo.tassa',
+    'minimo.movimento',
+    'minimo.documento',
     'dajaxice',
     'dajax',
     'crispy_forms',
@@ -173,7 +180,8 @@ LOGGING = {
         },
     }
 }
-
+import logging
+logging.getLogger('keyedcache').setLevel(logging.INFO)
 
 #TIPO_FATTURA="minimo"
 TIPO_FATTURA="standard"
