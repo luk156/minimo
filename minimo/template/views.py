@@ -16,19 +16,22 @@ from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, EmailMessage
 
+from minimo.documento.models import *
+from minimo.tassa.models import *
+from minimo.movimento.models import *
 
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
 
-
+#TODO: refactoring app da template a config
 @login_required
 def nuovotemplate(request):
     azione = 'Nuovo'
     if request.method == 'POST':
         form = TemplateDocumentoForm(request.POST, request.FILES)
-        form.helper.form_action = '/template/nuovo/'
+        form.helper.form_action = reverse('minimo.template.views.nuovotemplate',)
         if form.is_valid():
             t=form.save(commit=False)
             t.user=request.user
@@ -36,7 +39,7 @@ def nuovotemplate(request):
             return HttpResponseRedirect('/template')
     else:
         form = TemplateDocumentoForm()
-        form.helper.form_action = '/template/nuovo/'
+        form.helper.form_action = reverse('minimo.template.views.nuovotemplate',)
     return render_to_response('template/form_template.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
 
 @login_required
@@ -46,13 +49,13 @@ def modificatemplate(request,t_id):
     #if f.user == request.user or request.user.is_superuser:
     if request.method == 'POST':  # If the form has been submitted...
         form = TemplateDocumentoForm(request.POST, request.FILES, instance=f)  # necessario per modificare la riga preesistente
-        form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
+        form.helper.form_action = reverse('minimo.template.views.modificatemplate', args=(str(f.id)))
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/template/') # Redirect after POST
     else:
         form = TemplateDocumentoForm(instance=f)
-        form.helper.form_action = '/template/modifica/'+str(f.id)+'/'
+        form.helper.form_action = reverse('minimo.template.views.modificatemplate', args=(str(f.id)))
     return render_to_response('template/form_template.html',{'request': request, 'form': form,'azione': azione, 'f': f}, RequestContext(request))
     #else:
     #    raise PermissionDenied
@@ -68,9 +71,18 @@ def eliminatemplate(request,t_id):
 
 @login_required
 def template(request):
-    #if request.user.is_superuser:
+    imposte = Imposta.objects.all()
+    ritenute = Ritenuta.objects.all()
+    pagamenti = Pagamento.objects.all()
     template=TemplateDocumento.objects.all()
-    #else:
-    #    template=TemplateDocumento.objects.filter(user=request.user)
-    return render_to_response( 'template/template.html', {'request':request, 'templates': template, 'template_esempio':'template_standard.odt'}, RequestContext(request))
+    context = {
+        'pagamenti': pagamenti,
+        'imposte': imposte,
+        'ritenute': ritenute,
+        'templates': template,
+        'request': request,
+        'template_esempio': 'template_standard.odt',
+        
+    }
+    return render_to_response( 'template/template.html', context, RequestContext(request))
 

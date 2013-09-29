@@ -235,6 +235,7 @@ class Riga(models.Model):
             return round(self.totale_netto*(self.imposta/100.0), 2)
         else:
             return 0
+        
     totale_imposta = property(_totale_imposta)
     
     def __unicode__(self):
