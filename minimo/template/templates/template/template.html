@@ -4,11 +4,12 @@
 
 {% block breadcrumb %}
 <li><a href="#">Home</a> <span class="divider">/</span></li>
-<li><a href="#">Elenco Template</a></li>
+<li><a href="#">Elenco Opzioni</a></li>
 {% endblock %}
 
 {% block main %}
 
+<h4>Template diponibili</h4>
 <table class="table table-striped">
 	<thead>
 	<tr>
@@ -20,33 +21,138 @@
 	</tr>
 	</thead>
 	<tbody>
+		{% for t in templates %}
+			<tr>
+				<td>
+					{{t.nome}}
+				</td>
+				<td>
+					{{t.descrizione}}
+				</td>
+				<td>
+					<a href="{{ t.template.url }}"> {{t.template}}</a>
+				</td>
+				<td>
+					<div class="btn-group">
+						<a href="{% url 'minimo.template.views.modificatemplate' t.id %}" class="btn"><i class="icon-edit"></i> modifica</a>
+						<a href="{% url 'minimo.template.views.eliminatemplate' t.id %}" class="btn"><i class="icon-trash"></i> elimina</a>
+					</div>
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
 
-{% for t in templates %}
+<h4>Pagamenti diponibili</h4>
+<table class="table table-striped">
+	<thead>
 	<tr>
-		<td>
-			{{t.nome}}
-		</td>
-		<td>
-			{{t.descrizione}}
-		</td>
-		<td>
-			<a href="{{ t.template.url }}"> {{t.template}}</a>
-		</td>
-		<td>
-			<div class="btn-group">
-				<a href="{% url 'minimo.template.views.modificatemplate' t.id %}" class="btn"><i class="icon-edit"></i> modifica</a>
-				<a href="{% url 'minimo.template.views.eliminatemplate' t.id %}" class="btn"><i class="icon-trash"></i> elimina</a>
-			</div>
-		</td>
+		<th>Nome</th>
+		<th>Descrizione</th>
+		<th>Giorni</th>
+		<th></th>
 	</tr>
-{% endfor %}
+	</thead>
+	<tbody>
+		{%for p in pagamenti %}
+			<tr>
+				<td>
+					{{p.nome}}
+				</td>
+				<td>
+					{{p.descrizione}}
+				</td>
+				<td>
+					{{p.giorni}}
+				</td>
+				<td>
+					<div class="btn-group">
+						<a href="{% url 'minimo.documento.views.modificapagamento' p.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+						<a href="{% url 'minimo.documento.views.eliminapagamento' p.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+		{%endfor%}
+	</tbody>
+</table>
+
+<h4>Imposte diponibili</h4>
+<table class="table table-striped">
+	<thead>
+	<tr>
+		<th>Nome</th>
+		<th>Descrizione</th>
+		<th>Aliquota</th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+		{%for i in imposte %}
+			<tr>
+				<td>
+					{{i.nome}}
+				</td>
+				<td>
+					
+				</td>
+				<td>
+					{{i.aliquota}}
+				</td>
+				
+				<td>
+					<div class="btn-group">
+						<a href="{% url 'minimo.tassa.views.modificaimposta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+						<a href="{% url 'minimo.tassa.views.eliminaimposta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+		{%endfor%}
+	</tbody>
+</table>
+
+<h4>Ritenute diponibili</h4>
+<table class="table table-striped">
+	<thead>
+	<tr>
+		<th>Nome</th>
+		<th>Descrizione</th>
+		<th>Aliquota</th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+		{%for i in ritenute %}
+			<tr>
+				<td>
+					{{i.nome}}
+				</td>
+				<td>
+					
+				</td>
+				<td>
+					{{i.aliquota}}
+				</td>
+				
+				<td>
+					<div class="btn-group">
+						<a href="{% url 'minimo.tassa.views.modificaritenuta' i.id %}" class="btn btn-small"><i class="icon-edit"></i></a>
+						<a href="{% url 'minimo.tassa.views.eliminaritenuta' i.id %}" class="btn btn-small"><i class="icon-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+		{%endfor%}
 	</tbody>
 </table>
 
 {% endblock %}
 
 {% block left %}
+	
 	<h4>Azioni</h4>
 	<a href="{% url 'minimo.template.views.nuovotemplate' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi Template</a>
 	<a href="/static/{{template_esempio}}" class="btn btn-block "><i class="icon-download"> </i> Scarica Template Esempio</a>
+	<br><br>
+	<a href="{% url 'minimo.tassa.views.nuovoimposta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
+	<a href="{% url 'minimo.tassa.views.nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
+	<a href="{% url 'minimo.documento.views.nuovopagamento' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi pagamento</a>
 {% endblock%}
