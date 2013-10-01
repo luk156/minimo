@@ -74,11 +74,13 @@ def template(request):
     imposte = Imposta.objects.all()
     ritenute = Ritenuta.objects.all()
     pagamenti = Pagamento.objects.all()
+    unita = UnitaMisura.objects.all()
     template=TemplateDocumento.objects.all()
     context = {
         'pagamenti': pagamenti,
         'imposte': imposte,
         'ritenute': ritenute,
+        'unita': unita,
         'templates': template,
         'request': request,
         'template_esempio': 'template_standard.odt',

@@ -38,6 +38,10 @@ urlpatterns = patterns('minimo.documento.views',
     (r'^pagamenti/nuovo/$', 'nuovopagamento'),
     (r'^pagamenti/modifica/(?P<i_id>\w+)/$', 'modificapagamento'),
     (r'^pagamenti/elimina/(?P<i_id>\w+)/$', 'eliminapagamento'),
+    #pagamenti
+    (r'^unita/nuovo/$', 'nuovounita'),
+    (r'^unita/modifica/(?P<u_id>\w+)/$', 'modificaunita'),
+    (r'^unita/elimina/(?P<u_id>\w+)/$', 'eliminaunita'),
     # bilancio
     (r'^bilancio/$', 'bilancio'),
 

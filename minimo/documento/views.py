@@ -147,8 +147,7 @@ def nuovariga(request,f_id):
         form.helper.form_action = reverse('minimo.documento.views.nuovariga', args=(str(f.id),),)
         if form.is_valid():
             data = form.cleaned_data
-            print '--', data['descrizione_imposta']
-            r=Riga(descrizione=data['descrizione'],importo_unitario=data['importo_unitario'], quantita=data['quantita'],documento=f, descrizione_imposta=data['descrizione_imposta'])
+            r=Riga(descrizione=data['descrizione'],unita=data['unita'], importo_unitario=data['importo_unitario'], quantita=data['quantita'],documento=f, descrizione_imposta=data['descrizione_imposta'])
             r.save()
             return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id),))) 
     else:
@@ -587,7 +586,45 @@ def bilancio_intervallo(request, inizio, fine):
 
     return documenti
 
+@login_required
+def nuovounita(request):
+    azione = 'Nuovo'
+    if request.method == 'POST':
+        form = UnitaForm(request.POST)
+        form.helper.form_action = reverse('minimo.documento.views.nuovounita')
+        if form.is_valid():
+            t=form.save(commit=False)
+            t.user=request.user
+            t.save()
+            return HttpResponseRedirect(reverse('minimo.documento.views.home'))
+    else:
+        form = UnitaForm()
+        form.helper.form_action = reverse('minimo.documento.views.nuovounita')
+    return render_to_response('documento/form_unita.html',{'request':request,'form': form,'azione': azione,}, RequestContext(request))
 
+@login_required
+def modificaunita(request,u_id):
+    azione = 'Modifica'
+    i = UnitaMisura.objects.get(id=u_id)
+    #if i.user == request.user or request.user.is_superuser:
+    if request.method == 'POST':  # If the form has been submitted...
+        form = UnitaForm(request.POST, instance=i)  # necessario per modificare la riga preesistente
+        form.helper.form_action = reverse('minimo.documento.views.modificaunita', args=(str(i.id)))
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('minimo.documento.views.home')) # Redirect after POST
+    else:
+        form = UnitaForm(instance=i)
+        form.helper.form_action = reverse('minimo.documento.views.modificaunita', args=(str(i.id)))
+    return render_to_response('documento/form_unita.html',{'request': request, 'form': form,'azione': azione, 'i': i}, RequestContext(request))
+    #else:
+    #    raise PermissionDenied
+
+@login_required
+def eliminaunita(request,u_id):
+    r = UnitaMisura.objects.get(id=u_id)
+    r.delete()
+    return HttpResponseRedirect(reverse('minimo.documento.views.home'))
 
 @login_required
 def nuovopagamento(request):
