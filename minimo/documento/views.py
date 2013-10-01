@@ -144,16 +144,16 @@ def nuovariga(request,f_id):
     f=Documento.objects.get(id=f_id)
     if request.method == 'POST':
         form = RigaForm(request.POST)
-        form.helper.form_action = reverse('minimo.documento.views.nuovariga', args=(str(f.id)))
+        form.helper.form_action = reverse('minimo.documento.views.nuovariga', args=(str(f.id),),)
         if form.is_valid():
             data = form.cleaned_data
             print '--', data['descrizione_imposta']
             r=Riga(descrizione=data['descrizione'],importo_unitario=data['importo_unitario'], quantita=data['quantita'],documento=f, descrizione_imposta=data['descrizione_imposta'])
             r.save()
-            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id)))) 
+            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id),))) 
     else:
         form = RigaForm()
-        form.helper.form_action = reverse('minimo.documento.views.nuovariga', args=(str(f.id)))
+        form.helper.form_action = reverse('minimo.documento.views.nuovariga', args=(str(f.id),))
     return render_to_response('documento/form_riga.html',{'request':request, 'form': form,'azione': azione, 'f': f_id}, RequestContext(request))
  
 
@@ -164,14 +164,14 @@ def modificariga(request,p_id):
     f=riga.documento
     if request.method == 'POST': 
         form = RigaForm(request.POST, instance=riga,)
-        form.helper.form_action = reverse('minimo.documento.views.modificariga', args=(str(f.id)))
+        form.helper.form_action = reverse('minimo.documento.views.modificariga', args=(str(riga.id),),)
         if form.is_valid():
             data = form.cleaned_data             
             form.save()
-            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id)))) 
+            return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(f.id),))) 
     else:
         form = RigaForm(instance=riga)
-        form.helper.form_action = reverse('minimo.documento.views.modificariga', args=(str(f.id)))
+        form.helper.form_action = reverse('minimo.documento.views.modificariga', args=(str(riga.id),))
     return render_to_response('documento/form_riga.html',{'request':request, 'form': form,'azione': azione, 'p': riga,}, RequestContext(request))
 
 
