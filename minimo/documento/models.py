@@ -16,6 +16,14 @@ import os
 import config
 
 
+class UnitaMisura(models.Model):
+    nome = models.CharField('Unità di misura', max_length=30, default='Numero')
+    sigla = models.CharField('Abbreviazione', max_length=4, default='N')
+    stato = models.BooleanField(default=True)
+    
+    def __unicode__(self, ):
+        return "%s" % self.sigla
+    
 
 class Pagamento(models.Model):
     nome = models.CharField('Pagamento',max_length=30)
@@ -214,6 +222,7 @@ class Riga(models.Model):
     codice = models.CharField('Codice', max_length=70, blank=True, null=True, default=None)
     descrizione = models.TextField('Descrizione')
     quantita = models.FloatField('Quantità')
+    unita = models.ForeignKey('UnitaMisura' , blank=True, null=True, default=None)
     importo_unitario = models.FloatField('Prezzo unitario', default=1)
     descrizione_imposta = models.CharField('Descrizione Imposta', max_length=70, blank=True, null=True, default=None)
     imposta = models.IntegerField('Imposta', blank=True, null=True, default=None)
@@ -239,7 +248,7 @@ class Riga(models.Model):
     totale_imposta = property(_totale_imposta)
     
     def __unicode__(self):
-        return '%s(%s)' % (self.descrizione,self.totale_netto)
+        return '%s %s(%s)' % (self.unita.sigla, self.descrizione, self.totale_netto)
     
     def save(self, *args, **kwargs):
         print  self.descrizione_imposta
