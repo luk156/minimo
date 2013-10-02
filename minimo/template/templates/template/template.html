@@ -43,6 +43,39 @@
 	</tbody>
 </table>
 
+<h4>Unita di misura diponibili</h4>
+<table class="table table-striped">
+	<thead>
+	<tr>
+		<th>Nome</th>
+		<th>Sigla</th>
+		<th>Stato</th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+		{% for u in unita %}
+			<tr>
+				<td>
+					{{u.nome}}
+				</td>
+				<td>
+					{{u.sigla}}
+				</td>
+				<td>
+					
+				</td>
+				<td>
+					<div class="btn-group">
+						<a href="{% url 'minimo.documento.views.modificaunita' u.id %}" class="btn"><i class="icon-edit"></i> modifica</a>
+						<a href="{% url 'minimo.documento.views.eliminaunita' u.id %}" class="btn"><i class="icon-trash"></i> elimina</a>
+					</div>
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
 <h4>Pagamenti diponibili</h4>
 <table class="table table-striped">
 	<thead>
@@ -155,4 +188,6 @@
 	<a href="{% url 'minimo.tassa.views.nuovoimposta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi imposta</a>
 	<a href="{% url 'minimo.tassa.views.nuovoritenuta' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi ritenuta</a>
 	<a href="{% url 'minimo.documento.views.nuovopagamento' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi pagamento</a>
+	<a href="{% url 'minimo.documento.views.nuovounita' %}" class="btn btn-block "><i class="icon-plus"> </i> Aggiungi unita di misura</a>
+
 {% endblock%}

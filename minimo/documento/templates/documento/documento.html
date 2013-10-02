@@ -2,7 +2,7 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% load documento_extras %}
-
+{% load widget_tweaks %}
 {% block meta_title %}Dettaglio documento{% endblock %}
 
 {% block breadcrumb %}
@@ -137,13 +137,13 @@
 	<thead>
 		<tr>
 			<th>Descrizione</th>
-			<th>Prezzo unitario</th>
 			<th>Quantità</th>
-			
+			<th>Unità Misura</th>
+			<th>Prezzo unitario</th>
 			{% if not f.ritenuta %}
 				<th>IVA</th>
 			{% endif %}
-			<th>Importo</th>
+			<th>Totale</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -151,8 +151,9 @@
 		{% for p in f.righe %}
 		<tr>
 			<td>{{p.descrizione}}</td>
-			<td>{{p.importo_unitario}}</td>
 			<td>{{p.quantita}}</td>
+			<td>{{p.unita.sigla}}</td>
+			<td>{{p.importo_unitario}}</td>
 			{% if not f.ritenuta %}
 				<td>{%if p.imposta %} {{p.imposta}} % {%endif%}</td>
 			{% endif %}
@@ -169,25 +170,34 @@
 		<tr>
 		<td> 
 		 	<form  method="post" action="{% url 'minimo.documento.views.nuovariga' f.id %}">{% csrf_token %}
-		 	<textarea class="textarea" id="id_descrizione" name="descrizione" rows="5" style="width:90%;"></textarea>
+				{% render_field form.descrizione|attr:"rows:5"|attr:"style:width:90%;"|add_class:"textarea" %} 
 		 </td>
+		 
 		 <td>
 		 	<div class="input-append">
-		 	<input class="textinput textInput" id="id_importo_unitario" name="importo_unitario" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
+				{% render_field form.quantita %}<span class="add-on"><i class="icon-money"></i></span>
 		 	</div>
 		 </td>
 		 <td>
+		 	
+			<div class="input-append">
+				{% render_field form.unita %}
+			</div>
+		 </td>
+		 <td>
 		 	<div class="input-append">
-		 	<input class="textinput textInput" id="id_quantita" name="quantita" type="text" /> <span class="add-on"><i class="icon-money"></i></span>
+                {% render_field form.importo_unitario %}<span class="add-on"><i class="icon-money"></i></span>
 		 	</div>
 		 </td>
+		 
 		{% if not f.ritenuta %}
 			<td>
 				<div class="input-append">
-					<!--<input class="textinput textInput" id="id_iva" name="iva" type="text" /> <span class="add-on"><i class="icon-tag"></i></span>-->
-					<select name="descrizione_imposta" id="id_descrizione_imposta"><option value="1">---</option></select>
+					<select class='span4' name="descrizione_imposta" id="id_descrizione_imposta"><option value="1">---</option></select>
 				</div>
 			</td>
+		{% else %}
+			<td></td>
 		{% endif %}
 		 <td>
 		 	<input type="submit" name="save" value="Aggiungi" class="btn btn-primary btn-primary" id="submit-id-save"/> </form>

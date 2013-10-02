@@ -10,6 +10,27 @@ from minimo.documento.models import *
 from minimo.cliente.models import *
     
 
+class UnitaForm(forms.ModelForm):
+    
+    
+    class Meta:
+        model = UnitaMisura
+        
+        
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('nome'),
+            Field('sigla'),
+            Field('stato'),
+            FormActions(
+                Submit('save', 'Salva', css_class="btn-primary")
+            )
+        )
+        super(UnitaForm, self).__init__(*args, **kwargs)      
+
+
+
 class PagamentoaForm(forms.ModelForm):
     
     
@@ -139,7 +160,9 @@ class RigaForm(forms.ModelForm):
         self.helper.layout = Layout(
             Field('descrizione'),
             Field('quantita'),
-            AppendedText('importo_unitario', '<i class="icon-money"></i>'),
+            Field('unita'),
+            Field('importo_unitario'),
+            #AppendedText('importo_unitario', '<i class="icon-money"></i>'),
             Field('descrizione_imposta'),
             FormActions(
                 Submit('save', 'Aggiungi', css_class="btn-primary")
