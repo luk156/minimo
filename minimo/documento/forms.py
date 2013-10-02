@@ -161,7 +161,8 @@ class RigaForm(forms.ModelForm):
             Field('descrizione'),
             Field('quantita'),
             Field('unita'),
-            AppendedText('importo_unitario', '<i class="icon-money"></i>'),
+            Field('importo_unitario'),
+            #AppendedText('importo_unitario', '<i class="icon-money"></i>'),
             Field('descrizione_imposta'),
             FormActions(
                 Submit('save', 'Aggiungi', css_class="btn-primary")
