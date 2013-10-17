@@ -45,7 +45,49 @@ def nuovocliente(request):
         form = ClienteForm()
     return render_to_response('cliente/form_cliente.html',{'request':request, 'form': form,'azione': azione}, RequestContext(request))
 
+@login_required
+def nuovoatom(request,c_id):
+    azione = 'nuovo'
+    c = Cliente.objects.get(id=c_id)
+    if request.method == 'POST':
+        form = AtomForm(request.POST)
+        form.helper.form_action = reverse('minimo.cliente.views.nuovoatom', args=(str(c.id),),)
+        if form.is_valid():
+            data = form.cleaned_data
+            a = Atom(cliente=c, riferimento=data['riferimento'], tipo=data['tipo'], valore=data['valore'], principale=False)
+            a.save()
+            return HttpResponseRedirect(reverse('minimo.cliente.views.cliente', args=(str(c.id),))) 
+    else:
+        form = AtomForm()
+        form.helper.form_action = reverse('minimo.cliente.views.nuovoatom', args=(str(c.id),))
+    return render_to_response('cliente/form_atom.html',{'request':request, 'form': form,'azione': azione}, RequestContext(request))
 
+
+@login_required
+def eliminaatom(request,a_id):
+    atom = Atom.objects.get(id=a_id)
+    c = atom.cliente
+    atom.delete()
+    return HttpResponseRedirect(reverse('minimo.cliente.views.cliente', args=(str(c.id),)))
+
+
+@login_required
+def modificaatom(request,a_id):
+    azione = 'modifica'
+    a = Atom.objects.get(id=a_id)
+    c = a.cliente
+    if request.method == 'POST':
+        form = AtomForm(request.POST, instance=a)
+        form.helper.form_action = reverse('minimo.cliente.views.modificaatom', args=(str(a.id),),)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('minimo.cliente.views.cliente', args=(str(c.id),))) 
+    else:
+        form = AtomForm(instance=a)
+        form.helper.form_action = reverse('minimo.cliente.views.modificaatom', args=(str(a.id),))
+    return render_to_response('cliente/form_atom.html',{'request':request, 'form': form,'azione': azione}, RequestContext(request))
+
+    
 @login_required
 def modificacliente(request,c_id):
     azione = 'modifica'
@@ -64,11 +106,13 @@ def modificacliente(request,c_id):
 @login_required
 def clienti(request):
     clienti=Cliente.objects.all()
+    
     return render_to_response( 'cliente/clienti.html', {'request':request, 'clienti': clienti}, RequestContext(request))
 
 @login_required
 def export_clienti(request):
     clienti=Cliente.objects.all()
+    
     return export_csv(request, clienti, [('Ragione Sociale','ragione_sociale'),
         ('Indirizzo','indirizzo'),
         ('Codice Fiscale','codice_fiscale'),
@@ -80,7 +124,8 @@ def export_clienti(request):
 @login_required
 def cliente(request,c_id):
     c= Cliente.objects.get(id=c_id)
-    return render_to_response( 'cliente/cliente.html', {'request':request, 'c':c , 'f': Documento.objects.filter(ragione_sociale=c.ragione_sociale)}, RequestContext(request))
+    form = AtomForm()
+    return render_to_response( 'cliente/cliente.html', {'request':request, 'form': form, 'c':c , 'f': Documento.objects.filter(ragione_sociale=c.ragione_sociale)}, RequestContext(request))
 
 
 @login_required

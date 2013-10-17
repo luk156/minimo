@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 
 {% block breadcrumb %}
 <li><a href="/">Home</a> <span class="divider">/</span></li>
@@ -52,34 +53,81 @@
 	</tr>
 </table>
 
+<h3>Altri contatti:</h3>
+<table class="table table-striped" id="fatture">
+	<thead>
+		<tr>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for atom in c.contatti %}
+			<tr>
+				<td>{{atom.riferimento}}</td>
+				<td>{{atom.tipo}}:</td>
+				<td>{{atom.valore}}</td>
+				<td>
+				<div class="btn-group">
+					<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.cliente.views.modificaatom' atom.id %}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-edit"></i> modifica</a>
+					<a {% if f.stato %} href="#" {% else %} href="{% url 'minimo.cliente.views.eliminaatom' atom.id %}" {% endif %} class="btn  btn-small {% if f.stato %} disabled {% endif %}"><i class="icon-trash"></i> elimina</a>
+				</div>
+			</td>
+			</tr>
+		{% endfor %}
+		<tr>
+			<form  method="post" action="{% url 'minimo.cliente.views.nuovoatom' c.id %}">{% csrf_token %}
+			<td>
+				<div class="input-append">
+					{% render_field form.riferimento %}<span class="add-on"><i class="icon-user"></i></span>
+				</div>
+			</td>
+			<td>
+				<div class="input-append">
+					{% render_field form.tipo %}<span class="add-on"></span>
+				</div>
+			</td>
+			<td>
+				<div class="input-append">
+					{% render_field form.valore %}<span class="add-on"></i></span>
+				</div>
+			</td>
+			<td>
+				<input type="submit" name="save" value="Aggiungi" class="btn btn-primary btn-primary" id="submit-id-save"/> </form>
+			</td>
+			</form>
+		</tr>
+	</tbody>
+</table>
 <h3>Fatture:</h3>
 
 <table class="table table-striped" id="fatture">
-				<thead>
-				<tr>
-					<th>ID</th>
-					<th>Data</th>
-					<th>Totale</th>
-					<th>Pagata</th>
-				</tr>
-				</thead>
-				<tbody>
-					
-				{% for fattura in f %}
-
-				<tr>
-					<td><a href="{% url 'minimo.documento.views.dettagli_documento' fattura.id %}" ><i class="icon-search"> </i> 
-						{{fattura}}</a></td>
-					<td>{{fattura.data}}</td>
-					<td>{{fattura.totale}} €</td>
-					<td>
-						{% if fattura.stato %}<i class="icon-check"></i>
-						{% else %}<i class="icon-check-empty"></i>{% endif %}
-					</td>
-				</tr>
-				{% endfor %}
-				</tbody>
-			</table>
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Data</th>
+			<th>Totale</th>
+			<th>Pagata</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for fattura in f %}
+			<tr>
+				<td><a href="{% url 'minimo.documento.views.dettagli_documento' fattura.id %}" ><i class="icon-search"> </i> 
+					{{fattura}}</a></td>
+				<td>{{fattura.data}}</td>
+				<td>{{fattura.totale}} €</td>
+				<td>
+					{% if fattura.stato %}<i class="icon-check"></i>
+					{% else %}<i class="icon-check-empty"></i>{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
 
 {% endblock %}
 
