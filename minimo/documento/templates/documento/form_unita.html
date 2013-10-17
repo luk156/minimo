@@ -1,0 +1,24 @@
+{% extends "documento/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block meta_title %}{{azione}} unitè di misura {% endblock %}
+{% block title %} {{azione}} Unita di misura {% endblock %}	
+
+{% block head %}
+
+{% endblock%}
+
+{% block breadcrumb %}
+<li><a href="/">Home</a> <span class="divider">/</span></li>
+<li><a href="#">{{azione}} Unita di misura</a></li>
+{% endblock %}
+
+
+
+{% block main %}
+
+  {% crispy form %}
+
+{% endblock %}

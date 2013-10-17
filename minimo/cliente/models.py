@@ -27,3 +27,36 @@ class Cliente(models.Model):
         return '%s, %s %s %s' %(self.via, self.cap, self.citta, self.provincia)
     
     indirizzo = property(_get_indirizzo)
+    
+    def _get_contatti(self):
+        return Atom.objects.filter(cliente=self)
+    
+    contatti = property(_get_contatti)
+ 
+
+TIPO_ATOM = (
+    ('Telefono fisso', 'Telefono fisso'),
+    ('Telefono mobile', 'Telefono mobile'),
+    ('Email', 'Email'),
+    ('Fax', 'Ordine'),
+    ('Voip', 'Voip'),
+    ('Altro', 'Altro'),
+)
+
+class Atom(models.Model):
+    cliente = models.ForeignKey('Cliente')
+    riferimento = models.CharField('Riferimento', max_length=255, default=None, null=True, blank=True)
+    tipo = models.CharField('Tipo', max_length=30, choices=TIPO_ATOM)
+    valore = models.CharField('Valore', max_length=255,default=' ',)
+    principale = models.BooleanField(default=False)
+    
+    
+    def __unicode__(self):
+        return "%s: %s %s" %(self.riferimento, self.tipo, self.valore)
+    
+    def is_principale(self, ):
+        if self.principale:
+            return True
+        else:
+            return False
+    
