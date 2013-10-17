@@ -16,6 +16,6 @@
 	<h4>Azioni</h4>
 	<a href="{% url 'minimo.movimento.views.nuovodocumento' %}" class="btn btn-block " title="Registra un nuovo documento da pagare come bollette, fatture fornitori,  ecc..."><i class="icon-plus"> </i> Registra un nuovo documento</a>
 	<a href="{% url 'minimo.movimento.views.nuovomovimento' %}" class="btn btn-block " title="Inserisce un movimento sul conto senza registrare un documento."><i class="icon-plus"> </i> Inserisci un movimento</a>
-	<a href="#" class="btn btn-block " title="Esporta in frmato csv la lista movimenti. Il file esportato sarà visualizzabile con un foglio elettronico per una sucessiva elaborazione."><i class="icon-download"> </i> Scarica la lista movimenti .csv</a>
+	<a href="{% url 'minimo.movimento.views.esportamovimenti' %}" class="btn btn-block " title="Esporta in frmato csv la lista movimenti. Il file esportato sarà visualizzabile con un foglio elettronico per una sucessiva elaborazione."><i class="icon-download"> </i> Scarica la lista movimenti .csv</a>
     <a href="#" class="btn btn-block " title="Esporta in frmato csv la lista documenti. Il file esportato sarà visualizzabile con un foglio elettronico per una sucessiva elaborazione."><i class="icon-download"> </i> Scarica la lista documenti .csv</a>
 {% endblock left %}

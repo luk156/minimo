@@ -14,6 +14,7 @@ urlpatterns = patterns('minimo.movimento.views',
     (r'^nuovodocumento/$', 'nuovodocumento'),
     (r'^modificadocumento/(?P<t_id>\w+)/$', 'modificadocumento'),
     (r'^eliminadocumento/(?P<i_id>\w+)/$', 'eliminadocumento'),
-    (r'^pagadocumento/(?P<i_id>\w+)/$', 'pagadocumento',)
+    (r'^pagadocumento/(?P<i_id>\w+)/$', 'pagadocumento',),
+    (r'^esportalistamovimenti/$', 'esportamovimenti',),
     #(r'^$', 'movimenti'),
 )

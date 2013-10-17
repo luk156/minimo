@@ -24,6 +24,7 @@ from minimo.documento.utils import *
 from minimo.documento.models import *
 from minimo.movimento.forms import *
 from minimo.movimento.models import *
+from minimo.utils import *
 
 try:
     from cStringIO import StringIO
@@ -181,3 +182,15 @@ def pagadocumento(request,i_id):
     f.stato = True
     f.save()
     return HttpResponseRedirect(reverse('minimo.movimento.views.documenti'))
+
+
+@login_required
+def esportamovimenti(request):
+    movimenti = Movimento.objects.all()
+    return export_csv(request, movimenti, [
+        ('Conto', 'conto'),
+        ('Data','data_movimento'),
+        ('Descrizione', 'descrizione'),
+        ('Importo','importo'),
+        ('Documento', 'documento'),
+    ])

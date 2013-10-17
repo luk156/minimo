@@ -146,6 +146,7 @@ INSTALLED_APPS = (
     'dajax',
     'crispy_forms',
     'webodt',
+    'widget_tweaks',
 )
 
 

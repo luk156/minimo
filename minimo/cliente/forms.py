@@ -36,3 +36,23 @@ class ClienteForm(forms.ModelForm):
             )
         )
         super( ClienteForm, self).__init__(*args, **kwargs)
+
+
+class AtomForm(forms.ModelForm):
+    
+    class Meta:
+        model = Atom
+        exclude = ('cliente', 'principale')
+    
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field('riferimento'),
+            Field('tipo'),
+            Field('valore'),
+            FormActions(
+                Submit('save', 'Aggiungi', css_class="btn-primary")
+            )
+        )
+        super(AtomForm, self).__init__(*args, **kwargs)
