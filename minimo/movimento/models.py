@@ -57,6 +57,14 @@ class Movimento(models.Model):
     def get_documento(self):
         return self.documento
     
+    def _get_importo(self, ):
+        if self.tipo == 'E':
+            return self.importo
+        else:
+            return -self.importo
+        
+    valore_importo = property(_get_importo)
+    
     def save(self, *args, **kwargs):
         aggiorna_saldo(nome=None, importo=self.importo, operazione=self.tipo)
         super(Movimento, self).save(*args, **kwargs)
