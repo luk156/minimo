@@ -124,8 +124,18 @@ def export_clienti(request):
 @login_required
 def cliente(request,c_id):
     c= Cliente.objects.get(id=c_id)
+    documenti = Documento.objects.filter(ragione_sociale=c.ragione_sociale)
     form = AtomForm()
-    return render_to_response( 'cliente/cliente.html', {'request':request, 'form': form, 'c':c , 'f': Documento.objects.filter(ragione_sociale=c.ragione_sociale)}, RequestContext(request))
+    context = {
+        'request':request,
+        'form': form,
+        'c': c ,
+        'fa': documenti.filter(tipo='FA'),
+        'pr': documenti.filter(tipo='PR'),
+        'ra': documenti.filter(tipo='RA'),
+        'or': documenti.filter(tipo='OR'),
+        }
+    return render_to_response( 'cliente/cliente.html', context, RequestContext(request))
 
 
 @login_required
