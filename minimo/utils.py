@@ -14,11 +14,16 @@ from django.core.mail import send_mail, EmailMessage
 from django.core import serializers
 from django.utils import simplejson
 
+import datetime as dt
 import csv, codecs
 import webodt
 import pdb
 import os
 
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 def export_csv(request, queryset, export_data, filter_by=None, file_name='exported_data.csv',
         object_id=None, not_available='n.a.', require_permission=None):

@@ -187,10 +187,11 @@ def pagadocumento(request,i_id):
 @login_required
 def esportamovimenti(request):
     movimenti = Movimento.objects.all()
+    print movimenti
     return export_csv(request, movimenti, [
-        ('Conto', 'conto'),
+        ('Conto', 'conto.nome'),
         ('Data','data_movimento'),
         ('Descrizione', 'descrizione'),
-        ('Importo','importo'),
-        ('Documento', 'documento'),
+        ('Importo','valore_importo'),
+        
     ])
