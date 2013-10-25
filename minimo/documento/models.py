@@ -248,7 +248,10 @@ class Riga(models.Model):
     totale_imposta = property(_totale_imposta)
     
     def __unicode__(self):
-        return '%s %s(%s)' % (self.unita.sigla, self.descrizione, self.totale_netto)
+        if self.unita:
+            return '%s %s %s(%s)' % (self.quantita, self.unita.sigla, self.descrizione, self.totale_netto)
+        else:
+            return '%s %s(%s)' % (self.quantita, self.descrizione, self.totale_netto)
     
     def save(self, *args, **kwargs):
         print  self.descrizione_imposta
