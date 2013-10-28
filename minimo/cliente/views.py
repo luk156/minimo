@@ -25,6 +25,7 @@ from django.utils import simplejson
 from minimo.cliente.models import *
 from minimo.cliente.forms import *
 from minimo.documento.models import *
+from minimo.utils import *
 
 try:
     from cStringIO import StringIO
