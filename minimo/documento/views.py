@@ -162,19 +162,20 @@ def sblocca_documento(request, d_id):
     d = Documento.objects.get(id=d_id)
     d.stato = False
     d.save()
-    movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='U')
-    movimento.importo = d.totale
-    if d.importo_residuo:
-        movimento.importo = d.totale - d.importo_residuo
-        movimento.descrizione = "Storno incasso parziale fattura %s del %s cliente %s per errato incasso" %(d, d.data, d.cliente)
-    else:
+    if d.tipo == 'FA' or d.tipo == 'RA':
+        movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='U')
         movimento.importo = d.totale
-        movimento.descrizione = "Storno fattura %s del %s cliente %s per errato incasso" %(d, d.data, d.cliente)
-    movimento.documento = d
-    movimento.data_movimento = dt.datetime.today()
-    d.importo_residuo = 0
-    d.save()
-    movimento.save()
+        if d.importo_residuo:
+            movimento.importo = d.totale - d.importo_residuo
+            movimento.descrizione = "Storno incasso parziale fattura %s del %s cliente %s per errato incasso" %(d, d.data, d.cliente)
+        else:
+            movimento.importo = d.totale
+            movimento.descrizione = "Storno fattura %s del %s cliente %s per errato incasso" %(d, d.data, d.cliente)
+        movimento.documento = d
+        movimento.data_movimento = dt.datetime.today()
+        d.importo_residuo = 0
+        d.save()
+        movimento.save()
     return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(d.id),)))
 
 
@@ -185,18 +186,19 @@ def incassa_documento(request, d_id):
     d = Documento.objects.get(id=d_id)
     d.stato = True
     d.save()
-    movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='E')
-    if d.importo_residuo:
-        movimento.importo = d.importo_residuo
-        movimento.descrizione = "Incasso residuo fattura %s del %s cliente %s" %(d, d.data, d.cliente)
-    else:
-        movimento.importo = d.totale
-        movimento.descrizione = "Incasso fattura %s del %s cliente %s" %(d, d.data, d.cliente)
-    movimento.documento = d
-    movimento.data_movimento = dt.datetime.today()
-    d.importo_residuo = 0
-    d.save()
-    movimento.save()
+    if d.tipo == 'FA' or d.tipo == 'RA':
+        movimento = Movimento(data_movimento=dt.datetime.today(), user=request.user, tipo='E')
+        if d.importo_residuo:
+            movimento.importo = d.importo_residuo
+            movimento.descrizione = "Incasso residuo fattura %s del %s cliente %s" %(d, d.data, d.cliente)
+        else:
+            movimento.importo = d.totale
+            movimento.descrizione = "Incasso fattura %s del %s cliente %s" %(d, d.data, d.cliente)
+        movimento.documento = d
+        movimento.data_movimento = dt.datetime.today()
+        d.importo_residuo = 0
+        d.save()
+        movimento.save()
     return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(d.id),)))
 
 #TODO: controllare se l'importo incassato è minore del residuo e ritornare 
@@ -316,12 +318,14 @@ def fattura_documento(request,d_id):
     fattura.riferimento = preventivo
     fattura.data = dt.datetime.today()
     fattura.numero = 0
+    fattura.stato = False
     fattura.save()
     for riga in preventivo.righe:
         riga.id = None
         riga.documento = fattura
         riga.save()
     preventivo.riferimento = fattura
+    preventivo.stato = True
     preventivo.save()
     return HttpResponseRedirect(reverse('minimo.documento.views.dettagli_documento', args=(str(fattura.id),))) 
     
@@ -459,7 +463,8 @@ class preventivato():
             totale += f.totale
         return totale
     
-    def tot_ordino(self):
+    
+    def tot_ordini(self):
         totale = 0
         for f in self.documenti.filter(tipo='OR'):
             totale += f.totale
